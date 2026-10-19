@@ -2893,9 +2893,9 @@ function runSoftwareRouteOptimizer() {
               <span>📍 ${stop.area || stop.wardZone}</span>
               <span>Origin: <strong>${originLabel}</strong></span>
             </div>
-            <div style="font-weight: 700; font-size: 1.1rem;">${stop.landmark}</div>
-            <div style="font-size: 0.88rem; color: #556960;">${stop.notes || 'No extra notes.'}</div>
-            <div style="font-size: 0.78rem; font-family: monospace; color: #64748b; margin-top: 0.2rem;">Coordinates: Lat ${stop.latitude || stop.coords?.lat || 19.0760}, Lng ${stop.longitude || stop.coords?.lng || 72.8777}</div>
+            <div class="stop-landmark-title">${stop.landmark}</div>
+            <div class="stop-notes-desc">${stop.notes || 'No extra notes.'}</div>
+            <div class="stop-coords-text">Coordinates: Lat ${stop.latitude || stop.coords?.lat || 19.0760}, Lng ${stop.longitude || stop.coords?.lng || 72.8777}</div>
           </div>
           <div style="display: flex; flex-direction: column; gap: 0.4rem; align-items: flex-end;">
             <button class="btn btn-outline btn-xs" onclick="event.stopPropagation(); selectWorkerTargetStop('${stop.id}')">🎯 Focus Stop</button>
@@ -2945,11 +2945,56 @@ window.toggleWorkerShift = function() {
   alert(newStatus === 'active' ? 'Shift started! GPS navigation and route optimization are now active.' : 'Shift ended. You are now marked as Idle / Off-Shift.');
 };
 
+let workerRouteCruisingController = null;
+
+function startWorkerRouteCruising(roadCoords, finalRoute) {
+  if (!workerLocationMarker || !roadCoords || roadCoords.length < 2) return;
+  if (workerRouteCruisingController && typeof workerRouteCruisingController.stop === 'function') {
+    workerRouteCruisingController.stop();
+    workerRouteCruisingController = null;
+  }
+
+  const targetStop = (finalRoute && finalRoute.length > 0) ? (finalRoute.find(s => s.id === activeWorkerTargetStopId) || finalRoute[0]) : null;
+  const targetLat = targetStop ? (targetStop.latitude !== undefined ? targetStop.latitude : (targetStop.coords?.lat || 19.0760)) : roadCoords[roadCoords.length - 1][0];
+  const targetLng = targetStop ? (targetStop.longitude !== undefined ? targetStop.longitude : (targetStop.coords?.lng || 72.8777)) : roadCoords[roadCoords.length - 1][1];
+
+  workerRouteCruisingController = startContinuousRoadPatrol(workerLocationMarker, roadCoords, workerMapObj, {
+    intervalMs: 1500,
+    step: 2,
+    loop: true,
+    trailColor: '#1c52d8',
+    showTrail: true,
+    onStep: (pos, bearing) => {
+      workerCurrentPos.lat = Number(pos[0].toFixed(5));
+      workerCurrentPos.lng = Number(pos[1].toFixed(5));
+
+      const distMeters = Math.round(calcDistance(pos[0], pos[1], targetLat, targetLng) * 1000);
+      const distBadge = document.getElementById('workerTargetDistanceBadge');
+      const liveReadout = document.getElementById('workerLiveDistanceReadout');
+      const proximityNotice = document.getElementById('workerProximityNotice');
+
+      if (distBadge) distBadge.textContent = `${distMeters} m`;
+      if (liveReadout) liveReadout.textContent = `${distMeters}m to next stop`;
+
+      if (distMeters <= 50) {
+        if (proximityNotice) proximityNotice.style.display = 'block';
+      } else {
+        if (proximityNotice) proximityNotice.style.display = 'none';
+      }
+    }
+  });
+}
+
 function initWorkerRouteMap(finalRoute) {
   const mapElement = document.getElementById('workerRouteMap');
   if (!mapElement) return;
 
   if (typeof L === 'undefined') return;
+
+  if (workerRouteCruisingController && typeof workerRouteCruisingController.stop === 'function') {
+    workerRouteCruisingController.stop();
+    workerRouteCruisingController = null;
+  }
 
   if (workerMapObj) {
     workerMapObj.invalidateSize();
@@ -3002,6 +3047,13 @@ function initWorkerRouteMap(finalRoute) {
       })
     }).addTo(workerMapObj).bindPopup('<strong>👷 Worker (You)</strong><br>Live GPS starting point.<br><small style="color: #64748b;">(Drag marker to test 50m proximity auto-advance)</small>');
 
+    workerLocationMarker.on('dragstart', () => {
+      if (workerRouteCruisingController && typeof workerRouteCruisingController.stop === 'function') {
+        workerRouteCruisingController.stop();
+        workerRouteCruisingController = null;
+      }
+    });
+
     workerLocationMarker.on('dragend', (e) => {
       const pos = e.target.getLatLng();
       const dragBearing = calculateBearing(workerCurrentPos.lat, workerCurrentPos.lng, pos.lat, pos.lng);
@@ -3034,13 +3086,22 @@ function initWorkerRouteMap(finalRoute) {
     }).addTo(workerMapObj);
     animatePolylineDrawIn(workerRoutePolyline, pathCoords, 450);
 
-    // Synchronize polyline to real street network
-    if (typeof fetchRoadSnappedRoute === 'function') {
+    // Synchronize polyline to real street network & launch road cruising animation
+    const precomputed = (typeof window !== 'undefined' && window.PRECOMPUTED_WORKER_ROUTES) ? window.PRECOMPUTED_WORKER_ROUTES[currentUser?.id] : null;
+    if (precomputed && precomputed.length > 2) {
+      animatePolylineDrawIn(workerRoutePolyline, precomputed, 450);
+      startWorkerRouteCruising(precomputed, finalRoute);
+    } else if (typeof fetchRoadSnappedRoute === 'function') {
       fetchRoadSnappedRoute(pathCoords).then(roadCoords => {
         if (roadCoords && roadCoords.length > pathCoords.length && workerRoutePolyline) {
           animatePolylineDrawIn(workerRoutePolyline, roadCoords, 500);
+          startWorkerRouteCruising(roadCoords, finalRoute);
+        } else {
+          startWorkerRouteCruising(pathCoords, finalRoute);
         }
       });
+    } else {
+      startWorkerRouteCruising(pathCoords, finalRoute);
     }
   }
 
@@ -4832,6 +4893,66 @@ function getNextRoadWaypoint(currentLat, currentLng, roadCoords, stepDistanceKm 
   };
 }
 
+/* Generic Continuous Municipal Road Patrol Animation */
+function startContinuousRoadPatrol(marker, waypoints, mapObj, options = {}, onSetId = null) {
+  if (!marker || !waypoints || waypoints.length < 2) return null;
+
+  let currentIdx = 0;
+  let isRunning = true;
+  let animTimer = null;
+
+  const intervalMs = options.intervalMs || 1500;
+  const step = options.step || 2;
+  const loop = options.loop !== false;
+  const trailColor = options.trailColor || '#10b981';
+
+  animTimer = setInterval(() => {
+    if (!isRunning || !marker._map) {
+      clearInterval(animTimer);
+      return;
+    }
+
+    const prevIdx = currentIdx;
+    let nextIdx = prevIdx + step;
+
+    if (nextIdx >= waypoints.length) {
+      if (loop) {
+        nextIdx = nextIdx % waypoints.length;
+      } else {
+        nextIdx = waypoints.length - 1;
+        clearInterval(animTimer);
+        isRunning = false;
+      }
+    }
+
+    currentIdx = nextIdx;
+    const fromPos = waypoints[prevIdx];
+    const toPos = waypoints[nextIdx];
+    if (!fromPos || !toPos) return;
+
+    const bearing = calculateBearing(fromPos[0], fromPos[1], toPos[0], toPos[1]);
+
+    animateMarkerTo(marker, fromPos, toPos, Math.max(800, intervalMs - 100), {
+      map: mapObj || marker._map,
+      bearing,
+      showTrail: options.showTrail !== false,
+      trailColor
+    });
+
+    if (typeof options.onStep === 'function') {
+      options.onStep(toPos, bearing, nextIdx);
+    }
+  }, intervalMs);
+
+  if (onSetId) onSetId(animTimer);
+  return {
+    stop: () => {
+      isRunning = false;
+      if (animTimer) clearInterval(animTimer);
+    }
+  };
+}
+
 /* Progressive Route Polyline Draw-in Animation */
 function animatePolylineDrawIn(polyline, fullCoords, duration = 450) {
   if (!polyline || !fullCoords || fullCoords.length < 2) return;
@@ -5450,6 +5571,51 @@ window.reassignNearestWorkerStop = function(fromWorkerId) {
   }
 };
 
+let adminOverlayTruckMarker = null;
+let adminOverlayTruckController = null;
+
+function startAdminOverlayTruck(roadCoords, worker, vehicle) {
+  if (!adminWorkerMapObj || !roadCoords || roadCoords.length < 2) return;
+  if (adminOverlayTruckController && typeof adminOverlayTruckController.stop === 'function') {
+    adminOverlayTruckController.stop();
+    adminOverlayTruckController = null;
+  }
+  if (adminOverlayTruckMarker) {
+    adminOverlayTruckMarker.remove();
+    adminOverlayTruckMarker = null;
+  }
+
+  const startPt = roadCoords[0];
+  const nextPt = roadCoords[1] || roadCoords[0];
+  const initBearing = calculateBearing(startPt[0], startPt[1], nextPt[0], nextPt[1]);
+
+  adminOverlayTruckMarker = L.marker(startPt, {
+    icon: L.divIcon({
+      className: 'custom-admin-worker-icon',
+      html: createVehicleMarkerHtml(worker, vehicle, initBearing, true, false),
+      iconSize: [42, 56],
+      iconAnchor: [21, 28]
+    }),
+    zIndexOffset: 1600
+  }).addTo(adminWorkerMapObj);
+
+  adminOverlayTruckMarker.bindPopup(`
+    <div style="min-width: 210px; font-family: inherit;">
+      <strong style="color: #047857;">🚛 Live Traversal: ${worker.name}</strong><br>
+      Vehicle: ${vehicle ? vehicle.type : 'Compactor'} (<code>${vehicle ? vehicle.regNo : 'MH-01'}</code>)<br>
+      <span style="font-size: 0.78rem; color: #059669; font-weight: 700;">🛣️ Road Synced Shift Clearance</span>
+    </div>
+  `);
+
+  adminOverlayTruckController = startContinuousRoadPatrol(adminOverlayTruckMarker, roadCoords, adminWorkerMapObj, {
+    intervalMs: 1500,
+    step: 2,
+    loop: true,
+    trailColor: '#10b981',
+    showTrail: true
+  });
+}
+
 window.adminOverlayWorkerRoute = function(workerId) {
   if (!adminWorkerMapObj) return;
 
@@ -5489,16 +5655,20 @@ window.adminOverlayWorkerRoute = function(workerId) {
     animatePolylineDrawIn(adminWorkerRouteLine, pathCoords, 450);
     adminWorkerMapObj.fitBounds(adminWorkerRouteLine.getBounds(), { padding: [40, 40] });
 
-    // Synchronize route line with OpenStreetMap road network
+    // Synchronize route line with OpenStreetMap road network & launch animated truck
     const precomputed = (typeof window !== 'undefined' && window.PRECOMPUTED_WORKER_ROUTES) ? window.PRECOMPUTED_WORKER_ROUTES[worker.id] : null;
     if (precomputed && precomputed.length > 2 && adminWorkerRouteLine && adminWorkerRouteLine._activeWorkerId === worker.id) {
       animatePolylineDrawIn(adminWorkerRouteLine, precomputed, 450);
       adminWorkerMapObj.fitBounds(adminWorkerRouteLine.getBounds(), { padding: [40, 40] });
+      startAdminOverlayTruck(precomputed, worker, vehicle);
     } else {
       fetchRoadSnappedRoute(pathCoords).then(roadCoords => {
         if (roadCoords && roadCoords.length > pathCoords.length && adminWorkerRouteLine && adminWorkerRouteLine._activeWorkerId === worker.id) {
           animatePolylineDrawIn(adminWorkerRouteLine, roadCoords, 500);
           adminWorkerMapObj.fitBounds(adminWorkerRouteLine.getBounds(), { padding: [40, 40] });
+          startAdminOverlayTruck(roadCoords, worker, vehicle);
+        } else {
+          startAdminOverlayTruck(pathCoords, worker, vehicle);
         }
       });
     }
@@ -5545,6 +5715,14 @@ window.adminOverlayWorkerRoute = function(workerId) {
 };
 
 window.clearAdminWorkerRouteOverlay = function() {
+  if (adminOverlayTruckController && typeof adminOverlayTruckController.stop === 'function') {
+    adminOverlayTruckController.stop();
+    adminOverlayTruckController = null;
+  }
+  if (adminOverlayTruckMarker) {
+    adminOverlayTruckMarker.remove();
+    adminOverlayTruckMarker = null;
+  }
   if (adminWorkerRouteLine) {
     adminWorkerRouteLine.remove();
     adminWorkerRouteLine = null;
@@ -6778,6 +6956,9 @@ function processReferralBonusOnFirstReport(newReport) {
 /* Nearby Open Reports Read-Only Community Map */
 let citizenNearbyMap = null;
 let citizenNearbyMarkers = [];
+let citizenPatrolMarker = null;
+let citizenPatrolPolyline = null;
+let citizenPatrolController = null;
 
 function initCitizenNearbyReportsMap() {
   const container = document.getElementById('citizenNearbyReportsMap');
@@ -6793,11 +6974,32 @@ function initCitizenNearbyReportsMap() {
     }).addTo(citizenNearbyMap);
   }
 
+  // Clear prior patrol vehicle, polyline, and patrol controller
+  if (citizenPatrolController && typeof citizenPatrolController.stop === 'function') {
+    citizenPatrolController.stop();
+    citizenPatrolController = null;
+  }
+  if (citizenPatrolMarker) {
+    citizenPatrolMarker.remove();
+    citizenPatrolMarker = null;
+  }
+  if (citizenPatrolPolyline) {
+    citizenPatrolPolyline.remove();
+    citizenPatrolPolyline = null;
+  }
+
   citizenNearbyMarkers.forEach(m => m.remove());
   citizenNearbyMarkers = [];
 
   const reports = getReports();
-  const openReports = reports.filter(r => r.status !== 'cleared');
+  // Filter for valid Mumbai metropolitan coordinates
+  const openReports = reports.filter(r => {
+    if (r.status === 'cleared') return false;
+    const lat = r.latitude || r.coords?.lat || 19.0760;
+    const lng = r.longitude || r.coords?.lng || 72.8777;
+    return lat >= 18.90 && lat <= 19.35 && lng >= 72.75 && lng <= 73.05;
+  });
+
   const badge = document.getElementById('citizenNearbyCountBadge');
   if (badge) badge.textContent = `${openReports.length} Open in Ward Area`;
 
@@ -6824,6 +7026,74 @@ function initCitizenNearbyReportsMap() {
     `);
     citizenNearbyMarkers.push(marker);
   });
+
+  // 1. Road-Synced Municipal Collection Corridor (High-Precision Mumbai Road Network)
+  const citizenRoadCircuit = (typeof window !== 'undefined' && window.PRECOMPUTED_ROAD_CIRCUITS && window.PRECOMPUTED_ROAD_CIRCUITS['bandra'])
+    || (typeof window !== 'undefined' && window.PRECOMPUTED_ROAD_CIRCUITS && window.PRECOMPUTED_ROAD_CIRCUITS['dadar'])
+    || [[19.0558, 72.8335], [19.0570, 72.8298], [19.0595, 72.8295], [19.0597, 72.8268], [19.0547, 72.8268], [19.0558, 72.8335]];
+
+  citizenPatrolPolyline = L.polyline(citizenRoadCircuit, {
+    color: '#059669',
+    weight: 4,
+    opacity: 0.85,
+    dashArray: '6, 8',
+    className: 'animated-route-line'
+  }).addTo(citizenNearbyMap);
+
+  // 2. Animated Municipal Patrol Collection Truck (Electric Multi-Bin Tipper Auto)
+  const patrolDef = {
+    id: 'CIT-PATROL-102',
+    regNo: 'MH-02-EV-1088',
+    type: 'Electric Multi-Bin Tipper Auto (1.5T)',
+    vehicleType: 'Electric Multi-Bin Tipper Auto (1.5T)',
+    name: 'Ward Patrol Crew #102',
+    driver: 'Sunita Devi (Crew #102)',
+    crewNumber: '102',
+    ward: 'Ward H/West - Bandra Residential'
+  };
+
+  const startPt = citizenRoadCircuit[0];
+  const nextPt = citizenRoadCircuit[1] || citizenRoadCircuit[0];
+  const initBearing = calculateBearing(startPt[0], startPt[1], nextPt[0], nextPt[1]);
+
+  citizenPatrolMarker = L.marker(startPt, {
+    icon: L.divIcon({
+      className: 'custom-admin-worker-icon',
+      html: createVehicleMarkerHtml(patrolDef, patrolDef, initBearing, true, false),
+      iconSize: [42, 56],
+      iconAnchor: [21, 28]
+    }),
+    zIndexOffset: 1500
+  }).addTo(citizenNearbyMap);
+
+  citizenPatrolMarker.bindPopup(`
+    <div style="min-width: 220px; font-family: inherit;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+        <strong style="color: #047857; font-size: 0.95rem;">${patrolDef.type}</strong>
+        <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #047857; font-size: 0.68rem; font-weight: 700;">LIVE PATROL</span>
+      </div>
+      <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 4px;">
+        Reg: <code style="font-weight: 700; background: rgba(0,0,0,0.06); padding: 1px 4px; border-radius: 3px;">${patrolDef.regNo}</code> &bull; Ward H/West
+      </div>
+      <div style="font-size: 0.82rem; margin-bottom: 3px;">
+        👩‍✈️ Crew: <strong>${patrolDef.driver}</strong>
+      </div>
+      <div style="font-size: 0.78rem; color: #059669; font-weight: 700; margin-top: 4px;">
+        🛣️ Synchronized to Mumbai municipal road network
+      </div>
+    </div>
+  `);
+
+  // Start continuous, synchronized street movement
+  citizenPatrolController = startContinuousRoadPatrol(citizenPatrolMarker, citizenRoadCircuit, citizenNearbyMap, {
+    intervalMs: 1400,
+    step: 2,
+    trailColor: '#10b981',
+    showTrail: true
+  });
+
+  // Center map on Mumbai incident and patrol zone
+  citizenNearbyMap.setView([19.058, 72.833], 14);
 
   setTimeout(() => citizenNearbyMap && citizenNearbyMap.invalidateSize(), 200);
 }

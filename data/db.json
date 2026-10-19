@@ -33,7 +33,10 @@
           "reason": "Redeemed Digital Eco-Champion Badge",
           "amount": 0
         }
-      ]
+      ],
+      "lastKnownLat": 19.29897,
+      "lastKnownLng": 72.86401,
+      "lastLocationUpdatedAt": 1792430457295
     },
     {
       "id": "usr-2",
@@ -150,9 +153,9 @@
       "vehicleType": "Heavy Hydraulic Compactor (10T)",
       "vehicleRegistration": "MH-01-GA-4401",
       "shiftStatus": "active",
-      "lastKnownLat": 19.02,
-      "lastKnownLng": 72.835,
-      "lastLocationUpdatedAt": 1791308348273
+      "lastKnownLat": 19.29894,
+      "lastKnownLng": 72.86403,
+      "lastLocationUpdatedAt": 1792430745912
     },
     {
       "id": "usr-7",
@@ -166,9 +169,9 @@
       "vehicleType": "Electric Multi-Bin Tipper Auto (1.5T)",
       "vehicleRegistration": "MH-02-EV-1088",
       "shiftStatus": "active",
-      "lastKnownLat": 19.0595,
-      "lastKnownLng": 72.8295,
-      "lastLocationUpdatedAt": 1791308288273
+      "lastKnownLat": 19.29896,
+      "lastKnownLng": 72.86404,
+      "lastLocationUpdatedAt": 1792430368872
     },
     {
       "id": "usr-8",
@@ -182,9 +185,9 @@
       "vehicleType": "Biomedical Closed-Chamber Van (2T)",
       "vehicleRegistration": "MH-03-HA-0912",
       "shiftStatus": "active",
-      "lastKnownLat": 19.1136,
-      "lastKnownLng": 72.8697,
-      "lastLocationUpdatedAt": 1791308228273
+      "lastKnownLat": 19.299,
+      "lastKnownLng": 72.86402,
+      "lastLocationUpdatedAt": 1792432313167
     },
     {
       "id": "usr-9",
@@ -225,9 +228,9 @@
       "name": "Municipal Sanitation Officer",
       "role": "admin",
       "verificationCode": "ADMIN2026",
-      "lastKnownLat": 19.29898,
-      "lastKnownLng": 72.86404,
-      "lastLocationUpdatedAt": 1792422802849
+      "lastKnownLat": 19.299,
+      "lastKnownLng": 72.86396,
+      "lastLocationUpdatedAt": 1792434798929
     }
   ],
   "reports": [
@@ -305,7 +308,7 @@
       "severity": "full",
       "notes": "Flower offerings and coconut husk bio-waste accumulating.",
       "isEmergency": true,
-      "status": "assigned",
+      "status": "cleared",
       "assignedWorkerId": "usr-7",
       "assignedWorkerName": "Sunita Devi (Crew #102)",
       "createdAt": 1791305468273,
@@ -315,7 +318,9 @@
       "urgencyBoosted": true,
       "boostedAt": 1792428174074,
       "escalatedTo": "Zonal Municipal Commissioner",
-      "escalatedAt": 1792428175759
+      "escalatedAt": 1792428175759,
+      "clearedAt": 1792431679540,
+      "resolutionNotes": "Administrative force clear override issued by Municipal Officer."
     },
     {
       "id": "REP-1002",
@@ -399,10 +404,12 @@
       "assignedWorkerName": "Sunita Devi (Crew #102)",
       "createdAt": 1791307268273,
       "duplicateCount": 0,
-      "isEscalated": false,
+      "isEscalated": true,
       "assignedAt": 1792420668445,
       "urgencyBoosted": true,
-      "boostedAt": 1792429585234
+      "boostedAt": 1792429585234,
+      "escalatedTo": "Zonal Municipal Commissioner",
+      "escalatedAt": 1792431672474
     },
     {
       "id": "BULK-2002",
@@ -429,14 +436,18 @@
       "isBulk": true,
       "volumeKg": 420,
       "containerCount": 6,
-      "isEmergency": false,
+      "isEmergency": true,
       "status": "assigned",
       "assignedWorkerId": "usr-8",
       "assignedWorkerName": "Amit Verma (Crew #103)",
       "createdAt": 1791304868273,
       "assignedAt": 1791306068273,
       "duplicateCount": 1,
-      "isEscalated": false
+      "isEscalated": true,
+      "escalatedTo": "Zonal Municipal Commissioner",
+      "escalatedAt": 1792431671751,
+      "urgencyBoosted": true,
+      "boostedAt": 1792431868397
     },
     {
       "id": "REP-1006",
@@ -776,9 +787,9 @@
       "fuelPercent": 84,
       "status": "In Depot Maintenance",
       "icon": "🚛",
-      "lastKnownLat": 19.02,
-      "lastKnownLng": 72.835,
-      "lastLocationUpdatedAt": 1791308348273
+      "lastKnownLat": 19.29894,
+      "lastKnownLng": 72.86403,
+      "lastLocationUpdatedAt": 1792430745912
     },
     {
       "id": "FLT-ET-108",
@@ -793,9 +804,9 @@
       "fuelPercent": 68,
       "status": "In Depot Maintenance",
       "icon": "🛺",
-      "lastKnownLat": 19.0595,
-      "lastKnownLng": 72.8295,
-      "lastLocationUpdatedAt": 1791308288273
+      "lastKnownLat": 19.29896,
+      "lastKnownLng": 72.86404,
+      "lastLocationUpdatedAt": 1792430368872
     },
     {
       "id": "FLT-BM-09",
@@ -810,9 +821,9 @@
       "fuelPercent": 92,
       "status": "In Depot Maintenance",
       "icon": "🚐",
-      "lastKnownLat": 19.1136,
-      "lastKnownLng": 72.8697,
-      "lastLocationUpdatedAt": 1791308228273
+      "lastKnownLat": 19.299,
+      "lastKnownLng": 72.86402,
+      "lastLocationUpdatedAt": 1792432313167
     },
     {
       "id": "FLT-CD-550",
@@ -868,6 +879,76 @@
     }
   ],
   "audit_logs": [
+    {
+      "id": "log-1792431868397-77",
+      "timestamp": 1792431868397,
+      "actor": "Admin",
+      "action": "SLA_URGENCY_BOOST",
+      "details": "Urgency boost triggered on ticket BULK-2002"
+    },
+    {
+      "id": "log-1792431868392-32",
+      "timestamp": 1792431868392,
+      "actor": "Admin",
+      "action": "SLA_URGENCY_BOOST",
+      "details": "Urgency boost triggered on ticket BULK-2002. Priority elevated to High/Emergency."
+    },
+    {
+      "id": "log-1792431679557-921",
+      "timestamp": 1792431679557,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report REP-1004 (Siddhivinayak Temple Perimeter Bins)"
+    },
+    {
+      "id": "log-1792431679540-154",
+      "timestamp": 1792431679540,
+      "actor": "Municipal Sanitation Officer",
+      "action": "REPORT_CLEARED",
+      "details": "Report REP-1004 marked cleared and sanitized"
+    },
+    {
+      "id": "log-1792431672474-592",
+      "timestamp": 1792431672474,
+      "actor": "Admin",
+      "action": "STATUTORY_ESCALATION",
+      "details": "Escalated EMG-402 to Zonal Municipal Commissioner"
+    },
+    {
+      "id": "log-1792431672470-635",
+      "timestamp": 1792431672470,
+      "actor": "Admin",
+      "action": "STATUTORY_ESCALATION",
+      "details": "Ticket EMG-402 escalated directly to Zonal Municipal Commissioner."
+    },
+    {
+      "id": "log-1792431671751-539",
+      "timestamp": 1792431671751,
+      "actor": "Admin",
+      "action": "STATUTORY_ESCALATION",
+      "details": "Escalated BULK-2002 to Zonal Municipal Commissioner"
+    },
+    {
+      "id": "log-1792431671748-17",
+      "timestamp": 1792431671748,
+      "actor": "Admin",
+      "action": "STATUTORY_ESCALATION",
+      "details": "Ticket BULK-2002 escalated directly to Zonal Municipal Commissioner."
+    },
+    {
+      "id": "log-1792431670667-825",
+      "timestamp": 1792431670667,
+      "actor": "Admin",
+      "action": "STATUTORY_ESCALATION",
+      "details": "Escalated BULK-2002 to Zonal Municipal Commissioner"
+    },
+    {
+      "id": "log-1792431670664-698",
+      "timestamp": 1792431670664,
+      "actor": "Admin",
+      "action": "STATUTORY_ESCALATION",
+      "details": "Ticket BULK-2002 escalated directly to Zonal Municipal Commissioner."
+    },
     {
       "id": "log-1792429585234-915",
       "timestamp": 1792429585234,
