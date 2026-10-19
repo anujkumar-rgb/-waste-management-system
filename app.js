@@ -34,9 +34,16 @@ function initTheme() {
       btn.addEventListener('click', () => {
         const currentTheme = document.documentElement.getAttribute('data-theme');
         const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        
+        // Smooth cross-fade transition
+        document.documentElement.classList.add('theme-transitioning');
         document.documentElement.setAttribute('data-theme', newTheme);
         localStorage.setItem('swm_theme', newTheme);
         updateThemeIcons(newTheme);
+
+        setTimeout(() => {
+          document.documentElement.classList.remove('theme-transitioning');
+        }, 400);
       });
     }
   });
@@ -1509,6 +1516,7 @@ function applyBranchCoordinates(lat, lng) {
    5. CITIZEN DASHBOARD: SEVERITY SELECTOR, VOICE RECORDER & CREDIT STORE
    ========================================================================== */
 function renderCitizenDashboard() {
+  applyInitialStaggerToDashboard('citizenDashboard');
   document.getElementById('citizenWelcomeName').textContent = currentUser.name;
   document.getElementById('citizenCreditBalance').textContent = `${currentUser.credits || 0} credits`;
   document.getElementById('storeHeaderBalance').textContent = currentUser.credits || 0;
@@ -1893,15 +1901,58 @@ function renderRedemptionStore() {
   }).join('');
 }
 
+function triggerEcoConfettiBurst(originElem) {
+  if (typeof document === 'undefined') return;
+  const leaves = ['🌱', '🍃', '🌿'];
+  let x = window.innerWidth / 2;
+  let y = window.innerHeight / 2;
+
+  if (originElem && originElem.getBoundingClientRect) {
+    const rect = originElem.getBoundingClientRect();
+    x = rect.left + rect.width / 2;
+    y = rect.top + rect.height / 2;
+  }
+
+  const angles = [-65, -25, 25, 65];
+  angles.forEach((angle, i) => {
+    const el = document.createElement('div');
+    el.className = 'eco-confetti-particle';
+    el.textContent = leaves[i % leaves.length];
+    el.style.left = `${x}px`;
+    el.style.top = `${y}px`;
+
+    const rad = (angle * Math.PI) / 180;
+    const dist = 80 + Math.random() * 35;
+    const tx = Math.sin(rad) * dist;
+    const ty = -Math.cos(rad) * dist;
+    const rot = (Math.random() - 0.5) * 120;
+
+    el.style.setProperty('--leaf-tx', `${tx}px`);
+    el.style.setProperty('--leaf-ty', `${ty}px`);
+    el.style.setProperty('--leaf-rot', `${rot}deg`);
+
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1400);
+  });
+}
+
 window.redeemCreditStoreItem = function(itemId) {
   const item = CREDIT_STORE_CATALOG.find(i => i.id === itemId);
   if (!item) return;
 
   const userBalance = currentUser.credits || 0;
   if (userBalance < item.cost) {
-    alert(`Insufficient EcoCredits! You need ${item.cost} credits. Balance: ${userBalance}`);
+    if (typeof showToast === 'function') {
+      showToast(`Insufficient EcoCredits! You need ${item.cost} credits. Balance: ${userBalance}`, 'warning');
+    } else {
+      alert(`Insufficient EcoCredits! You need ${item.cost} credits. Balance: ${userBalance}`);
+    }
     return;
   }
+
+  // Trigger on-theme eco-confetti burst (leaf/sapling shapes)
+  const clickedBtn = (typeof event !== 'undefined' && event && event.target) ? event.target : null;
+  triggerEcoConfettiBurst(clickedBtn);
 
   awardCredits(-item.cost, `Redeemed: ${item.name}`);
 
@@ -1915,7 +1966,11 @@ window.redeemCreditStoreItem = function(itemId) {
       saveUsers(users);
     }
     localStorage.setItem('swm_current_user', JSON.stringify(currentUser));
-    alert(`🎉 Priority Pickup Pass Activated! Your next submitted report is guaranteed same-day collection, jumping to the top of the collection queue.`);
+    if (typeof showToast === 'function') {
+      showToast(`🎉 Priority Pickup Pass Activated! Your next report gets guaranteed same-day collection.`, 'success');
+    } else {
+      alert(`🎉 Priority Pickup Pass Activated! Your next submitted report is guaranteed same-day collection, jumping to the top of the collection queue.`);
+    }
     renderCitizenDashboard();
     return;
   }
@@ -1938,9 +1993,17 @@ window.redeemCreditStoreItem = function(itemId) {
   saveRedemptions(redemptions);
 
   if (isDigital) {
-    alert(`🎉 Digital Badge Awarded! Your Eco-Champion credential has been instantly fulfilled.`);
+    if (typeof showToast === 'function') {
+      showToast(`🎉 Digital Badge Awarded! Your Eco-Champion credential has been fulfilled.`, 'success');
+    } else {
+      alert(`🎉 Digital Badge Awarded! Your Eco-Champion credential has been instantly fulfilled.`);
+    }
   } else {
-    alert(`🎉 Redemption Requested! Ref Code: ${newRedemption.id}\nYour request for "${item.name}" will be fulfilled via the municipal depot.`);
+    if (typeof showToast === 'function') {
+      showToast(`🌱 Redemption Confirmed! Ref Code: ${newRedemption.id}. Pickup via municipal depot.`, 'success');
+    } else {
+      alert(`🎉 Redemption Requested! Ref Code: ${newRedemption.id}\nYour request for "${item.name}" will be fulfilled via the municipal depot.`);
+    }
   }
 
   renderCitizenDashboard();
@@ -1971,6 +2034,73 @@ function renderMyRedemptionsList() {
   `).join('');
 }
 
+/* Status Stepper with Smooth Progress Fill Animation */
+function renderStatusStepperHTML(status, compact = false) {
+  const isCleared = status === 'cleared';
+  const isAssigned = status === 'assigned';
+  const fillWidth = isCleared ? '100%' : (isAssigned ? '50%' : '18%');
+
+  return `
+    <div class="status-stepper" data-status="${status}" style="${compact ? 'font-size: 0.65rem;' : ''}">
+      <div class="stepper-progress-fill" style="width: ${fillWidth};"></div>
+      <span class="stepper-step ${status === 'reported' ? 'active' : 'completed'}">${compact ? '1' : '1. Reported'}</span>
+      <span class="stepper-arrow">›</span>
+      <span class="stepper-step ${isAssigned ? 'active' : (isCleared ? 'completed' : '')}">${compact ? '2' : '2. Assigned'}</span>
+      <span class="stepper-arrow">›</span>
+      <span class="stepper-step ${isCleared ? 'completed active' : ''}">${compact ? '3' : '3. Cleared'}</span>
+    </div>
+  `;
+}
+
+/* Screen-Level Emergency Alert Edge Pulse / Glow */
+let emergencyAlertTimeout = null;
+window.triggerEmergencyScreenAlert = function(reportOrText) {
+  if (typeof document === 'undefined') return;
+  let existing = document.getElementById('emergencyScreenAlertVignette');
+  if (existing) existing.remove();
+
+  const vignette = document.createElement('div');
+  vignette.id = 'emergencyScreenAlertVignette';
+  vignette.className = 'emergency-screen-vignette';
+
+  const banner = document.createElement('div');
+  banner.className = 'emergency-vignette-banner';
+  const label = typeof reportOrText === 'object' && reportOrText 
+    ? `🚨 CRITICAL EMERGENCY REPORT #${reportOrText.id || 'ALERT'} (${reportOrText.area || reportOrText.ward || 'Municipal Zone'})`
+    : (typeof reportOrText === 'string' ? reportOrText : '🚨 CRITICAL OVERFLOW EMERGENCY ALERT ACTIVE');
+  banner.innerHTML = `<span>${label}</span> <span style="font-size: 0.72rem; opacity: 0.85; text-decoration: underline;">Dismiss ✕</span>`;
+  banner.onclick = () => {
+    vignette.style.opacity = '0';
+    setTimeout(() => vignette.remove(), 400);
+  };
+
+  vignette.appendChild(banner);
+  document.body.appendChild(vignette);
+
+  if (emergencyAlertTimeout) clearTimeout(emergencyAlertTimeout);
+  emergencyAlertTimeout = setTimeout(() => {
+    if (vignette && vignette.parentNode) {
+      vignette.style.opacity = '0';
+      setTimeout(() => vignette.remove(), 600);
+    }
+  }, 4800);
+};
+
+/* Initial Dashboard Staggered Card Load-In (Only runs on initial load) */
+const initialLoadedDashboards = new Set();
+function applyInitialStaggerToDashboard(containerId) {
+  if (typeof document === 'undefined') return;
+  if (initialLoadedDashboards.has(containerId)) return;
+  initialLoadedDashboards.add(containerId);
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const cards = container.querySelectorAll('.card, .stat-card');
+  cards.forEach((card, idx) => {
+    card.classList.add('initial-stagger-card');
+    card.style.animationDelay = `${idx * 45}ms`;
+  });
+}
+
 function renderCitizenReportsFeed() {
   evaluateEscalations();
   const reports = getReports().filter(r => r.userId === currentUser.id);
@@ -1991,13 +2121,7 @@ function renderCitizenReportsFeed() {
     <div class="report-item ${r.isEmergency ? 'emergency' : ''} ${r.isEscalated ? 'escalated' : ''}">
       <div>
         <div class="report-meta">
-          <div class="status-stepper">
-            <span class="stepper-step ${r.status === 'reported' ? 'active' : 'completed'}">1. Reported</span>
-            <span class="stepper-arrow">›</span>
-            <span class="stepper-step ${r.status === 'assigned' ? 'active' : (r.status === 'cleared' ? 'completed' : '')}">2. Assigned</span>
-            <span class="stepper-arrow">›</span>
-            <span class="stepper-step ${r.status === 'cleared' ? 'completed active' : ''}">3. Cleared</span>
-          </div>
+          ${renderStatusStepperHTML(r.status)}
           ${r.isEmergency ? `<span class="badge badge-emergency">EMERGENCY</span>` : ''}
           ${r.isEscalated ? `<span class="badge badge-escalated">ESCALATED (>24h)</span>` : ''}
           <span>📍 ${r.area}</span>
@@ -2055,6 +2179,7 @@ window.triggerEmergencyModal = function() {
    6. INSTITUTION DASHBOARD (SCHOOL & COMPANY/OFFICE + MULTI-BRANCH)
    ========================================================================== */
 function renderInstitutionDashboard() {
+  applyInitialStaggerToDashboard('institutionDashboard');
   const isSchool = currentUser.institutionType === 'school';
   const isCompany = currentUser.institutionType === 'company';
 
@@ -2240,13 +2365,7 @@ function renderInstitutionList() {
     <div class="report-item">
       <div>
         <div class="report-meta">
-          <div class="status-stepper">
-            <span class="stepper-step ${r.status === 'reported' ? 'active' : 'completed'}">1. Reported</span>
-            <span class="stepper-arrow">›</span>
-            <span class="stepper-step ${r.status === 'assigned' ? 'active' : (r.status === 'cleared' ? 'completed' : '')}">2. Assigned</span>
-            <span class="stepper-arrow">›</span>
-            <span class="stepper-step ${r.status === 'cleared' ? 'completed active' : ''}">3. Cleared</span>
-          </div>
+          ${renderStatusStepperHTML(r.status)}
           <span>🏢 ${r.branchName || 'Main'}</span>
           <span>📍 ${r.area}</span>
           <span>⏱ ${formatTimeAgo(r.createdAt)}</span>
@@ -2572,6 +2691,7 @@ window.openStaffTrainingModal = function() {
    8. WORKER DASHBOARD: DAYLIGHT HIGH-CONTRAST ROUTE OPTIMIZATION
    ========================================================================== */
 function renderWorkerDashboard() {
+  applyInitialStaggerToDashboard('workerDashboard');
   evaluateEscalations();
   renderWorkerSafetyChecklist();
   runSoftwareRouteOptimizer();
@@ -3162,13 +3282,28 @@ window.openWorkerProofModal = function(reportId) {
       const stopLng = clearedStop.longitude || clearedStop.coords?.lng || workerCurrentPos.lng;
       updateWorkerLocation(stopLat, stopLng);
 
-      alert(`Stop ${id} confirmed CLEARED! Photo proof logged.`);
+      const card = document.querySelector(`.route-stop-card[data-report-id="${id}"]`);
+      if (card) {
+        card.classList.add('stop-card-collected');
+        const meta = card.querySelector('.report-meta');
+        if (meta) {
+          meta.insertAdjacentHTML('afterbegin', '<span class="stop-collected-badge">✓ Collected</span>');
+        }
+      }
+
+      if (typeof showToast === 'function') {
+        showToast(`✅ Stop ${id} confirmed CLEARED! Photo proof logged.`, 'success');
+      } else {
+        alert(`Stop ${id} confirmed CLEARED! Photo proof logged.`);
+      }
     }
 
     closeModal('workerProofModal');
-    // Clear active target so optimizer advances to next stop
+    // Clear active target so optimizer advances to next stop smoothly
     activeWorkerTargetStopId = null;
-    renderWorkerDashboard();
+    setTimeout(() => {
+      renderWorkerDashboard();
+    }, 450);
   };
 };
 
@@ -3176,6 +3311,7 @@ window.openWorkerProofModal = function(reportId) {
    9. ADMIN DASHBOARD: LIVE FEED, SBM 2.0, HOTSPOT MAP & REDEMPTIONS QUEUE
    ========================================================================== */
 function renderAdminDashboard() {
+  applyInitialStaggerToDashboard('adminDashboard');
   evaluateEscalations();
   const reports = getReports();
 
@@ -3183,6 +3319,15 @@ function renderAdminDashboard() {
   document.getElementById('adminStatPending').textContent = reports.filter(r => r.status === 'reported').length;
   document.getElementById('adminStatEmergency').textContent = reports.filter(r => r.isEmergency).length;
   document.getElementById('adminStatEscalated').textContent = reports.filter(r => r.isEscalated).length;
+
+  // Trigger brief peripheral edge pulse if active uncleared emergencies exist
+  const activeEmg = reports.filter(r => r.isEmergency && r.status !== 'cleared');
+  if (activeEmg.length > 0 && !window._adminEmergencyAlertTriggered) {
+    window._adminEmergencyAlertTriggered = true;
+    setTimeout(() => {
+      window.triggerEmergencyScreenAlert(`🚨 ${activeEmg.length} ACTIVE CRITICAL HAZARD EMERGENCY REPORTS ON BOARD`);
+    }, 450);
+  }
 
   renderAdminFeedTable();
   renderAdminFleet();
@@ -3241,13 +3386,7 @@ function renderAdminFeedTable(customReports) {
           ${r.isPriorityPickup ? '<br><span class="badge" style="background: var(--civic-signal-amber-soft); color: var(--civic-signal-amber); font-weight: 800; font-size: 0.65rem;">⚡ Priority Pass</span>' : ''}
         </td>
         <td>
-          <div class="status-stepper" style="font-size: 0.65rem;">
-            <span class="stepper-step ${r.status === 'reported' ? 'active' : 'completed'}">1</span>
-            <span class="stepper-arrow">›</span>
-            <span class="stepper-step ${r.status === 'assigned' ? 'active' : (r.status === 'cleared' ? 'completed' : '')}">2</span>
-            <span class="stepper-arrow">›</span>
-            <span class="stepper-step ${r.status === 'cleared' ? 'completed active' : ''}">3</span>
-          </div>
+          ${renderStatusStepperHTML(r.status, true)}
         </td>
         <td><small style="font-family: monospace;">${Number(lat).toFixed(4)}, ${Number(lng).toFixed(4)}</small></td>
         <td>
@@ -3620,6 +3759,26 @@ function getComplianceStatus(value, target) {
   return 'offtarget';
 }
 
+function animateValueCountUp(element, targetVal, duration = 850) {
+  if (!element) return;
+  const target = Number(targetVal) || 0;
+  const startTime = performance.now();
+
+  function updateCount(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(1, elapsed / duration);
+    const ease = 1 - Math.pow(1 - progress, 3);
+    const current = (target * ease).toFixed(1);
+    element.textContent = `${current}%`;
+    if (progress < 1) {
+      requestAnimationFrame(updateCount);
+    } else {
+      element.textContent = `${target}%`;
+    }
+  }
+  requestAnimationFrame(updateCount);
+}
+
 function renderAdminComplianceTable() {
   const metrics = JSON.parse(localStorage.getItem('swm_compliance_metrics') || '[]');
   const tbody = document.getElementById('adminComplianceTableBody');
@@ -3641,9 +3800,10 @@ function renderAdminComplianceTable() {
   const covEl = document.getElementById('adminCityCoverageRate');
   const procEl = document.getElementById('adminCityProcessingRate');
 
-  if (segEl) segEl.textContent = `${avgSeg}%`;
-  if (covEl) covEl.textContent = `${avgCov}%`;
-  if (procEl) procEl.textContent = `${avgProc}%`;
+  // Animate numbers counting up smoothly on load
+  if (segEl) animateValueCountUp(segEl, avgSeg);
+  if (covEl) animateValueCountUp(covEl, avgCov);
+  if (procEl) animateValueCountUp(procEl, avgProc);
 
   const segPill = document.getElementById('adminSegregationStatusPill');
   const covPill = document.getElementById('adminCoverageStatusPill');
@@ -3955,17 +4115,49 @@ function initAdminHotspotMap() {
       const isEmg = r.isEmergency;
       const markerColor = isEmg ? '#dc2626' : (r.status === 'cleared' ? '#166534' : '#1c52d8');
 
+      // Calculate nearby density within ~1.2 km
+      const nearbyCount = reports.filter(other => {
+        const oLat = other.latitude || other.coords?.lat;
+        const oLng = other.longitude || other.coords?.lng;
+        return oLat && oLng && calcDistance(lat, lng, oLat, oLng) <= 1.2;
+      }).length;
+
+      const baseRadius = isEmg ? 11 : 7;
+      const densityBoost = Math.min(12, (nearbyCount - 1) * 2.8);
+      const radius = baseRadius + Math.max(0, densityBoost);
+
+      // Density halo pulse ring for dense clusters (2+ reports) or emergencies
+      if (nearbyCount >= 2 || isEmg) {
+        L.circleMarker([lat, lng], {
+          radius: radius + 7,
+          color: markerColor,
+          weight: 1.5,
+          opacity: 0.45,
+          fillColor: markerColor,
+          fillOpacity: 0.15,
+          className: 'hotspot-density-pulse-ring'
+        }).addTo(adminMapObj);
+      }
+
       L.circleMarker([lat, lng], {
-        radius: isEmg ? 10 : 7,
-        color: markerColor,
+        radius: radius,
+        color: '#ffffff',
+        weight: 2,
         fillColor: markerColor,
-        fillOpacity: 0.7
+        fillOpacity: 0.85
       }).addTo(adminMapObj).bindPopup(`
-        <strong>${r.id} (${r.status.toUpperCase()})</strong><br>
-        Source: ${r.schoolName || r.companyName || r.userName}<br>
-        Address: ${r.resolvedAddress || r.landmark}<br>
-        Category: ${r.category}<br>
-        Severity: ${r.severity}
+        <div style="min-width: 190px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <strong style="font-size: 0.95rem;">${r.id}</strong>
+            <span class="badge" style="background: ${markerColor}22; color: ${markerColor}; font-weight: 800; font-size: 0.68rem;">${r.status.toUpperCase()}</span>
+          </div>
+          <div style="font-size: 0.78rem; font-weight: 700; color: #475569; margin-bottom: 4px;">
+            📊 Cluster Density: <span style="color: ${markerColor};">${nearbyCount} reports in this zone</span>
+          </div>
+          <div style="font-size: 0.82rem; margin-bottom: 2px;">Source: ${r.schoolName || r.companyName || r.userName || 'Citizen'}</div>
+          <div style="font-size: 0.82rem; margin-bottom: 2px;">Address: ${r.resolvedAddress || r.landmark || r.area || 'Mumbai'}</div>
+          <div style="font-size: 0.8rem; color: #64748b;">Category: ${r.category || 'General'} &bull; Severity: ${r.severity || 'Normal'}</div>
+        </div>
       `);
     }
   });
@@ -6197,6 +6389,26 @@ window.exportAdminAnalyticsCSV = function() {
 /* ==========================================================================
    10. COMMON HELPERS & MODALS
    ========================================================================== */
+function triggerCreditAwardAnimation(amount, reason) {
+  if (typeof document === 'undefined' || amount <= 0) return;
+  const balanceElem = document.getElementById('citizenCreditBalance') || document.getElementById('storeHeaderBalance');
+  if (!balanceElem) return;
+
+  const pill = document.createElement('div');
+  pill.className = 'credit-float-pill';
+  pill.innerHTML = `<span>+${amount}</span> <span style="font-size: 0.9rem;">🌱</span>`;
+
+  const rect = balanceElem.getBoundingClientRect();
+  pill.style.left = `${Math.max(10, rect.left + (rect.width / 2) - 25)}px`;
+  pill.style.top = `${Math.max(10, rect.top - 14)}px`;
+  document.body.appendChild(pill);
+  setTimeout(() => pill.remove(), 1300);
+
+  balanceElem.classList.remove('balance-count-bump');
+  void balanceElem.offsetWidth;
+  balanceElem.classList.add('balance-count-bump');
+}
+
 function awardCredits(amount, reason) {
   if (currentUser.role === 'institution') return;
 
@@ -6213,6 +6425,10 @@ function awardCredits(amount, reason) {
     saveUsers(users);
     currentUser = users[idx];
     localStorage.setItem('swm_current_user', JSON.stringify(currentUser));
+
+    if (amount > 0) {
+      triggerCreditAwardAnimation(amount, reason);
+    }
   }
 }
 
@@ -7476,6 +7692,12 @@ function addNotification(title, message, type = 'general') {
   list.unshift({ id: 'notif-' + Date.now(), title, message, type, time: Date.now(), read: false });
   saveNotifications(list);
   renderNotificationDropdown();
+
+  if (type === 'emergency' || (title && (title.toLowerCase().includes('emergency') || title.toLowerCase().includes('hazard')))) {
+    if (typeof window.triggerEmergencyScreenAlert === 'function') {
+      window.triggerEmergencyScreenAlert(`${title}: ${message}`);
+    }
+  }
 }
 function updateNotificationBadge() {
   const list = getNotifications();

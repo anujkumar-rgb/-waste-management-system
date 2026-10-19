@@ -304,14 +304,18 @@
       "category": "organic",
       "severity": "full",
       "notes": "Flower offerings and coconut husk bio-waste accumulating.",
-      "isEmergency": false,
+      "isEmergency": true,
       "status": "assigned",
       "assignedWorkerId": "usr-7",
       "assignedWorkerName": "Sunita Devi (Crew #102)",
       "createdAt": 1791305468273,
       "duplicateCount": 0,
-      "isEscalated": false,
-      "assignedAt": 1792421397882
+      "isEscalated": true,
+      "assignedAt": 1792421397882,
+      "urgencyBoosted": true,
+      "boostedAt": 1792428174074,
+      "escalatedTo": "Zonal Municipal Commissioner",
+      "escalatedAt": 1792428175759
     },
     {
       "id": "REP-1002",
@@ -330,14 +334,18 @@
       "category": "organic",
       "severity": "full",
       "notes": "Dry leaves and organic bins filled after morning sweep.",
-      "isEmergency": false,
+      "isEmergency": true,
       "status": "assigned",
       "assignedWorkerId": "usr-8",
       "assignedWorkerName": "Amit Verma (Crew #103)",
       "createdAt": 1791214868273,
       "assignedAt": 1792419200250,
       "duplicateCount": 2,
-      "isEscalated": true
+      "isEscalated": true,
+      "escalatedTo": "Zonal Municipal Commissioner",
+      "escalatedAt": 1792428177821,
+      "urgencyBoosted": true,
+      "boostedAt": 1792428178729
     },
     {
       "id": "REP-1005",
@@ -392,7 +400,9 @@
       "createdAt": 1791307268273,
       "duplicateCount": 0,
       "isEscalated": false,
-      "assignedAt": 1792420668445
+      "assignedAt": 1792420668445,
+      "urgencyBoosted": true,
+      "boostedAt": 1792429585234
     },
     {
       "id": "BULK-2002",
@@ -764,7 +774,7 @@
       "capacityTon": 10,
       "currentPayloadTon": 7.8,
       "fuelPercent": 84,
-      "status": "Active Collection",
+      "status": "In Depot Maintenance",
       "icon": "🚛",
       "lastKnownLat": 19.02,
       "lastKnownLng": 72.835,
@@ -781,7 +791,7 @@
       "capacityTon": 1.5,
       "currentPayloadTon": 1.35,
       "fuelPercent": 68,
-      "status": "Active Collection",
+      "status": "In Depot Maintenance",
       "icon": "🛺",
       "lastKnownLat": 19.0595,
       "lastKnownLng": 72.8295,
@@ -798,7 +808,7 @@
       "capacityTon": 2,
       "currentPayloadTon": 0.7,
       "fuelPercent": 92,
-      "status": "Active Collection",
+      "status": "In Depot Maintenance",
       "icon": "🚐",
       "lastKnownLat": 19.1136,
       "lastKnownLng": 72.8697,
@@ -815,7 +825,7 @@
       "capacityTon": 14,
       "currentPayloadTon": 8.4,
       "fuelPercent": 76,
-      "status": "Active Collection",
+      "status": "In Depot Maintenance",
       "icon": "🚜",
       "lastKnownLat": 19.1255,
       "lastKnownLng": 72.912,
@@ -832,7 +842,7 @@
       "capacityTon": 0.8,
       "currentPayloadTon": 0.2,
       "fuelPercent": 95,
-      "status": "Idle / Off-Shift",
+      "status": "In Depot Maintenance",
       "icon": "🛺",
       "lastKnownLat": 19.2307,
       "lastKnownLng": 72.8567,
@@ -858,6 +868,146 @@
     }
   ],
   "audit_logs": [
+    {
+      "id": "log-1792429585234-915",
+      "timestamp": 1792429585234,
+      "actor": "Admin",
+      "action": "SLA_URGENCY_BOOST",
+      "details": "Urgency boost triggered on ticket EMG-402"
+    },
+    {
+      "id": "log-1792429585230-347",
+      "timestamp": 1792429585230,
+      "actor": "Admin",
+      "action": "SLA_URGENCY_BOOST",
+      "details": "Urgency boost triggered on ticket EMG-402. Priority elevated to High/Emergency."
+    },
+    {
+      "id": "log-1792428178729-789",
+      "timestamp": 1792428178729,
+      "actor": "Admin",
+      "action": "SLA_URGENCY_BOOST",
+      "details": "Urgency boost triggered on ticket REP-1002"
+    },
+    {
+      "id": "log-1792428178725-551",
+      "timestamp": 1792428178725,
+      "actor": "Admin",
+      "action": "SLA_URGENCY_BOOST",
+      "details": "Urgency boost triggered on ticket REP-1002. Priority elevated to High/Emergency."
+    },
+    {
+      "id": "log-1792428177821-681",
+      "timestamp": 1792428177821,
+      "actor": "Admin",
+      "action": "STATUTORY_ESCALATION",
+      "details": "Escalated REP-1002 to Zonal Municipal Commissioner"
+    },
+    {
+      "id": "log-1792428177817-457",
+      "timestamp": 1792428177817,
+      "actor": "Admin",
+      "action": "STATUTORY_ESCALATION",
+      "details": "Ticket REP-1002 escalated directly to Zonal Municipal Commissioner."
+    },
+    {
+      "id": "log-1792428175759-653",
+      "timestamp": 1792428175759,
+      "actor": "Admin",
+      "action": "STATUTORY_ESCALATION",
+      "details": "Escalated REP-1004 to Zonal Municipal Commissioner"
+    },
+    {
+      "id": "log-1792428175755-912",
+      "timestamp": 1792428175755,
+      "actor": "Admin",
+      "action": "STATUTORY_ESCALATION",
+      "details": "Ticket REP-1004 escalated directly to Zonal Municipal Commissioner."
+    },
+    {
+      "id": "log-1792428174074-222",
+      "timestamp": 1792428174074,
+      "actor": "Admin",
+      "action": "SLA_URGENCY_BOOST",
+      "details": "Urgency boost triggered on ticket REP-1004"
+    },
+    {
+      "id": "log-1792428174069-21",
+      "timestamp": 1792428174069,
+      "actor": "Admin",
+      "action": "SLA_URGENCY_BOOST",
+      "details": "Urgency boost triggered on ticket REP-1004. Priority elevated to High/Emergency."
+    },
+    {
+      "id": "log-1792428142975-444",
+      "timestamp": 1792428142975,
+      "actor": "Admin",
+      "action": "FLEET_UPDATE",
+      "details": "Updated status of vehicle FLT-MR-505 to In Depot Maintenance"
+    },
+    {
+      "id": "log-1792428142971-947",
+      "timestamp": 1792428142971,
+      "actor": "Admin",
+      "action": "FLEET_STATUS",
+      "details": "Vehicle MH-02-ET-5055 status set to \"In Depot Maintenance\""
+    },
+    {
+      "id": "log-1792428141199-293",
+      "timestamp": 1792428141199,
+      "actor": "Admin",
+      "action": "FLEET_UPDATE",
+      "details": "Updated status of vehicle FLT-CD-550 to In Depot Maintenance"
+    },
+    {
+      "id": "log-1792428141194-815",
+      "timestamp": 1792428141194,
+      "actor": "Admin",
+      "action": "FLEET_STATUS",
+      "details": "Vehicle MH-04-CD-5501 status set to \"In Depot Maintenance\""
+    },
+    {
+      "id": "log-1792428140291-863",
+      "timestamp": 1792428140291,
+      "actor": "Admin",
+      "action": "FLEET_UPDATE",
+      "details": "Updated status of vehicle FLT-BM-09 to In Depot Maintenance"
+    },
+    {
+      "id": "log-1792428140287-604",
+      "timestamp": 1792428140287,
+      "actor": "Admin",
+      "action": "FLEET_STATUS",
+      "details": "Vehicle MH-03-HA-0912 status set to \"In Depot Maintenance\""
+    },
+    {
+      "id": "log-1792428139054-770",
+      "timestamp": 1792428139054,
+      "actor": "Admin",
+      "action": "FLEET_UPDATE",
+      "details": "Updated status of vehicle FLT-CT-401 to In Depot Maintenance"
+    },
+    {
+      "id": "log-1792428139049-892",
+      "timestamp": 1792428139049,
+      "actor": "Admin",
+      "action": "FLEET_STATUS",
+      "details": "Vehicle MH-01-GA-4401 status set to \"In Depot Maintenance\""
+    },
+    {
+      "id": "log-1792428134484-754",
+      "timestamp": 1792428134484,
+      "actor": "Admin",
+      "action": "FLEET_UPDATE",
+      "details": "Updated status of vehicle FLT-ET-108 to In Depot Maintenance"
+    },
+    {
+      "id": "log-1792428134479-378",
+      "timestamp": 1792428134479,
+      "actor": "Admin",
+      "action": "FLEET_STATUS",
+      "details": "Vehicle MH-02-EV-1088 status set to \"In Depot Maintenance\""
+    },
     {
       "id": "log-1792424685703-497",
       "timestamp": 1792424685703,
