@@ -225,9 +225,9 @@
       "name": "Municipal Sanitation Officer",
       "role": "admin",
       "verificationCode": "ADMIN2026",
-      "lastKnownLat": 19.44052,
-      "lastKnownLng": 72.79489,
-      "lastLocationUpdatedAt": 1791311846616
+      "lastKnownLat": 19.29898,
+      "lastKnownLng": 72.86404,
+      "lastLocationUpdatedAt": 1792422802849
     }
   ],
   "reports": [
@@ -249,12 +249,15 @@
       "severity": "overflowing",
       "notes": "Plastic packaging spillage blocking pedestrian footpath.",
       "isEmergency": false,
-      "status": "assigned",
-      "assignedWorkerId": "usr-4",
-      "assignedWorkerName": "Rajesh Singh (Crew #101)",
+      "status": "cleared",
+      "assignedWorkerId": "usr-7",
+      "assignedWorkerName": "Sunita Devi (Crew #102)",
       "createdAt": 1791305768273,
       "duplicateCount": 1,
-      "isEscalated": false
+      "isEscalated": false,
+      "assignedAt": 1792420952347,
+      "clearedAt": 1792424516587,
+      "resolutionNotes": "Administrative force clear override issued by Municipal Officer."
     },
     {
       "id": "EMG-401",
@@ -274,12 +277,15 @@
       "severity": "emergency",
       "notes": "Corrosive industrial battery leakage spreading on pavement.",
       "isEmergency": true,
-      "status": "assigned",
-      "assignedWorkerId": "usr-4",
-      "assignedWorkerName": "Rajesh Singh (Crew #101)",
+      "status": "cleared",
+      "assignedWorkerId": "usr-7",
+      "assignedWorkerName": "Sunita Devi (Crew #102)",
       "createdAt": 1791307568273,
       "duplicateCount": 0,
-      "isEscalated": false
+      "isEscalated": false,
+      "assignedAt": 1792420951185,
+      "clearedAt": 1792424685693,
+      "resolutionNotes": "Administrative force clear override issued by Municipal Officer."
     },
     {
       "id": "REP-1004",
@@ -300,11 +306,12 @@
       "notes": "Flower offerings and coconut husk bio-waste accumulating.",
       "isEmergency": false,
       "status": "assigned",
-      "assignedWorkerId": "usr-4",
-      "assignedWorkerName": "Rajesh Singh (Crew #101)",
+      "assignedWorkerId": "usr-7",
+      "assignedWorkerName": "Sunita Devi (Crew #102)",
       "createdAt": 1791305468273,
       "duplicateCount": 0,
-      "isEscalated": false
+      "isEscalated": false,
+      "assignedAt": 1792421397882
     },
     {
       "id": "REP-1002",
@@ -325,10 +332,10 @@
       "notes": "Dry leaves and organic bins filled after morning sweep.",
       "isEmergency": false,
       "status": "assigned",
-      "assignedWorkerId": "usr-7",
-      "assignedWorkerName": "Sunita Devi (Crew #102)",
+      "assignedWorkerId": "usr-8",
+      "assignedWorkerName": "Amit Verma (Crew #103)",
       "createdAt": 1791214868273,
-      "assignedAt": 1791218468273,
+      "assignedAt": 1792419200250,
       "duplicateCount": 2,
       "isEscalated": true
     },
@@ -349,13 +356,17 @@
       "category": "plastic",
       "severity": "overflowing",
       "notes": "Recyclable packaging from weekend organic food stalls.",
-      "isEmergency": false,
+      "isEmergency": true,
       "status": "assigned",
       "assignedWorkerId": "usr-7",
       "assignedWorkerName": "Sunita Devi (Crew #102)",
       "createdAt": 1791303668273,
       "duplicateCount": 1,
-      "isEscalated": false
+      "isEscalated": true,
+      "urgencyBoosted": true,
+      "boostedAt": 1792421700691,
+      "escalatedTo": "Zonal Municipal Commissioner",
+      "escalatedAt": 1792421704781
     },
     {
       "id": "EMG-402",
@@ -376,12 +387,12 @@
       "notes": "Illegal dumping of clinic syringes and biohazard bags.",
       "isEmergency": true,
       "status": "assigned",
-      "assignedWorkerId": "usr-8",
-      "assignedWorkerName": "Amit Verma (Crew #103)",
+      "assignedWorkerId": "usr-7",
+      "assignedWorkerName": "Sunita Devi (Crew #102)",
       "createdAt": 1791307268273,
       "duplicateCount": 0,
       "isEscalated": false,
-      "assignedAt": 1791311835669
+      "assignedAt": 1792420668445
     },
     {
       "id": "BULK-2002",
@@ -847,6 +858,440 @@
     }
   ],
   "audit_logs": [
+    {
+      "id": "log-1792424685703-497",
+      "timestamp": 1792424685703,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report EMG-401 (Dadar Station Road Chemical Hazard Point)"
+    },
+    {
+      "id": "log-1792424685693-775",
+      "timestamp": 1792424685693,
+      "actor": "Municipal Sanitation Officer",
+      "action": "REPORT_CLEARED",
+      "details": "Report EMG-401 marked cleared and sanitized"
+    },
+    {
+      "id": "log-1792424516666-213",
+      "timestamp": 1792424516666,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report REP-1001 (City Plaza Market Gate 2 Bin Point)"
+    },
+    {
+      "id": "log-1792424516587-962",
+      "timestamp": 1792424516587,
+      "actor": "Municipal Sanitation Officer",
+      "action": "REPORT_CLEARED",
+      "details": "Report REP-1001 marked cleared and sanitized"
+    },
+    {
+      "id": "log-1792423662890-337",
+      "timestamp": 1792423662890,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report REP-1001 (City Plaza Market Gate 2 Bin Point)"
+    },
+    {
+      "id": "log-1792423609385-156",
+      "timestamp": 1792423609385,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report REP-1001 (City Plaza Market Gate 2 Bin Point)"
+    },
+    {
+      "id": "log-1792423564229-276",
+      "timestamp": 1792423564229,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report REP-1001 (City Plaza Market Gate 2 Bin Point)"
+    },
+    {
+      "id": "log-1792423360452-442",
+      "timestamp": 1792423360452,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report EMG-401 (Dadar Station Road Chemical Hazard Point)"
+    },
+    {
+      "id": "log-1792423290637-625",
+      "timestamp": 1792423290637,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report REP-1001 (City Plaza Market Gate 2 Bin Point)"
+    },
+    {
+      "id": "log-1792423254398-22",
+      "timestamp": 1792423254398,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report REP-1001 (City Plaza Market Gate 2 Bin Point)"
+    },
+    {
+      "id": "log-1792423235338-421",
+      "timestamp": 1792423235338,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report REP-1001 (City Plaza Market Gate 2 Bin Point)"
+    },
+    {
+      "id": "log-1792422943731-864",
+      "timestamp": 1792422943731,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report REP-1001 (City Plaza Market Gate 2 Bin Point)"
+    },
+    {
+      "id": "log-1792422922099-519",
+      "timestamp": 1792422922099,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report REP-1001 (City Plaza Market Gate 2 Bin Point)"
+    },
+    {
+      "id": "log-1792422889438-361",
+      "timestamp": 1792422889438,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report REP-1001 (City Plaza Market Gate 2 Bin Point)"
+    },
+    {
+      "id": "log-1792422742511-326",
+      "timestamp": 1792422742511,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report REP-1002 (Community Park Main Gate)"
+    },
+    {
+      "id": "log-1792422697329-86",
+      "timestamp": 1792422697329,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report REP-1001 (City Plaza Market Gate 2 Bin Point)"
+    },
+    {
+      "id": "log-1792421947755-939",
+      "timestamp": 1792421947755,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report REP-1001 (City Plaza Market Gate 2 Bin Point)"
+    },
+    {
+      "id": "log-1792421713482-641",
+      "timestamp": 1792421713482,
+      "actor": "Admin",
+      "action": "CITATION_ISSUED",
+      "details": "Statutory notice issued for ticket REP-1005: Unauthorized Construction & Demolition Debris Dumping - Standard Municipal Fine Tier 1 (₹2,500)"
+    },
+    {
+      "id": "log-1792421704781-590",
+      "timestamp": 1792421704781,
+      "actor": "Admin",
+      "action": "STATUTORY_ESCALATION",
+      "details": "Escalated REP-1005 to Zonal Municipal Commissioner"
+    },
+    {
+      "id": "log-1792421704777-437",
+      "timestamp": 1792421704777,
+      "actor": "Admin",
+      "action": "STATUTORY_ESCALATION",
+      "details": "Ticket REP-1005 escalated directly to Zonal Municipal Commissioner."
+    },
+    {
+      "id": "log-1792421703653-693",
+      "timestamp": 1792421703653,
+      "actor": "Admin",
+      "action": "STATUTORY_ESCALATION",
+      "details": "Escalated REP-1005 to Zonal Municipal Commissioner"
+    },
+    {
+      "id": "log-1792421703650-461",
+      "timestamp": 1792421703650,
+      "actor": "Admin",
+      "action": "STATUTORY_ESCALATION",
+      "details": "Ticket REP-1005 escalated directly to Zonal Municipal Commissioner."
+    },
+    {
+      "id": "log-1792421700691-996",
+      "timestamp": 1792421700691,
+      "actor": "Admin",
+      "action": "SLA_URGENCY_BOOST",
+      "details": "Urgency boost triggered on ticket REP-1005"
+    },
+    {
+      "id": "log-1792421700688-68",
+      "timestamp": 1792421700688,
+      "actor": "Admin",
+      "action": "SLA_URGENCY_BOOST",
+      "details": "Urgency boost triggered on ticket REP-1005. Priority elevated to High/Emergency."
+    },
+    {
+      "id": "log-1792421560536-574",
+      "timestamp": 1792421560536,
+      "actor": "Admin",
+      "action": "FLEET_UPDATE",
+      "details": "Updated status of vehicle FLT-CT-401 to Active Collection"
+    },
+    {
+      "id": "log-1792421560534-787",
+      "timestamp": 1792421560534,
+      "actor": "Admin",
+      "action": "FLEET_STATUS",
+      "details": "Vehicle MH-01-GA-4401 status set to \"Active Collection\""
+    },
+    {
+      "id": "log-1792421555680-138",
+      "timestamp": 1792421555680,
+      "actor": "Admin",
+      "action": "FLEET_UPDATE",
+      "details": "Updated status of vehicle FLT-ET-108 to Active Collection"
+    },
+    {
+      "id": "log-1792421555679-448",
+      "timestamp": 1792421555679,
+      "actor": "Admin",
+      "action": "FLEET_STATUS",
+      "details": "Vehicle MH-02-EV-1088 status set to \"Active Collection\""
+    },
+    {
+      "id": "log-1792421553924-405",
+      "timestamp": 1792421553924,
+      "actor": "Admin",
+      "action": "FLEET_UPDATE",
+      "details": "Updated status of vehicle FLT-ET-108 to In Depot Maintenance"
+    },
+    {
+      "id": "log-1792421553922-906",
+      "timestamp": 1792421553922,
+      "actor": "Admin",
+      "action": "FLEET_STATUS",
+      "details": "Vehicle MH-02-EV-1088 status set to \"In Depot Maintenance\""
+    },
+    {
+      "id": "log-1792421552255-984",
+      "timestamp": 1792421552255,
+      "actor": "Admin",
+      "action": "FLEET_UPDATE",
+      "details": "Updated status of vehicle FLT-CT-401 to In Depot Maintenance"
+    },
+    {
+      "id": "log-1792421552252-176",
+      "timestamp": 1792421552252,
+      "actor": "Admin",
+      "action": "FLEET_STATUS",
+      "details": "Vehicle MH-01-GA-4401 status set to \"In Depot Maintenance\""
+    },
+    {
+      "id": "log-1792421547253-470",
+      "timestamp": 1792421547253,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report REP-1002 (Community Park Main Gate)"
+    },
+    {
+      "id": "log-1792421546586-387",
+      "timestamp": 1792421546586,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report REP-1004 (Siddhivinayak Temple Perimeter Bins)"
+    },
+    {
+      "id": "log-1792421545866-756",
+      "timestamp": 1792421545866,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report EMG-401 (Dadar Station Road Chemical Hazard Point)"
+    },
+    {
+      "id": "log-1792421545431-250",
+      "timestamp": 1792421545431,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report REP-1001 (City Plaza Market Gate 2 Bin Point)"
+    },
+    {
+      "id": "log-1792421545258-140",
+      "timestamp": 1792421545258,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report REP-1001 (City Plaza Market Gate 2 Bin Point)"
+    },
+    {
+      "id": "log-1792421545079-27",
+      "timestamp": 1792421545079,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report REP-1001 (City Plaza Market Gate 2 Bin Point)"
+    },
+    {
+      "id": "log-1792421544891-837",
+      "timestamp": 1792421544891,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report REP-1001 (City Plaza Market Gate 2 Bin Point)"
+    },
+    {
+      "id": "log-1792421544295-589",
+      "timestamp": 1792421544295,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report REP-1001 (City Plaza Market Gate 2 Bin Point)"
+    },
+    {
+      "id": "log-1792421501167-89",
+      "timestamp": 1792421501167,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report REP-1001 (City Plaza Market Gate 2 Bin Point)"
+    },
+    {
+      "id": "log-1792421500989-274",
+      "timestamp": 1792421500989,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report REP-1001 (City Plaza Market Gate 2 Bin Point)"
+    },
+    {
+      "id": "log-1792421500824-173",
+      "timestamp": 1792421500824,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report REP-1001 (City Plaza Market Gate 2 Bin Point)"
+    },
+    {
+      "id": "log-1792421500634-105",
+      "timestamp": 1792421500634,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report REP-1001 (City Plaza Market Gate 2 Bin Point)"
+    },
+    {
+      "id": "log-1792421500478-642",
+      "timestamp": 1792421500478,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report REP-1001 (City Plaza Market Gate 2 Bin Point)"
+    },
+    {
+      "id": "log-1792421500305-876",
+      "timestamp": 1792421500305,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report REP-1001 (City Plaza Market Gate 2 Bin Point)"
+    },
+    {
+      "id": "log-1792421500126-938",
+      "timestamp": 1792421500126,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report REP-1001 (City Plaza Market Gate 2 Bin Point)"
+    },
+    {
+      "id": "log-1792421499968-63",
+      "timestamp": 1792421499968,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report REP-1001 (City Plaza Market Gate 2 Bin Point)"
+    },
+    {
+      "id": "log-1792421499804-489",
+      "timestamp": 1792421499804,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report REP-1001 (City Plaza Market Gate 2 Bin Point)"
+    },
+    {
+      "id": "log-1792421499653-403",
+      "timestamp": 1792421499653,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report REP-1001 (City Plaza Market Gate 2 Bin Point)"
+    },
+    {
+      "id": "log-1792421499451-894",
+      "timestamp": 1792421499451,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report REP-1001 (City Plaza Market Gate 2 Bin Point)"
+    },
+    {
+      "id": "log-1792421498979-446",
+      "timestamp": 1792421498979,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report REP-1001 (City Plaza Market Gate 2 Bin Point)"
+    },
+    {
+      "id": "log-1792421397882-500",
+      "timestamp": 1792421397882,
+      "actor": "Admin",
+      "action": "REASSIGN_STOP",
+      "details": "Reassigned stop REP-1004 (Siddhivinayak Temple Perimeter Bins) from Rajesh Singh (Crew #101) to Sunita Devi (Crew #102)."
+    },
+    {
+      "id": "log-1792421397878-31",
+      "timestamp": 1792421397878,
+      "actor": "Admin",
+      "action": "REASSIGN_NEAREST_STOP",
+      "details": "Manually reassigned stop REP-1004 (Siddhivinayak Temple Perimeter Bins) from Rajesh Singh (Crew #101) to Sunita Devi (Crew #102) (4.82 km away)."
+    },
+    {
+      "id": "log-1792420952347-815",
+      "timestamp": 1792420952347,
+      "actor": "Admin",
+      "action": "REASSIGN_STOP",
+      "details": "Reassigned stop REP-1001 (City Plaza Market Gate 2 Bin Point) from Rajesh Singh (Crew #101) to Sunita Devi (Crew #102)."
+    },
+    {
+      "id": "log-1792420952344-732",
+      "timestamp": 1792420952344,
+      "actor": "Admin",
+      "action": "REASSIGN_NEAREST_STOP",
+      "details": "Manually reassigned stop REP-1001 (City Plaza Market Gate 2 Bin Point) from Rajesh Singh (Crew #101) to Sunita Devi (Crew #102) (4.40 km away)."
+    },
+    {
+      "id": "log-1792420951185-357",
+      "timestamp": 1792420951185,
+      "actor": "Admin",
+      "action": "REASSIGN_STOP",
+      "details": "Reassigned stop EMG-401 (Dadar Station Road Chemical Hazard Point) from Rajesh Singh (Crew #101) to Sunita Devi (Crew #102)."
+    },
+    {
+      "id": "log-1792420951183-226",
+      "timestamp": 1792420951183,
+      "actor": "Admin",
+      "action": "REASSIGN_NEAREST_STOP",
+      "details": "Manually reassigned stop EMG-401 (Dadar Station Road Chemical Hazard Point) from Rajesh Singh (Crew #101) to Sunita Devi (Crew #102) (4.78 km away)."
+    },
+    {
+      "id": "log-1792420668445-806",
+      "timestamp": 1792420668445,
+      "actor": "Admin",
+      "action": "REASSIGN_STOP",
+      "details": "Reassigned stop EMG-402 (Bandra Polyclinic Alleyway) from Amit Verma (Crew #103) to Sunita Devi (Crew #102)."
+    },
+    {
+      "id": "log-1792420668441-534",
+      "timestamp": 1792420668441,
+      "actor": "Admin",
+      "action": "REASSIGN_NEAREST_STOP",
+      "details": "Manually reassigned stop EMG-402 (Bandra Polyclinic Alleyway) from Amit Verma (Crew #103) to Sunita Devi (Crew #102) (0.69 km away)."
+    },
+    {
+      "id": "log-1792419200250-2",
+      "timestamp": 1792419200250,
+      "actor": "Admin",
+      "action": "REASSIGN_STOP",
+      "details": "Reassigned stop REP-1002 (Community Park Main Gate) from Sunita Devi (Crew #102) to Amit Verma (Crew #103)."
+    },
+    {
+      "id": "log-1792419200244-231",
+      "timestamp": 1792419200244,
+      "actor": "Admin",
+      "action": "REASSIGN_NEAREST_STOP",
+      "details": "Manually reassigned stop REP-1002 (Community Park Main Gate) from Sunita Devi (Crew #102) to Amit Verma (Crew #103) (7.46 km away)."
+    },
     {
       "id": "log-1791311835669-991",
       "timestamp": 1791311835669,

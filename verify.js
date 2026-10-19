@@ -862,6 +862,41 @@ runTest('Accessibility: Comprehensive prefers-reduced-motion overrides in CSS an
 });
 
 // --------------------------------------------------------------------------
+// 17. CUSTOM ANIMATED VEHICLE GPS MARKERS & LIVE FLEET ROUTE MOTION
+// --------------------------------------------------------------------------
+console.log('\n🚛 17. Testing Custom Animated Vehicle GPS Markers & Route Motion...');
+
+runTest('Vehicle Markers: Inline SVGs for Compactor, Tipper, E-Rickshaw & Mini-Truck', () => {
+  assert(appContent.includes('vehicle-compactor-svg'), 'Compactor truck SVG missing in app.js');
+  assert(appContent.includes('vehicle-tipper-svg'), 'Tipper truck SVG missing in app.js');
+  assert(appContent.includes('vehicle-erickshaw-svg'), 'E-rickshaw SVG missing in app.js');
+  assert(appContent.includes('vehicle-minitruck-svg'), 'Mini-truck SVG missing in app.js');
+  assert(appContent.includes('function createVehicleMarkerHtml('), 'createVehicleMarkerHtml function missing in app.js');
+});
+
+runTest('Directional Rotation & Bearing Calculation', () => {
+  assert(appContent.includes('function calculateBearing('), 'calculateBearing function missing in app.js');
+  assert(stylesContent.includes('.vehicle-icon-rotator'), '.vehicle-icon-rotator CSS class missing in styles.css');
+  assert(stylesContent.includes('transform-origin: 50% 50%'), 'transform-origin: 50% 50% missing in styles.css');
+});
+
+runTest('Idle vs Moving States: Subtle bounce, ripple ring and exhaust particles', () => {
+  assert(stylesContent.includes('.vehicle-marker-container.vehicle-state-idle'), 'vehicle-state-idle class missing in styles.css');
+  assert(stylesContent.includes('.vehicle-marker-container.vehicle-state-moving'), 'vehicle-state-moving class missing in styles.css');
+  assert(stylesContent.includes('@keyframes vehicleIdleBounce'), 'vehicleIdleBounce keyframes missing in styles.css');
+  assert(stylesContent.includes('.vehicle-exhaust-stream'), 'vehicle-exhaust-stream missing in styles.css');
+  assert(stylesContent.includes('@keyframes vehicleExhaustPuff'), 'vehicleExhaustPuff keyframes missing in styles.css');
+  assert(stylesContent.includes('.vehicle-motion-trail'), 'vehicle-motion-trail class missing in styles.css');
+});
+
+runTest('Pacing, Reusable Interpolation & Reduced Motion', () => {
+  assert(appContent.includes('function animateMarkerTo('), 'animateMarkerTo interpolation missing in app.js');
+  assert(stylesContent.includes('.vehicle-marker-container.vehicle-state-idle .vehicle-icon-body') && 
+         stylesContent.includes('@media (prefers-reduced-motion: reduce)'), 'prefers-reduced-motion override missing for vehicle animations in styles.css');
+  assert(htmlContent.includes('btnAdminLiveSimulationToggle'), 'btnAdminLiveSimulationToggle missing in index.html');
+});
+
+// --------------------------------------------------------------------------
 // TEST SUMMARY
 // --------------------------------------------------------------------------
 console.log('\n======================================================');

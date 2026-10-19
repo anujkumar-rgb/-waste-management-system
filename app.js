@@ -1844,7 +1844,7 @@ function renderRedemptionStore() {
   const container = document.getElementById('rewardStoreGrid');
   if (!container) return;
 
-  const userBalance = currentUser.credits || 0;
+  const userBalance = (currentUser && currentUser.credits) ? currentUser.credits : 0;
   const isHi = (typeof currentLang !== 'undefined' && currentLang === 'hi');
 
   container.innerHTML = CREDIT_STORE_CATALOG.map(item => {
@@ -2842,7 +2842,12 @@ function initWorkerRouteMap(finalRoute) {
   }
 
   // Clear previous stop markers & lines
-  workerStopMarkers.forEach(m => m.remove());
+  workerStopMarkers.forEach(item => {
+    if (item) {
+      if (typeof item.remove === 'function') item.remove();
+      else if (item.marker && typeof item.marker.remove === 'function') item.marker.remove();
+    }
+  });
   workerStopMarkers = [];
   if (workerRoutePolyline) {
     workerRoutePolyline.remove();
@@ -2855,20 +2860,33 @@ function initWorkerRouteMap(finalRoute) {
 
   // Worker Live Location Marker (draggable in demo to simulate driving/walking)
   if (workerLocationMarker) {
-    workerLocationMarker.setLatLng([workerCurrentPos.lat, workerCurrentPos.lng]);
+    animateMarkerTo(workerLocationMarker, [workerCurrentPos.lat, workerCurrentPos.lng], 1600);
   } else {
+    const vType = currentUser?.vehicleType || 'Heavy Hydraulic Compactor (10T)';
+    const vehicle = getFleet().find(f => f.driverId === currentUser?.id || f.driver === currentUser?.name);
+    let initialWorkerBearing = 0;
+    if (finalRoute && finalRoute.length > 0) {
+      const firstStop = finalRoute[0];
+      const sLat = firstStop.latitude !== undefined ? firstStop.latitude : (firstStop.coords?.lat || 19.0760);
+      const sLng = firstStop.longitude !== undefined ? firstStop.longitude : (firstStop.coords?.lng || 72.8777);
+      initialWorkerBearing = calculateBearing(workerCurrentPos.lat, workerCurrentPos.lng, sLat, sLng);
+    }
+
     workerLocationMarker = L.marker([workerCurrentPos.lat, workerCurrentPos.lng], {
       draggable: true,
       icon: L.divIcon({
-        className: 'worker-pulse-container',
-        html: `<div class="worker-pulse-marker" title="Worker Location (Drag to test proximity)">🚛</div>`,
-        iconSize: [24, 24],
-        iconAnchor: [12, 12]
+        className: 'worker-pulse-container custom-admin-worker-icon',
+        html: createVehicleMarkerHtml(currentUser || { name: 'You' }, vehicle, initialWorkerBearing, false, false),
+        iconSize: [52, 68],
+        iconAnchor: [26, 34]
       })
     }).addTo(workerMapObj).bindPopup('<strong>👷 Worker (You)</strong><br>Live GPS starting point.<br><small style="color: #64748b;">(Drag marker to test 50m proximity auto-advance)</small>');
 
     workerLocationMarker.on('dragend', (e) => {
       const pos = e.target.getLatLng();
+      const dragBearing = calculateBearing(workerCurrentPos.lat, workerCurrentPos.lng, pos.lat, pos.lng);
+      const rotEl = workerLocationMarker.getElement()?.querySelector('.vehicle-icon-rotator');
+      if (rotEl) rotEl.style.transform = `rotate(${Math.round(dragBearing)}deg)`;
       updateWorkerLocation(pos.lat, pos.lng);
       updateWorkerNavigationGuidance(finalRoute);
     });
@@ -2895,6 +2913,15 @@ function initWorkerRouteMap(finalRoute) {
       className: 'animated-route-line'
     }).addTo(workerMapObj);
     animatePolylineDrawIn(workerRoutePolyline, pathCoords, 450);
+
+    // Synchronize polyline to real street network
+    if (typeof fetchRoadSnappedRoute === 'function') {
+      fetchRoadSnappedRoute(pathCoords).then(roadCoords => {
+        if (roadCoords && roadCoords.length > pathCoords.length && workerRoutePolyline) {
+          animatePolylineDrawIn(workerRoutePolyline, roadCoords, 500);
+        }
+      });
+    }
   }
 
   // Add numbered markers for each stop
@@ -3230,7 +3257,10 @@ function renderAdminFeedTable(customReports) {
           </select>
         </td>
         <td>
-          <button class="btn btn-outline btn-xs" onclick="adminForceClear('${r.id}')">Force Clear</button>
+          ${r.status === 'cleared'
+            ? `<button id="forceClearBtn_${r.id}" class="btn btn-outline btn-xs" onclick="adminForceClear('${r.id}')" style="background: rgba(16, 185, 129, 0.12); color: #10b981; border-color: #10b981; opacity: 0.85;" title="Report already cleared">✓ Cleared</button>`
+            : `<button id="forceClearBtn_${r.id}" class="btn btn-outline btn-xs" onclick="adminForceClear('${r.id}')" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.6);" title="Force mark report as cleared">Force Clear</button>`
+          }
         </td>
       </tr>
     `;
@@ -3478,6 +3508,7 @@ function renderAdminGrievanceTable() {
           <div style="display: flex; gap: 0.35rem;">
             <button class="btn btn-outline btn-xs" onclick="adminEscalateTicket('${r.id}')" title="Escalate directly to Zonal Municipal Commissioner">🏛️ Escalate</button>
             <button class="btn btn-outline btn-xs" onclick="openSanitationNoticeModal('${r.id}')" title="Issue formal citation warning">📜 Notice</button>
+            <button class="btn btn-outline btn-xs" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.6);" onclick="adminForceClear('${r.id}')" title="Administrative Force Clear">⚡ Clear</button>
           </div>
         </td>
       </tr>
@@ -3894,6 +3925,8 @@ window.openAboutProjectModal = function() {
 };
 
 let adminMapObj = null;
+let adminHotspotVehicles = [];
+let adminHotspotVehicleSimulationInterval = null;
 
 function initAdminHotspotMap() {
   const mapElement = document.getElementById('adminHotspotMap');
@@ -3901,6 +3934,9 @@ function initAdminHotspotMap() {
 
   if (adminMapObj) {
     adminMapObj.invalidateSize();
+    if (typeof startHotspotVehicleSimulation === 'function') {
+      startHotspotVehicleSimulation();
+    }
     return;
   }
 
@@ -3933,6 +3969,11 @@ function initAdminHotspotMap() {
       `);
     }
   });
+
+  // Launch live moving vehicles on Hotspot Density Map
+  if (typeof initHotspotMovingVehicles === 'function') {
+    initHotspotMovingVehicles();
+  }
 }
 
 /* ==========================================================================
@@ -3949,58 +3990,654 @@ let adminMultiRoutePolylines = [];
 let adminMultiRouteMarkers = [];
 const MULTI_ROUTE_COLORS = ['#059669', '#1c52d8', '#7c3aed', '#d97706', '#e11d48', '#0891b2'];
 
-/* Vehicle-Specific Inline SVG Icons for Municipal Tracking */
-function getVehicleSvgIcon(vehicleType = '', isIdle = false) {
-  const typeStr = (vehicleType || '').toLowerCase();
-  const fill = isIdle ? '#64748b' : '#047857';
-
-  if (typeStr.includes('biomedical')) {
-    return `<svg width="18" height="18" viewBox="0 0 24 24" fill="${fill}" style="vertical-align: middle;"><path d="M2 7h14v10H2V7zm15 3h4l2 3v4h-6v-7zM6 19a2 2 0 100-4 2 2 0 000 4zm12 0a2 2 0 100-4 2 2 0 000 4z"/><path d="M8 9h2v2h2v2h-2v2H8v-2H6v-2h2V9z" fill="#ef4444"/></svg>`;
-  }
-  if (typeStr.includes('tipper auto') || typeStr.includes('auto')) {
-    return `<svg width="18" height="18" viewBox="0 0 24 24" fill="${fill}" style="vertical-align: middle;"><path d="M3 13l2-6h9v6H3zm12-4h4l2 4h-6V9zM5 18a2 2 0 100-4 2 2 0 000 4zm11 0a2 2 0 100-4 2 2 0 000 4zM11 6l2-3h4l-1 3h-5z"/></svg>`;
-  }
-  if (typeStr.includes('e-rickshaw') || typeStr.includes('mini')) {
-    return `<svg width="18" height="18" viewBox="0 0 24 24" fill="${fill}" style="vertical-align: middle;"><path d="M4 11h9v5H4v-5zm10 1h4l2 2v2h-6v-4zM6 18a2 2 0 100-4 2 2 0 000 4zm10 0a2 2 0 100-4 2 2 0 000 4z"/><path d="M10 4l-2 4h3l-1 3 4-5h-3l1-2h-2z" fill="#10b981"/></svg>`;
-  }
-  if (typeStr.includes('dumper') || typeStr.includes('debris')) {
-    return `<svg width="18" height="18" viewBox="0 0 24 24" fill="${fill}" style="vertical-align: middle;"><path d="M3 14l2-6h10l-2 6H3zm11-3h5l3 3v3h-8v-6zM6 19a2 2 0 100-4 2 2 0 000 4zm12 0a2 2 0 100-4 2 2 0 000 4z"/></svg>`;
-  }
-  return `<svg width="18" height="18" viewBox="0 0 24 24" fill="${fill}" style="vertical-align: middle;"><path d="M1 8h13v8H1V8zm14 2h4l3 3v3h-7v-6zM5 19a2 2 0 100-4 2 2 0 000 4zm13 0a2 2 0 100-4 2 2 0 000 4z"/><path d="M4 10h4v4H4z" fill="#fff" opacity="0.6"/></svg>`;
+/* Directional Bearing Calculation (0 to 360 deg, North = 0 deg) */
+function calculateBearing(lat1, lng1, lat2, lng2) {
+  if (Math.abs(lat1 - lat2) < 0.000001 && Math.abs(lng1 - lng2) < 0.000001) return 0;
+  const toRad = deg => (deg * Math.PI) / 180;
+  const toDeg = rad => (rad * 180) / Math.PI;
+  const phi1 = toRad(lat1);
+  const phi2 = toRad(lat2);
+  const deltaLambda = toRad(lng2 - lng1);
+  const y = Math.sin(deltaLambda) * Math.cos(phi2);
+  const x = Math.cos(phi1) * Math.sin(phi2) - Math.sin(phi1) * Math.cos(phi2) * Math.cos(deltaLambda);
+  const theta = Math.atan2(y, x);
+  return (toDeg(theta) + 360) % 360;
 }
 
-/* Marker LatLng Smooth Interpolation (Respects prefers-reduced-motion) */
-function animateMarkerTo(marker, newLatLng, duration = 1200) {
+/* Custom Inline SVG Icons per Worker Vehicle Type (Compactor, Tipper, E-Rickshaw, Mini-Truck) */
+function getVehicleSvgIcon(vehicleType = '', isIdle = false) {
+  const typeStr = (vehicleType || '').toLowerCase();
+
+  // 1. Heavy Hydraulic Compactor Truck (10T)
+  if (typeStr.includes('compactor')) {
+    const bodyFill = isIdle ? '#475569' : '#047857';
+    const cabFill = isIdle ? '#334155' : '#065f46';
+    const strokeFill = isIdle ? '#1e293b' : '#064e3b';
+    const ribFill = isIdle ? '#64748b' : '#10b981';
+    const tailFill = isIdle ? '#0f172a' : '#022c22';
+
+    return `<svg class="vehicle-svg vehicle-compactor-svg" viewBox="0 0 34 52" width="34" height="52" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="3" width="30" height="46" rx="5" fill="rgba(0,0,0,0.22)"/>
+      <rect x="1" y="8" width="4" height="8" rx="2" fill="#1e293b"/>
+      <rect x="29" y="8" width="4" height="8" rx="2" fill="#1e293b"/>
+      <rect x="1" y="32" width="4" height="8" rx="2" fill="#1e293b"/>
+      <rect x="29" y="32" width="4" height="8" rx="2" fill="#1e293b"/>
+      <rect x="1" y="41" width="4" height="8" rx="2" fill="#1e293b"/>
+      <rect x="29" y="41" width="4" height="8" rx="2" fill="#1e293b"/>
+      <rect x="4" y="16" width="26" height="33" rx="4" fill="${bodyFill}" stroke="${strokeFill}" stroke-width="1.5"/>
+      <line x1="6" y1="23" x2="28" y2="23" stroke="${ribFill}" stroke-width="2" stroke-linecap="round"/>
+      <line x1="6" y1="30" x2="28" y2="30" stroke="${ribFill}" stroke-width="2" stroke-linecap="round"/>
+      <line x1="6" y1="37" x2="28" y2="37" stroke="${ribFill}" stroke-width="2" stroke-linecap="round"/>
+      <rect x="7" y="43" width="20" height="5" rx="1.5" fill="${tailFill}"/>
+      <line x1="11" y1="45.5" x2="23" y2="45.5" stroke="#34d399" stroke-width="1.5" stroke-linecap="round"/>
+      <path d="M5 16V8a3 3 0 0 1 3-3h18a3 3 0 0 1 3 3v8H5z" fill="${cabFill}"/>
+      <path d="M7 8h20l-1 5H8L7 8z" fill="#93c5fd" opacity="0.9"/>
+      <circle cx="8" cy="6" r="1.8" fill="#f59e0b"/>
+      <circle cx="26" cy="6" r="1.8" fill="#f59e0b"/>
+      <polygon points="8,4 5,-2 11,-2" fill="#fef08a" opacity="0.75"/>
+      <polygon points="26,4 23,-2 29,-2" fill="#fef08a" opacity="0.75"/>
+    </svg>`;
+  }
+
+  // 2. Electric Multi-Bin Tipper Truck / Tipper Auto
+  if (typeStr.includes('tipper') || typeStr.includes('dumper') || typeStr.includes('debris') || typeStr.includes('auto')) {
+    const bodyFill = isIdle ? '#475569' : '#1d4ed8';
+    const cabFill = isIdle ? '#334155' : '#1e40af';
+    const strokeFill = isIdle ? '#1e293b' : '#172554';
+
+    return `<svg class="vehicle-svg vehicle-tipper-svg" viewBox="0 0 32 48" width="32" height="48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="3" width="28" height="42" rx="5" fill="rgba(0,0,0,0.22)"/>
+      <rect x="1" y="7" width="4" height="8" rx="2" fill="#1e293b"/>
+      <rect x="27" y="7" width="4" height="8" rx="2" fill="#1e293b"/>
+      <rect x="1" y="33" width="4" height="8" rx="2" fill="#1e293b"/>
+      <rect x="27" y="33" width="4" height="8" rx="2" fill="#1e293b"/>
+      <rect x="4" y="16" width="24" height="29" rx="3" fill="${bodyFill}" stroke="${strokeFill}" stroke-width="1.5"/>
+      <rect x="6" y="19" width="9" height="22" rx="2" fill="${isIdle ? '#64748b' : '#15803d'}" stroke="#14532d" stroke-width="0.8"/>
+      <rect x="17" y="19" width="9" height="22" rx="2" fill="${isIdle ? '#475569' : '#2563eb'}" stroke="#1e3a8a" stroke-width="0.8"/>
+      <rect x="8" y="42.5" width="16" height="2.5" rx="1" fill="#f59e0b"/>
+      <path d="M5 16V8a3 3 0 0 1 3-3h16a3 3 0 0 1 3 3v8H5z" fill="${cabFill}"/>
+      <path d="M7 8h18l-1 5H8L7 8z" fill="#bfdbfe"/>
+      <rect x="2" y="9" width="3" height="2" rx="1" fill="#1e293b"/>
+      <rect x="27" y="9" width="3" height="2" rx="1" fill="#1e293b"/>
+      <polygon points="8,4 5,-2 11,-2" fill="#fef08a" opacity="0.75"/>
+      <polygon points="24,4 21,-2 27,-2" fill="#fef08a" opacity="0.75"/>
+    </svg>`;
+  }
+
+  // 3. Mini Tipper E-Rickshaw
+  if (typeStr.includes('e-rickshaw') || typeStr.includes('rickshaw')) {
+    const bodyFill = isIdle ? '#475569' : '#0d9488';
+    const roofFill = isIdle ? '#334155' : '#115e59';
+    const trayFill = isIdle ? '#64748b' : '#14b8a6';
+    const strokeFill = isIdle ? '#1e293b' : '#042f2e';
+    const boltFill = isIdle ? '#94a3b8' : '#34d399';
+
+    return `<svg class="vehicle-svg vehicle-erickshaw-svg" viewBox="0 0 28 42" width="28" height="42" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="14" cy="22" rx="12" ry="17" fill="rgba(0,0,0,0.2)"/>
+      <rect x="12" y="1" width="4" height="7" rx="2" fill="#1e293b"/>
+      <rect x="1" y="27" width="4" height="8" rx="2" fill="#1e293b"/>
+      <rect x="23" y="27" width="4" height="8" rx="2" fill="#1e293b"/>
+      <path d="M14 4L23 15V36H5V15L14 4z" fill="${bodyFill}" stroke="${strokeFill}" stroke-width="1.2"/>
+      <path d="M10 11L14 7L18 11L17 14H11L10 11z" fill="#ccfbf1"/>
+      <rect x="6" y="15" width="16" height="13" rx="2" fill="${roofFill}"/>
+      <path d="M15 17l-3 4h3l-2 5 5-6h-3l2-3h-2z" fill="${boltFill}"/>
+      <rect x="5.5" y="29" width="17" height="7.5" rx="2" fill="${trayFill}" stroke="${strokeFill}" stroke-width="1"/>
+      <line x1="14" y1="29" x2="14" y2="36.5" stroke="#042f2e" stroke-width="1"/>
+      <polygon points="14,2 9,-3 19,-3" fill="#fef08a" opacity="0.8"/>
+    </svg>`;
+  }
+
+  // 4. Mini-Truck / Biomedical Closed-Chamber Van
+  const isBiomed = typeStr.includes('biomedical') || typeStr.includes('chamber');
+  const bodyFill = isIdle ? '#475569' : (isBiomed ? '#f8fafc' : '#d97706');
+  const cabFill = isIdle ? '#334155' : (isBiomed ? '#e2e8f0' : '#b45309');
+  const bedFill = isIdle ? '#64748b' : (isBiomed ? '#f1f5f9' : '#f59e0b');
+  const strokeFill = isIdle ? '#1e293b' : (isBiomed ? '#dc2626' : '#78350f');
+
+  return `<svg class="vehicle-svg vehicle-minitruck-svg" viewBox="0 0 30 46" width="30" height="46" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="2" y="3" width="26" height="40" rx="4" fill="rgba(0,0,0,0.2)"/>
+    <rect x="1" y="7" width="4" height="8" rx="2" fill="#1e293b"/>
+    <rect x="25" y="7" width="4" height="8" rx="2" fill="#1e293b"/>
+    <rect x="1" y="31" width="4" height="8" rx="2" fill="#1e293b"/>
+    <rect x="25" y="31" width="4" height="8" rx="2" fill="#1e293b"/>
+    <rect x="4" y="17" width="22" height="25" rx="3" fill="${bodyFill}" stroke="${strokeFill}" stroke-width="1.5"/>
+    <rect x="6" y="19.5" width="18" height="20" rx="2" fill="${bedFill}" stroke="${strokeFill}" stroke-width="1"/>
+    ${isBiomed 
+      ? '<path d="M13 26h4v3h3v4h-3v3h-4v-3h-3v-4h3v-3z" fill="#ef4444"/>' 
+      : '<line x1="6" y1="26" x2="24" y2="26" stroke="#b45309" stroke-width="1" stroke-dasharray="2 2"/><line x1="6" y1="33" x2="24" y2="33" stroke="#b45309" stroke-width="1" stroke-dasharray="2 2"/>'}
+    <path d="M5 17V8a3 3 0 0 1 3-3h14a3 3 0 0 1 3 3v9H5z" fill="${cabFill}"/>
+    <path d="M7 8h16l-1 5H8L7 8z" fill="#fef3c7"/>
+    <rect x="2" y="9" width="3" height="2" rx="1" fill="#1e293b"/>
+    <rect x="25" y="9" width="3" height="2" rx="1" fill="#1e293b"/>
+    <polygon points="8,4 5,-2 11,-2" fill="#fef08a" opacity="0.75"/>
+    <polygon points="22,4 19,-2 25,-2" fill="#fef08a" opacity="0.75"/>
+  </svg>`;
+}
+
+/* Construct HTML for Vehicle Marker with Rotator, States & Label */
+function createVehicleMarkerHtml(worker, vehicle, bearing = 0, isMoving = false, isIdle = false) {
+  const vType = vehicle ? (vehicle.type || worker.vehicleType || '') : (worker.vehicleType || '');
+  const vehicleSvg = getVehicleSvgIcon(vType, isIdle);
+  const firstName = (worker.name || 'Crew').split(' ')[0];
+  const crewNum = worker.crewNumber || (worker.id ? worker.id.replace('usr-', '') : '101');
+  const roundedBearing = Math.round(bearing);
+
+  return `
+    <div class="vehicle-marker-container ${isIdle ? 'vehicle-state-idle' : ''} ${isMoving ? 'vehicle-state-moving' : ''}" data-worker-id="${worker.id || ''}">
+      <div class="vehicle-icon-rotator" style="transform: rotate(${roundedBearing}deg);">
+        <div class="vehicle-icon-body">
+          ${vehicleSvg}
+        </div>
+        <div class="vehicle-exhaust-stream"></div>
+      </div>
+      <div class="vehicle-crew-label">
+        <span class="crew-num">#${crewNum}</span>
+        <span class="crew-name">${firstName}</span>
+      </div>
+    </div>
+  `;
+}
+
+/* Marker LatLng Smooth Interpolation with Directional Rotation & Pacing (Reusable across Maps) */
+function animateMarkerTo(marker, arg2, arg3, arg4, arg5) {
   if (!marker) return;
+
+  // Supports both signatures:
+  // Signature 1: animateMarkerTo(marker, newLatLng, duration, options)
+  // Signature 2: animateMarkerTo(marker, fromLatLng, toLatLng, durationMs, options)
+  let fromLatLng = null;
+  let targetLatLng = null;
+  let duration = null;
+  let options = {};
+
+  if (arg3 !== undefined && (Array.isArray(arg3) || (arg3 && typeof arg3.lat === 'number'))) {
+    fromLatLng = arg2;
+    targetLatLng = arg3;
+    duration = typeof arg4 === 'number' ? arg4 : null;
+    if (typeof arg5 === 'object' && arg5 !== null) options = arg5;
+  } else {
+    targetLatLng = arg2;
+    fromLatLng = marker.getLatLng ? marker.getLatLng() : null;
+    duration = typeof arg3 === 'number' ? arg3 : null;
+    if (typeof arg4 === 'object' && arg4 !== null) options = arg4;
+  }
+
+  if (!targetLatLng) return;
+
+  const startLat = Array.isArray(fromLatLng) ? fromLatLng[0] : (fromLatLng ? fromLatLng.lat : 19.0760);
+  const startLng = Array.isArray(fromLatLng) ? fromLatLng[1] : (fromLatLng ? fromLatLng.lng : 72.8777);
+  const destLat = Array.isArray(targetLatLng) ? targetLatLng[0] : targetLatLng.lat;
+  const destLng = Array.isArray(targetLatLng) ? targetLatLng[1] : targetLatLng.lng;
+
+  // Calculate distance in km
+  const distKm = typeof calcDistance === 'function'
+    ? calcDistance(startLat, startLng, destLat, destLng)
+    : Math.sqrt(Math.pow(destLat - startLat, 2) + Math.pow(destLng - startLng, 2)) * 111;
+
+  const isMoved = distKm > 0.0005;
+  const targetBearing = typeof options.bearing === 'number'
+    ? options.bearing
+    : (isMoved ? calculateBearing(startLat, startLng, destLat, destLng) : 0);
+
+  // 5. Speed-appropriate animation pacing (~1.45s to 2.0s based on distance covered)
+  if (duration === null || duration === undefined) {
+    if (distKm < 0.1) {
+      duration = 2000; // Small distance -> slower movement
+    } else if (distKm < 0.4) {
+      duration = 1800; // Moderate distance
+    } else if (distKm < 1.0) {
+      duration = 1650; // Medium distance
+    } else {
+      duration = 1450; // Larger distance -> faster traversal
+    }
+  }
+
+  // 6. Respect prefers-reduced-motion
   const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (prefersReduced || duration <= 0) {
-    marker.setLatLng(newLatLng);
+    marker.setLatLng([destLat, destLng]);
+    const rotEl = marker.getElement ? marker.getElement()?.querySelector('.vehicle-icon-rotator') : null;
+    if (rotEl && isMoved) {
+      rotEl.style.transition = 'none';
+      rotEl.style.transform = `rotate(${Math.round(targetBearing)}deg)`;
+    }
+    const container = marker.getElement ? marker.getElement()?.querySelector('.vehicle-marker-container') : null;
+    if (container) {
+      container.classList.remove('vehicle-state-moving');
+      container.classList.add('vehicle-state-idle');
+    }
+    if (options.onComplete) options.onComplete();
     return;
   }
 
-  const startLatLng = marker.getLatLng();
-  const startLat = startLatLng.lat;
-  const startLng = startLatLng.lng;
-  const targetLat = Array.isArray(newLatLng) ? newLatLng[0] : newLatLng.lat;
-  const targetLng = Array.isArray(newLatLng) ? newLatLng[1] : newLatLng.lng;
-
-  if (Math.abs(startLat - targetLat) < 0.00001 && Math.abs(startLng - targetLng) < 0.00001) {
+  // If not moved, set idle state
+  if (!isMoved) {
+    marker.setLatLng([destLat, destLng]);
+    const container = marker.getElement ? marker.getElement()?.querySelector('.vehicle-marker-container') : null;
+    if (container) {
+      container.classList.remove('vehicle-state-moving');
+      container.classList.add('vehicle-state-idle');
+    }
+    if (options.onComplete) options.onComplete();
     return;
+  }
+
+  // 4. Moving State: activate moving class & rotate vehicle icon
+  const markerEl = marker.getElement ? marker.getElement() : null;
+  const container = markerEl?.querySelector('.vehicle-marker-container');
+  const rotEl = markerEl?.querySelector('.vehicle-icon-rotator');
+
+  if (container) {
+    container.classList.remove('vehicle-state-idle');
+    container.classList.add('vehicle-state-moving');
+  }
+
+  if (rotEl) {
+    rotEl.style.transition = 'transform 320ms cubic-bezier(0.25, 0.1, 0.25, 1)';
+    rotEl.style.transform = `rotate(${Math.round(targetBearing)}deg)`;
+  }
+
+  // Light trail / glow on path just traveled
+  let trailPolyline = null;
+  const map = options.map || marker._map;
+  if (map && typeof L !== 'undefined' && options.showTrail !== false) {
+    trailPolyline = L.polyline([[startLat, startLng], [startLat, startLng]], {
+      color: options.trailColor || '#10b981',
+      weight: 3.5,
+      opacity: 0.7,
+      dashArray: '4, 4',
+      className: 'vehicle-motion-trail'
+    }).addTo(map);
+  }
+
+  // Cancel any running animation on this marker
+  if (marker._animFrameId) {
+    cancelAnimationFrame(marker._animFrameId);
+    marker._animFrameId = null;
   }
 
   const startTime = performance.now();
+
   function step(now) {
     const elapsed = now - startTime;
     const progress = Math.min(elapsed / duration, 1);
     const ease = progress < 0.5 ? 2 * progress * progress : -1 + (4 - 2 * progress) * progress;
-    const currentLat = startLat + (targetLat - startLat) * ease;
-    const currentLng = startLng + (targetLng - startLng) * ease;
+
+    const currentLat = startLat + (destLat - startLat) * ease;
+    const currentLng = startLng + (destLng - startLng) * ease;
+
     marker.setLatLng([currentLat, currentLng]);
+
+    if (trailPolyline) {
+      trailPolyline.setLatLngs([[startLat, startLng], [currentLat, currentLng]]);
+    }
+
+    if (options.onStep) {
+      options.onStep(currentLat, currentLng, progress);
+    }
+
     if (progress < 1) {
-      requestAnimationFrame(step);
+      marker._animFrameId = requestAnimationFrame(step);
+    } else {
+      marker._animFrameId = null;
+      marker.setLatLng([destLat, destLng]);
+
+      // Reached destination -> switch to subtle idle state
+      if (container) {
+        container.classList.remove('vehicle-state-moving');
+        container.classList.add('vehicle-state-idle');
+      }
+
+      // Fade out motion trail smoothly after ~1.2s
+      if (trailPolyline) {
+        setTimeout(() => {
+          let op = 0.7;
+          const fadeTimer = setInterval(() => {
+            op -= 0.1;
+            if (op <= 0) {
+              clearInterval(fadeTimer);
+              trailPolyline.remove();
+            } else {
+              trailPolyline.setStyle({ opacity: op });
+            }
+          }, 60);
+        }, 1200);
+      }
+
+      if (options.onComplete) {
+        options.onComplete();
+      }
     }
   }
-  requestAnimationFrame(step);
+
+  marker._animFrameId = requestAnimationFrame(step);
+}
+
+/* OpenStreetMap / OSRM Real Road Network Snapping & Geometry Sync */
+const roadRouteCache = new Map();
+
+async function fetchRoadSnappedRoute(waypoints) {
+  if (!waypoints || waypoints.length < 2) return waypoints;
+
+  // Deduplicate consecutive identical coordinates
+  const cleanPts = [];
+  waypoints.forEach((pt, i) => {
+    const lat = Array.isArray(pt) ? pt[0] : pt.lat;
+    const lng = Array.isArray(pt) ? pt[1] : pt.lng;
+    if (i === 0 || Math.abs(lat - cleanPts[cleanPts.length - 1][0]) > 0.0001 || Math.abs(lng - cleanPts[cleanPts.length - 1][1]) > 0.0001) {
+      cleanPts.push([lat, lng]);
+    }
+  });
+
+  if (cleanPts.length < 2) return waypoints;
+
+  const cacheKey = cleanPts.map(pt => `${Number(pt[0]).toFixed(4)},${Number(pt[1]).toFixed(4)}`).join(';');
+  if (roadRouteCache.has(cacheKey)) {
+    return roadRouteCache.get(cacheKey);
+  }
+
+  // OSRM coordinates parameter format: lng,lat;lng,lat
+  const coordsParam = cleanPts.map(pt => `${Number(pt[1]).toFixed(5)},${Number(pt[0]).toFixed(5)}`).join(';');
+  const url = `https://router.project-osrm.org/route/v1/driving/${coordsParam}?overview=full&geometries=geojson`;
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2600);
+
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
+
+    if (res.ok) {
+      const data = await res.json();
+      if (data.code === 'Ok' && data.routes && data.routes[0] && data.routes[0].geometry) {
+        const roadCoords = data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]);
+        if (roadCoords && roadCoords.length >= 2) {
+          roadRouteCache.set(cacheKey, roadCoords);
+          return roadCoords;
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('OSRM road snapping fallback to direct path:', err.message);
+  }
+
+  return cleanPts;
+}
+
+/* ==========================================================================
+   Hotspot Density Map: Live Moving Municipal Vehicles & Patrol Circuits
+   (Snapped 100% to Real Mumbai Road Network: JVLR, Central Ave, SV Rd, Hill Rd, etc.)
+   ========================================================================== */
+const HOTSPOT_MUNICIPAL_VEHICLES = [
+  {
+    id: 'FLT-CD-550',
+    circuitKey: 'powai',
+    regNo: 'MH-04-CD-5501',
+    type: 'C&D Debris Hydraulic Dumper (14T)',
+    vehicleType: 'C&D Debris Hydraulic Dumper (14T)',
+    name: 'Harish Kumar',
+    driver: 'Harish Kumar (Crew #104)',
+    crewNumber: '104',
+    ward: 'Ward S - Powai Lake & Tech Enclave',
+    // Realistic street circuit: Jogeshwari-Vikhroli Link Road (JVLR) -> Adi Shankaracharya Marg -> Central Ave (Hiranandani) -> Orchard Ave
+    waypoints: [
+      [19.1235, 72.9090],
+      [19.1242, 72.9115],
+      [19.1250, 72.9145],
+      [19.1262, 72.9175],
+      [19.1245, 72.9182],
+      [19.1225, 72.9170],
+      [19.1208, 72.9145],
+      [19.1220, 72.9115],
+      [19.1235, 72.9090]
+    ]
+  },
+  {
+    id: 'FLT-BM-09',
+    circuitKey: 'andheri',
+    regNo: 'MH-03-HA-0912',
+    type: 'Biomedical Closed-Chamber Van (2T)',
+    vehicleType: 'Biomedical Closed-Chamber Van (2T)',
+    name: 'Amit Verma',
+    driver: 'Amit Verma (Crew #103)',
+    crewNumber: '103',
+    ward: 'Ward K/East - Andheri Industrial Estate',
+    // Realistic street circuit: Andheri-Kurla Road -> Airport Road Metro -> Marol Pipeline Rd -> MIDC Central Rd -> Sahar Cargo Rd
+    waypoints: [
+      [19.1114, 72.8615],
+      [19.1118, 72.8655],
+      [19.1123, 72.8690],
+      [19.1128, 72.8735],
+      [19.1155, 72.8742],
+      [19.1185, 72.8730],
+      [19.1192, 72.8685],
+      [19.1180, 72.8640],
+      [19.1145, 72.8625],
+      [19.1114, 72.8615]
+    ]
+  },
+  {
+    id: 'FLT-CT-401',
+    circuitKey: 'dadar',
+    regNo: 'MH-01-GA-4401',
+    type: 'Heavy Hydraulic Compactor (10T)',
+    vehicleType: 'Heavy Hydraulic Compactor (10T)',
+    name: 'Rajesh Singh',
+    driver: 'Rajesh Singh (Crew #101)',
+    crewNumber: '101',
+    ward: 'Ward G/South - Dadar & Elphinstone',
+    // Realistic street circuit: Dadar TT Circle -> Tilak Bridge -> NC Kelkar Rd -> Gokhale Rd -> Bhavani Shankar Rd
+    waypoints: [
+      [19.0195, 72.8430],
+      [19.0190, 72.8390],
+      [19.0185, 72.8360],
+      [19.0220, 72.8345],
+      [19.0255, 72.8335],
+      [19.0260, 72.8375],
+      [19.0230, 72.8405],
+      [19.0195, 72.8430]
+    ]
+  },
+  {
+    id: 'FLT-ET-108',
+    circuitKey: 'bandra',
+    regNo: 'MH-02-EV-1088',
+    type: 'Electric Multi-Bin Tipper Auto (1.5T)',
+    vehicleType: 'Electric Multi-Bin Tipper Auto (1.5T)',
+    name: 'Sunita Devi',
+    driver: 'Sunita Devi (Crew #102)',
+    crewNumber: '102',
+    ward: 'Ward H/West - Bandra Residential',
+    // Realistic street circuit: Hill Road -> Mehboob Studio -> St John Baptist Rd -> Perry Cross Rd -> Linking Rd
+    waypoints: [
+      [19.0558, 72.8335],
+      [19.0566, 72.8300],
+      [19.0574, 72.8265],
+      [19.0552, 72.8238],
+      [19.0535, 72.8255],
+      [19.0550, 72.8278],
+      [19.0585, 72.8310],
+      [19.0575, 72.8340],
+      [19.0558, 72.8335]
+    ]
+  },
+  {
+    id: 'FLT-MR-505',
+    circuitKey: 'borivali',
+    regNo: 'MH-02-ET-5055',
+    type: 'Mini Tipper E-Rickshaw (0.8T)',
+    vehicleType: 'Mini Tipper E-Rickshaw (0.8T)',
+    name: 'Sachin Kamble',
+    driver: 'Sachin Kamble (Crew #105)',
+    crewNumber: '105',
+    ward: 'Ward R/Central - Borivali West',
+    // Realistic street circuit: SV Road Borivali Station -> SV Rd Moksh -> Chandavarkar Rd -> New Link Rd -> Pai Nagar
+    waypoints: [
+      [19.2295, 72.8570],
+      [19.2330, 72.8565],
+      [19.2365, 72.8558],
+      [19.2370, 72.8520],
+      [19.2368, 72.8485],
+      [19.2335, 72.8490],
+      [19.2300, 72.8530],
+      [19.2295, 72.8570]
+    ]
+  }
+];
+
+let adminHotspotRouteLines = [];
+
+async function initHotspotMovingVehicles() {
+  if (!adminMapObj) return;
+
+  // Clean up any existing vehicle markers & patrol lines on the hotspot map
+  adminHotspotVehicles.forEach(v => {
+    if (v.marker) v.marker.remove();
+  });
+  adminHotspotVehicles = [];
+
+  adminHotspotRouteLines.forEach(l => l.remove());
+  adminHotspotRouteLines = [];
+
+  for (const vDef of HOTSPOT_MUNICIPAL_VEHICLES) {
+    // 1. Obtain road snapped coordinates (precomputed street geometry or OSRM)
+    let roadCoords = null;
+    if (typeof window !== 'undefined' && window.PRECOMPUTED_ROAD_CIRCUITS && window.PRECOMPUTED_ROAD_CIRCUITS[vDef.circuitKey]) {
+      roadCoords = window.PRECOMPUTED_ROAD_CIRCUITS[vDef.circuitKey];
+    } else {
+      roadCoords = vDef.waypoints;
+      try {
+        const snapped = await fetchRoadSnappedRoute(vDef.waypoints);
+        if (snapped && snapped.length >= 2) {
+          roadCoords = snapped;
+        }
+      } catch (e) {
+        console.warn('Road snapping notice for vehicle:', vDef.id, e);
+      }
+    }
+
+    // 2. Draw subtle municipal road patrol circuit line directly on the road
+    const patrolLine = L.polyline(roadCoords, {
+      color: '#059669',
+      weight: 3.5,
+      opacity: 0.65,
+      dashArray: '5, 8'
+    }).addTo(adminMapObj);
+    adminHotspotRouteLines.push(patrolLine);
+
+    const startPos = roadCoords[0];
+    const nextPos = roadCoords[1] || roadCoords[0];
+    const initialBearing = calculateBearing(startPos[0], startPos[1], nextPos[0], nextPos[1]);
+
+    const marker = L.marker(startPos, {
+      icon: L.divIcon({
+        className: 'custom-admin-worker-icon',
+        html: createVehicleMarkerHtml(
+          { id: vDef.id, name: vDef.name, crewNumber: vDef.crewNumber, vehicleType: vDef.vehicleType },
+          vDef,
+          initialBearing,
+          true,
+          false
+        ),
+        iconSize: [38, 52],
+        iconAnchor: [19, 26]
+      }),
+      zIndexOffset: 1200
+    }).addTo(adminMapObj);
+
+    marker.bindPopup(`
+      <div style="min-width: 220px; font-family: inherit;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+          <strong style="color: #047857; font-size: 0.95rem;">${vDef.type}</strong>
+          <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #047857; font-size: 0.68rem; font-weight: 700;">LIVE PATROL</span>
+        </div>
+        <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 6px;">
+          Reg: <code style="font-weight: 700; background: rgba(0,0,0,0.06); padding: 1px 4px; border-radius: 3px;">${vDef.regNo}</code> &bull; ${vDef.ward.split(' - ')[0]}
+        </div>
+        <div style="font-size: 0.82rem; margin-bottom: 3px;">
+          👨‍✈️ Driver: <strong>${vDef.driver}</strong>
+        </div>
+        <div style="font-size: 0.8rem; margin-bottom: 3px; color: #1e293b;">
+          ⚡ Mission: <strong>High-Density Hotspot Clearance Patrol</strong>
+        </div>
+        <div style="font-size: 0.78rem; color: #475569;">
+          Speed: <strong>~24 km/h</strong> &bull; Snapped to Street Network 🛣️
+        </div>
+      </div>
+    `);
+
+    adminHotspotVehicles.push({
+      def: vDef,
+      marker,
+      roadCoords,
+      coordIndex: 0,
+      currentPos: startPos
+    });
+  }
+
+  startHotspotVehicleSimulation();
+}
+
+function startHotspotVehicleSimulation() {
+  if (adminHotspotVehicleSimulationInterval) {
+    clearInterval(adminHotspotVehicleSimulationInterval);
+    adminHotspotVehicleSimulationInterval = null;
+  }
+
+  adminHotspotVehicleSimulationInterval = setInterval(() => {
+    if (!adminMapObj || !document.getElementById('adminHotspotMap')) return;
+
+    adminHotspotVehicles.forEach(v => {
+      const roadCoords = v.roadCoords;
+      if (!roadCoords || roadCoords.length < 2) return;
+
+      const prevIdx = v.coordIndex;
+      // Step forward by 2 road vertices (~20-30 meters) to glide smoothly along street curves
+      const step = 2;
+      const nextIdx = (prevIdx + step) % roadCoords.length;
+      v.coordIndex = nextIdx;
+
+      const fromPos = v.currentPos;
+      const toPos = roadCoords[nextIdx];
+      const bearing = calculateBearing(fromPos[0], fromPos[1], toPos[0], toPos[1]);
+
+      animateMarkerTo(v.marker, fromPos, toPos, 1400, {
+        map: adminMapObj,
+        bearing,
+        showTrail: true,
+        trailColor: '#10b981'
+      });
+
+      v.currentPos = toPos;
+    });
+  }, 1500);
+}
+
+function getNextRoadWaypoint(currentLat, currentLng, roadCoords, stepDistanceKm = 0.25) {
+  if (!roadCoords || roadCoords.length < 2) return null;
+  let closestIdx = 0;
+  let minDist = Infinity;
+  for (let i = 0; i < roadCoords.length; i++) {
+    const d = calcDistance(currentLat, currentLng, roadCoords[i][0], roadCoords[i][1]);
+    if (d < minDist) {
+      minDist = d;
+      closestIdx = i;
+    }
+  }
+
+  let accumulatedDist = 0;
+  let targetIdx = closestIdx;
+  for (let i = closestIdx; i < roadCoords.length - 1; i++) {
+    const d = calcDistance(roadCoords[i][0], roadCoords[i][1], roadCoords[i + 1][0], roadCoords[i + 1][1]);
+    accumulatedDist += d;
+    targetIdx = i + 1;
+    if (accumulatedDist >= stepDistanceKm) break;
+  }
+
+  return {
+    lat: Number(roadCoords[targetIdx][0].toFixed(5)),
+    lng: Number(roadCoords[targetIdx][1].toFixed(5))
+  };
 }
 
 /* Progressive Route Polyline Draw-in Animation */
@@ -4012,17 +4649,21 @@ function animatePolylineDrawIn(polyline, fullCoords, duration = 450) {
     return;
   }
   let stepIdx = 2;
-  const interval = Math.max(25, Math.floor(duration / fullCoords.length));
-  polyline.setLatLngs(fullCoords.slice(0, 2));
+  const total = fullCoords.length;
+  const stepInc = Math.max(1, Math.ceil(total / 24));
+  const interval = Math.max(16, Math.floor(duration / (total / stepInc)));
+  polyline.setLatLngs(fullCoords.slice(0, Math.min(stepIdx, total)));
   const timer = setInterval(() => {
-    if (stepIdx <= fullCoords.length) {
+    stepIdx += stepInc;
+    if (stepIdx <= total) {
       polyline.setLatLngs(fullCoords.slice(0, stepIdx));
-      stepIdx++;
     } else {
+      polyline.setLatLngs(fullCoords);
       clearInterval(timer);
     }
   }, interval);
 }
+
 
 /* Empty State Modern SVG Renderer */
 function getEmptyStateHTML(iconType, message, subtext) {
@@ -4149,6 +4790,58 @@ function initAdminWorkerLocationsMap(forceRefresh) {
     }).addTo(adminWorkerMapObj);
   }
 
+  // If forceRefresh is requested, advance active workers along their routes
+  if (forceRefresh) {
+    const allPendingReports = getReports().filter(r => r.status !== 'cleared');
+    let usersList = getUsers();
+    let fleetList = getFleet();
+    let hasUpdatedAny = false;
+
+    usersList.forEach(u => {
+      if (u.role === 'worker' && u.shiftStatus !== 'off-shift') {
+        const stops = allPendingReports.filter(r => r.assignedWorkerId === u.id || (u.name && r.assignedWorkerName && (r.assignedWorkerName.includes(u.name) || u.name.includes(r.assignedWorkerName))));
+        if (stops.length > 0) {
+          const nextStop = stops[0];
+          const sLat = nextStop.latitude !== undefined ? nextStop.latitude : (nextStop.coords?.lat || 19.0760);
+          const sLng = nextStop.longitude !== undefined ? nextStop.longitude : (nextStop.coords?.lng || 72.8777);
+          const cLat = u.lastKnownLat || 19.0200;
+          const cLng = u.lastKnownLng || 72.8350;
+
+          const dist = calcDistance(cLat, cLng, sLat, sLng);
+          if (dist > 0.02) {
+            let nextPt = null;
+            const cachedRoad = roadRouteCache.get(`${Number(cLat).toFixed(4)},${Number(cLng).toFixed(4)};${Number(sLat).toFixed(4)},${Number(sLng).toFixed(4)}`)
+              || Array.from(roadRouteCache.values()).find(coords => coords.some(pt => Math.abs(pt[0] - cLat) < 0.005 && Math.abs(pt[1] - cLng) < 0.005));
+
+            if (cachedRoad && cachedRoad.length > 2) {
+              nextPt = getNextRoadWaypoint(cLat, cLng, cachedRoad, 0.18);
+            }
+
+            const newLat = nextPt ? nextPt.lat : Number((cLat + (sLat - cLat) * Math.min(0.25, Math.max(0.12, 0.2 / Math.max(dist, 0.1)))).toFixed(5));
+            const newLng = nextPt ? nextPt.lng : Number((cLng + (sLng - cLng) * Math.min(0.25, Math.max(0.12, 0.2 / Math.max(dist, 0.1)))).toFixed(5));
+            u.lastKnownLat = newLat;
+            u.lastKnownLng = newLng;
+            u.lastLocationUpdatedAt = Date.now();
+            hasUpdatedAny = true;
+
+            const fItem = fleetList.find(f => f.driverId === u.id || f.driver === u.name);
+            if (fItem) {
+              fItem.lastKnownLat = newLat;
+              fItem.lastKnownLng = newLng;
+              fItem.lastLocationUpdatedAt = u.lastLocationUpdatedAt;
+            }
+          }
+        }
+
+      }
+    });
+
+    if (hasUpdatedAny) {
+      saveUsers(usersList);
+      saveFleet(fleetList);
+    }
+  }
+
   const workers = getUsers().filter(u => u.role === 'worker');
   const fleet = getFleet();
   const reports = getReports().filter(r => r.status !== 'cleared');
@@ -4191,7 +4884,14 @@ function initAdminWorkerLocationsMap(forceRefresh) {
     const assignedStops = reports.filter(r => r.assignedWorkerId === w.id || (w.name && r.assignedWorkerName && (r.assignedWorkerName.includes(w.name) || w.name.includes(r.assignedWorkerName))));
     const isIdle = w.shiftStatus === 'off-shift' || (Date.now() - (w.lastLocationUpdatedAt || 0)) > 30 * 60 * 1000;
     const updatedStr = w.lastLocationUpdatedAt ? formatTimeAgo(w.lastLocationUpdatedAt) : 'Just now';
-    const vehicleSvg = getVehicleSvgIcon(vehicle ? vehicle.type : '', isIdle);
+
+    let destBearing = 0;
+    if (assignedStops.length > 0) {
+      const firstStop = assignedStops[0];
+      const sLat = firstStop.latitude !== undefined ? firstStop.latitude : (firstStop.coords?.lat || 19.0760);
+      const sLng = firstStop.longitude !== undefined ? firstStop.longitude : (firstStop.coords?.lng || 72.8777);
+      destBearing = calculateBearing(lat, lng, sLat, sLng);
+    }
 
     const popupHtml = `
       <div style="min-width: 240px; font-family: var(--font-body);">
@@ -4214,23 +4914,49 @@ function initAdminWorkerLocationsMap(forceRefresh) {
 
     if (adminWorkerMarkersMap.has(w.id)) {
       const entry = adminWorkerMarkersMap.get(w.id);
+      const oldPos = entry.lastPos || [lat, lng];
+      const dist = calcDistance(oldPos[0], oldPos[1], lat, lng);
+      const hasMoved = dist > 0.0005;
+      const moveBearing = hasMoved ? calculateBearing(oldPos[0], oldPos[1], lat, lng) : (entry.bearing || destBearing);
+
       entry.worker = w;
-      animateMarkerTo(entry.marker, [lat, lng], 1200);
-      entry.marker.setIcon(L.divIcon({
-        className: 'custom-admin-worker-icon',
-        html: `<div class="admin-worker-marker ${isIdle ? 'idle' : ''}" style="cursor: pointer; display: flex; align-items: center; gap: 4px;">${vehicleSvg} <span>${w.name.split(' ')[0]}</span></div>`,
-        iconSize: [105, 30],
-        iconAnchor: [52, 15]
-      }));
+      entry.lastPos = [lat, lng];
+      entry.bearing = moveBearing;
       entry.marker.setPopupContent(popupHtml);
+
+      if (hasMoved) {
+        animateMarkerTo(entry.marker, oldPos, [lat, lng], null, {
+          map: adminWorkerMapObj,
+          bearing: moveBearing,
+          showTrail: true,
+          trailColor: isIdle ? '#94a3b8' : '#059669'
+        });
+      } else {
+        entry.marker.setIcon(L.divIcon({
+          className: 'custom-admin-worker-icon',
+          html: createVehicleMarkerHtml(w, vehicle, moveBearing, false, isIdle),
+          iconSize: [52, 68],
+          iconAnchor: [26, 34]
+        }));
+      }
+
+      // If single route overlay is active for this worker, keep the starting coordinate synchronized
+      if (adminWorkerRouteLine && adminWorkerRouteLine._activeWorkerId === w.id) {
+        const lineCoords = adminWorkerRouteLine.getLatLngs();
+        if (lineCoords && lineCoords.length > 0) {
+          lineCoords[0] = L.latLng(lat, lng);
+          adminWorkerRouteLine.setLatLngs(lineCoords);
+        }
+      }
+
       adminWorkerMarkers.push(entry);
     } else {
       const marker = L.marker([lat, lng], {
         icon: L.divIcon({
           className: 'custom-admin-worker-icon marker-pin-drop',
-          html: `<div class="admin-worker-marker ${isIdle ? 'idle' : ''}" style="cursor: pointer; display: flex; align-items: center; gap: 4px;">${vehicleSvg} <span>${w.name.split(' ')[0]}</span></div>`,
-          iconSize: [105, 30],
-          iconAnchor: [52, 15]
+          html: createVehicleMarkerHtml(w, vehicle, destBearing, false, isIdle),
+          iconSize: [52, 68],
+          iconAnchor: [26, 34]
         })
       }).addTo(adminWorkerMapObj);
 
@@ -4239,11 +4965,12 @@ function initAdminWorkerLocationsMap(forceRefresh) {
         adminOverlayWorkerRoute(w.id);
       });
 
-      const entry = { id: w.id, marker, worker: w };
+      const entry = { id: w.id, marker, worker: w, bearing: destBearing, lastPos: [lat, lng] };
       adminWorkerMarkersMap.set(w.id, entry);
       adminWorkerMarkers.push(entry);
     }
   });
+
 
   // Render Worker List Panel beside the map
   const listPanel = document.getElementById('adminWorkerListPanel');
@@ -4393,6 +5120,18 @@ window.renderMultiWorkerRouteOverlays = function() {
       }).addTo(adminWorkerMapObj);
       animatePolylineDrawIn(poly, pathCoords, 450);
       adminMultiRoutePolylines.push(poly);
+
+      // Snap multi-route overlay to real street network
+      const precomputedMulti = (typeof window !== 'undefined' && window.PRECOMPUTED_WORKER_ROUTES) ? window.PRECOMPUTED_WORKER_ROUTES[w.id] : null;
+      if (precomputedMulti && precomputedMulti.length > 2 && poly) {
+        poly.setLatLngs(precomputedMulti);
+      } else {
+        fetchRoadSnappedRoute(pathCoords).then(roadCoords => {
+          if (roadCoords && roadCoords.length > pathCoords.length && poly) {
+            poly.setLatLngs(roadCoords);
+          }
+        });
+      }
     }
 
     assignedStops.forEach((stop, idx) => {
@@ -4553,9 +5292,24 @@ window.adminOverlayWorkerRoute = function(workerId) {
       dashArray: '8, 8',
       className: 'animated-route-line'
     }).addTo(adminWorkerMapObj);
+    adminWorkerRouteLine._activeWorkerId = worker.id;
 
     animatePolylineDrawIn(adminWorkerRouteLine, pathCoords, 450);
     adminWorkerMapObj.fitBounds(adminWorkerRouteLine.getBounds(), { padding: [40, 40] });
+
+    // Synchronize route line with OpenStreetMap road network
+    const precomputed = (typeof window !== 'undefined' && window.PRECOMPUTED_WORKER_ROUTES) ? window.PRECOMPUTED_WORKER_ROUTES[worker.id] : null;
+    if (precomputed && precomputed.length > 2 && adminWorkerRouteLine && adminWorkerRouteLine._activeWorkerId === worker.id) {
+      animatePolylineDrawIn(adminWorkerRouteLine, precomputed, 450);
+      adminWorkerMapObj.fitBounds(adminWorkerRouteLine.getBounds(), { padding: [40, 40] });
+    } else {
+      fetchRoadSnappedRoute(pathCoords).then(roadCoords => {
+        if (roadCoords && roadCoords.length > pathCoords.length && adminWorkerRouteLine && adminWorkerRouteLine._activeWorkerId === worker.id) {
+          animatePolylineDrawIn(adminWorkerRouteLine, roadCoords, 500);
+          adminWorkerMapObj.fitBounds(adminWorkerRouteLine.getBounds(), { padding: [40, 40] });
+        }
+      });
+    }
   }
 
   // Draw numbered stop markers on admin map
@@ -4582,7 +5336,8 @@ window.adminOverlayWorkerRoute = function(workerId) {
   const listElem = document.getElementById('adminOverlayStopsList');
 
   if (panel) panel.style.display = 'block';
-  if (nameElem) nameElem.textContent = `Route Overlay: 👷 ${worker.name} (${vehicle ? vehicle.type : 'Compactor'})`;
+  if (nameElem) nameElem.innerHTML = `Route Overlay: 👷 <strong>${worker.name}</strong> (${vehicle ? vehicle.type : 'Compactor'}) <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #047857; font-size: 0.72rem; margin-left: 0.5rem;">🛣️ Road Synced (OSRM)</span>`;
+
   if (countElem) {
     countElem.textContent = `${assignedStops.length} Stops Active`;
     countElem.classList.remove('stop-count-badge-pop');
@@ -4608,9 +5363,39 @@ window.clearAdminWorkerRouteOverlay = function() {
   if (panel) panel.style.display = 'none';
 };
 
+let adminLiveWorkerSimInterval = null;
+
+window.toggleAdminLiveWorkerSimulation = function(forceState) {
+  const btn = document.getElementById('btnAdminLiveSimulationToggle');
+  const dot = document.getElementById('adminLiveSimulationDot');
+  const txt = document.getElementById('adminLiveSimulationText');
+
+  const shouldRun = forceState !== undefined ? forceState : !adminLiveWorkerSimInterval;
+
+  if (shouldRun) {
+    if (adminLiveWorkerSimInterval) clearInterval(adminLiveWorkerSimInterval);
+    adminLiveWorkerSimInterval = setInterval(() => {
+      if (!adminWorkerMapObj) return;
+      initAdminWorkerLocationsMap(true);
+    }, 7000);
+    if (dot) dot.style.background = '#10b981';
+    if (txt) txt.textContent = 'Live Stream: Active';
+    if (btn) btn.classList.add('active');
+  } else {
+    if (adminLiveWorkerSimInterval) {
+      clearInterval(adminLiveWorkerSimInterval);
+      adminLiveWorkerSimInterval = null;
+    }
+    if (dot) dot.style.background = '#64748b';
+    if (txt) txt.textContent = 'Live Stream: Paused';
+    if (btn) btn.classList.remove('active');
+  }
+};
+
 window.renderAdminWorkerLocationsMap = function(forceRefresh) {
   initAdminWorkerLocationsMap(forceRefresh);
 };
+
 
 /* ==========================================================================
    Visual Charts & Analytics Engine (Chart.js Role-Scoped Visualizations)
@@ -5205,7 +5990,7 @@ window.switchAdminTab = function(tabName) {
   if (tabName === 'logs') renderAdminLogsTable();
 };
 
-window.reassignWorker = function(reportId, workerId) {
+window.reassignWorker = async function(reportId, workerId) {
   let reports = getReports();
   const index = reports.findIndex(r => r.id === reportId);
   if (index !== -1) {
@@ -5218,21 +6003,101 @@ window.reassignWorker = function(reportId, workerId) {
     reports[index].assignedAt = Date.now();
     saveReports(reports);
 
+    if (isBackendConnected) {
+      try {
+        await fetch(`/api/reports/${reportId}/assign`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ workerId })
+        });
+      } catch (e) {
+        console.warn('Backend sync failed on reassign:', e);
+      }
+    }
+
     logAdminAction('Reassign Stop', 'Admin (MCGM)', `Reassigned report ${reportId} to ${w ? w.name : 'Unassigned'}`);
     alert(`Task ${reportId} assigned to ${w ? w.name : 'Unassigned'}!`);
     renderAdminDashboard();
   }
 };
 
-window.adminForceClear = function(reportId) {
+function showToast(message, type = 'success') {
+  let container = document.getElementById('swmGlobalToastContainer');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'swmGlobalToastContainer';
+    container.style.cssText = 'position: fixed; bottom: 24px; right: 24px; z-index: 99999; display: flex; flex-direction: column; gap: 8px; pointer-events: none;';
+    document.body.appendChild(container);
+  }
+  const toast = document.createElement('div');
+  const bg = type === 'error' ? '#ef4444' : type === 'warning' ? '#f59e0b' : '#10b981';
+  toast.style.cssText = `background: ${bg}; color: #ffffff; padding: 12px 20px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.25); font-size: 0.88rem; font-weight: 600; display: flex; align-items: center; gap: 10px; pointer-events: auto; transform: translateY(10px); opacity: 0; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);`;
+  toast.innerHTML = `<span>${message}</span>`;
+  container.appendChild(toast);
+  requestAnimationFrame(() => {
+    toast.style.transform = 'translateY(0)';
+    toast.style.opacity = '1';
+  });
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(10px)';
+    setTimeout(() => toast.remove(), 300);
+  }, 4000);
+}
+window.showToast = showToast;
+
+window.adminForceClear = async function(reportId) {
   let reports = getReports();
   const index = reports.findIndex(r => r.id === reportId);
   if (index !== -1) {
+    const targetReport = reports[index];
+    if (targetReport.status === 'cleared') {
+      showToast(`Report #${reportId} is already marked as cleared.`, 'warning');
+      return;
+    }
+
     reports[index].status = 'cleared';
     reports[index].clearedAt = Date.now();
+    reports[index].resolutionNotes = reports[index].resolutionNotes || 'Administrative force clear override issued by Municipal Officer.';
     saveReports(reports);
-    logAdminAction('Force Clear Override', 'Admin (MCGM)', `Administrative force clear issued for report ${reportId} (${reports[index].landmark})`);
+
+    if (isBackendConnected) {
+      try {
+        await fetch(`/api/reports/${reportId}/clear`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            actor: (typeof currentUser !== 'undefined' && currentUser) ? currentUser.name : 'Admin (MCGM)',
+            resolutionNotes: 'Administrative force clear override issued by Municipal Officer.'
+          })
+        });
+      } catch (e) {
+        console.warn('Backend sync failed on force clear:', e);
+      }
+    }
+
+    logAdminAction('Force Clear Override', 'Admin (MCGM)', `Administrative force clear issued for report ${reportId} (${reports[index].landmark || reports[index].area || ''})`);
+
+    if (typeof addNotification === 'function') {
+      addNotification('⚡ Administrative Force Clear', `Report #${reportId} has been forcibly marked as cleared by Admin.`, 'admin');
+    }
+
+    showToast(`✅ Report #${reportId} successfully force cleared!`, 'success');
+
+    // Check if active filter exists
+    const keywordInput = document.getElementById('adminFeedSearchInput');
+    const statusSelect = document.getElementById('adminFeedStatusFilter');
+    const wardSelect = document.getElementById('adminFeedWardFilter');
+    const hasFilter = (keywordInput && keywordInput.value.trim()) || 
+                      (statusSelect && statusSelect.value !== 'all') || 
+                      (wardSelect && wardSelect.value !== 'all');
+
     renderAdminDashboard();
+    if (hasFilter && typeof filterAdminFeed === 'function') {
+      filterAdminFeed();
+    }
+  } else {
+    showToast(`Report #${reportId} not found.`, 'error');
   }
 };
 

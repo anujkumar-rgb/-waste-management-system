@@ -1579,8 +1579,18 @@
       <!-- Admin Section 3: GPS Hotspot Map -->
       <div id="adminPanelHotspot" style="display: none;">
         <div class="card">
-          <h3 style="margin-bottom: 0.35rem;">GPS Overflow Density Cluster Map</h3>
-          <p style="color: #64748b; margin-bottom: 1.25rem;">Plots real latitude and longitude coordinates submitted from citizen and institution reports.</p>
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem;">
+            <div>
+              <h3 style="margin-bottom: 0.35rem;">GPS Overflow Density Cluster Map</h3>
+              <p style="color: #64748b; margin-bottom: 0;">Plots real latitude and longitude coordinates submitted from citizen and institution reports with live municipal collection vehicle patrols.</p>
+            </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #047857; font-weight: 700; font-size: 0.78rem; display: flex; align-items: center; gap: 6px; padding: 0.35rem 0.65rem; border-radius: 9999px;">
+                <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 6px #10b981;"></span>
+                5 Municipal Vehicles In Motion
+              </span>
+            </div>
+          </div>
           <div id="adminHotspotMap" class="map-box"></div>
         </div>
       </div>
@@ -1594,9 +1604,11 @@
               <p style="color: #64748b; font-size: 0.82rem; margin: 0;">Live GPS positions of active field collection crews, assigned fleet vehicles, and on-demand route overlays.</p>
             </div>
             <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              <button type="button" id="btnAdminLiveSimulationToggle" class="btn btn-outline btn-xs" onclick="toggleAdminLiveWorkerSimulation()"><span id="adminLiveSimulationDot" style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#10b981; margin-right:4px;"></span><span id="adminLiveSimulationText">Live Stream: Active</span></button>
               <button type="button" id="btnAdminRefreshWorkerMap" class="btn btn-outline btn-xs" onclick="renderAdminWorkerLocationsMap(true)"><span class="refresh-icon">🔄</span> Refresh Live Positions</button>
               <button type="button" class="btn btn-outline btn-xs" onclick="clearAllWorkerRouteOverlays()">Clear All Overlays</button>
             </div>
+
           </div>
 
           <!-- Fleet Utilization Summary Stat Strip -->
@@ -2437,7 +2449,9 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <!-- Chart.js for Impact Visualizer -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Precomputed Road Network Geometry -->
+  <script src="road_geometry.js?v=2.4"></script>
   <!-- App JS Engine -->
-  <script src="app.js"></script>
+  <script src="app.js?v=2.4"></script>
 </body>
 </html>
