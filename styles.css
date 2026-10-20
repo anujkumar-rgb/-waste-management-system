@@ -2579,11 +2579,12 @@ html.theme-transitioning *::after {
 .frosted-glass-nav {
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
-  background: rgba(255, 255, 255, 0.88) !important;
+  background: rgba(14, 25, 20, 0.92) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
 [data-theme="dark"] .frosted-glass-nav {
-  background: rgba(14, 25, 20, 0.9) !important;
+  background: rgba(14, 25, 20, 0.92) !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 

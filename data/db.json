@@ -34,9 +34,9 @@
           "amount": 0
         }
       ],
-      "lastKnownLat": 19.299,
-      "lastKnownLng": 72.86396,
-      "lastLocationUpdatedAt": 1792478111422
+      "lastKnownLat": 19.29899,
+      "lastKnownLng": 72.864,
+      "lastLocationUpdatedAt": 1792480113775
     },
     {
       "id": "usr-2",
@@ -188,9 +188,9 @@
       "vehicleType": "Biomedical Closed-Chamber Van (2T)",
       "vehicleRegistration": "MH-03-HA-0912",
       "shiftStatus": "active",
-      "lastKnownLat": 19.299,
-      "lastKnownLng": 72.86402,
-      "lastLocationUpdatedAt": 1792478028561
+      "lastKnownLat": 19.29896,
+      "lastKnownLng": 72.86393,
+      "lastLocationUpdatedAt": 1792479021275
     },
     {
       "id": "usr-9",
@@ -231,9 +231,9 @@
       "name": "Municipal Sanitation Officer",
       "role": "admin",
       "verificationCode": "ADMIN2026",
-      "lastKnownLat": 19.29886,
-      "lastKnownLng": 72.86406,
-      "lastLocationUpdatedAt": 1792436183739
+      "lastKnownLat": 19.29893,
+      "lastKnownLng": 72.86403,
+      "lastLocationUpdatedAt": 1792479129941
     }
   ],
   "reports": [
@@ -343,7 +343,7 @@
       "severity": "full",
       "notes": "Dry leaves and organic bins filled after morning sweep.",
       "isEmergency": true,
-      "status": "assigned",
+      "status": "cleared",
       "assignedWorkerId": "usr-8",
       "assignedWorkerName": "Amit Verma (Crew #103)",
       "createdAt": 1791214868273,
@@ -353,7 +353,9 @@
       "escalatedTo": "Zonal Municipal Commissioner",
       "escalatedAt": 1792428177821,
       "urgencyBoosted": true,
-      "boostedAt": 1792428178729
+      "boostedAt": 1792428178729,
+      "clearedAt": 1792479038590,
+      "resolutionNotes": "Administrative force clear override issued by Municipal Officer."
     },
     {
       "id": "REP-1005",
@@ -824,9 +826,9 @@
       "fuelPercent": 92,
       "status": "In Depot Maintenance",
       "icon": "🚐",
-      "lastKnownLat": 19.299,
-      "lastKnownLng": 72.86402,
-      "lastLocationUpdatedAt": 1792478028561
+      "lastKnownLat": 19.29896,
+      "lastKnownLng": 72.86393,
+      "lastLocationUpdatedAt": 1792479021275
     },
     {
       "id": "FLT-CD-550",
@@ -882,6 +884,41 @@
     }
   ],
   "audit_logs": [
+    {
+      "id": "log-1792479038607-707",
+      "timestamp": 1792479038607,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report REP-1002 (Community Park Main Gate)"
+    },
+    {
+      "id": "log-1792479038590-157",
+      "timestamp": 1792479038590,
+      "actor": "Municipal Sanitation Officer",
+      "action": "REPORT_CLEARED",
+      "details": "Report REP-1002 marked cleared and sanitized"
+    },
+    {
+      "id": "log-1792479007892-549",
+      "timestamp": 1792479007893,
+      "actor": "Amit Verma (Crew #103)",
+      "action": "Stop Skipped / Obstruction Reported",
+      "details": "Stop #BULK-2002 skipped: Road Blocked / Civic Construction. Notes: None"
+    },
+    {
+      "id": "log-1792478988071-536",
+      "timestamp": 1792478988071,
+      "actor": "Amit Verma (Crew #103)",
+      "action": "Stop Skipped / Obstruction Reported",
+      "details": "Stop #REP-1002 skipped: Road Blocked / Civic Construction. Notes: None"
+    },
+    {
+      "id": "log-1792478973950-569",
+      "timestamp": 1792478973950,
+      "actor": "Amit Verma (Crew #103)",
+      "action": "Safety Log Verified",
+      "details": "Completed pre-shift inspection: 5 PPE/vehicle items verified at 00:49:33"
+    },
     {
       "id": "log-1792477332615-747",
       "timestamp": 1792477332615,

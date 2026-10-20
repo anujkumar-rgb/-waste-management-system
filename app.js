@@ -24,7 +24,12 @@ document.addEventListener('DOMContentLoaded', () => {
    ========================================================================== */
 function initTheme() {
   const themeToggleBtns = [document.getElementById('themeToggleBtn'), document.getElementById('guestThemeToggleBtn')];
-  const savedTheme = localStorage.getItem('swm_theme') || 'light';
+  // Default to municipal dark forest green theme
+  let savedTheme = localStorage.getItem('swm_theme');
+  if (!savedTheme || savedTheme === 'light') {
+    savedTheme = 'dark';
+    localStorage.setItem('swm_theme', 'dark');
+  }
 
   document.documentElement.setAttribute('data-theme', savedTheme);
   updateThemeIcons(savedTheme);
