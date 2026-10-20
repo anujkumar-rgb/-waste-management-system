@@ -156,9 +156,9 @@
       "vehicleType": "Heavy Hydraulic Compactor (10T)",
       "vehicleRegistration": "MH-01-GA-4401",
       "shiftStatus": "active",
-      "lastKnownLat": 19.299,
-      "lastKnownLng": 72.86402,
-      "lastLocationUpdatedAt": 1792475621777
+      "lastKnownLat": 19.29898,
+      "lastKnownLng": 72.86404,
+      "lastLocationUpdatedAt": 1792483460462
     },
     {
       "id": "usr-7",
@@ -220,9 +220,9 @@
       "vehicleType": "Mini Tipper E-Rickshaw (0.8T)",
       "vehicleRegistration": "MH-02-ET-5055",
       "shiftStatus": "off-shift",
-      "lastKnownLat": 19.29899,
-      "lastKnownLng": 72.86401,
-      "lastLocationUpdatedAt": 1792475893869
+      "lastKnownLat": 19.29892,
+      "lastKnownLng": 72.86403,
+      "lastLocationUpdatedAt": 1792481544768
     },
     {
       "id": "usr-5",
@@ -471,13 +471,17 @@
       "category": "plastic",
       "severity": "overflowing",
       "notes": "Litter accumulation along metro entry stairway.",
-      "isEmergency": false,
-      "status": "assigned",
+      "isEmergency": true,
+      "status": "cleared",
       "assignedWorkerId": "usr-8",
       "assignedWorkerName": "Amit Verma (Crew #103)",
       "createdAt": 1791303968273,
       "duplicateCount": 0,
-      "isEscalated": false
+      "isEscalated": false,
+      "urgencyBoosted": true,
+      "boostedAt": 1792480301039,
+      "clearedAt": 1792480302874,
+      "resolutionNotes": "Administrative force clear override issued by Municipal Officer."
     },
     {
       "id": "EMG-403",
@@ -502,7 +506,9 @@
       "assignedWorkerName": "Amit Verma (Crew #103)",
       "createdAt": 1791307868273,
       "duplicateCount": 0,
-      "isEscalated": false
+      "isEscalated": true,
+      "escalatedTo": "Zonal Municipal Commissioner",
+      "escalatedAt": 1792480307879
     },
     {
       "id": "BULK-2001",
@@ -790,11 +796,11 @@
       "capacityTon": 10,
       "currentPayloadTon": 7.8,
       "fuelPercent": 84,
-      "status": "In Depot Maintenance",
+      "status": "Active Collection",
       "icon": "🚛",
-      "lastKnownLat": 19.299,
-      "lastKnownLng": 72.86402,
-      "lastLocationUpdatedAt": 1792475621777
+      "lastKnownLat": 19.29898,
+      "lastKnownLng": 72.86404,
+      "lastLocationUpdatedAt": 1792483460462
     },
     {
       "id": "FLT-ET-108",
@@ -807,7 +813,7 @@
       "capacityTon": 1.5,
       "currentPayloadTon": 1.35,
       "fuelPercent": 68,
-      "status": "In Depot Maintenance",
+      "status": "Active Collection",
       "icon": "🛺",
       "lastKnownLat": 19.29898,
       "lastKnownLng": 72.86401,
@@ -824,7 +830,7 @@
       "capacityTon": 2,
       "currentPayloadTon": 0.7,
       "fuelPercent": 92,
-      "status": "In Depot Maintenance",
+      "status": "Active Collection",
       "icon": "🚐",
       "lastKnownLat": 19.29896,
       "lastKnownLng": 72.86393,
@@ -841,7 +847,7 @@
       "capacityTon": 14,
       "currentPayloadTon": 8.4,
       "fuelPercent": 76,
-      "status": "In Depot Maintenance",
+      "status": "Active Collection",
       "icon": "🚜",
       "lastKnownLat": 19.1255,
       "lastKnownLng": 72.912,
@@ -860,9 +866,9 @@
       "fuelPercent": 95,
       "status": "Idle / Off-Shift",
       "icon": "🛺",
-      "lastKnownLat": 19.29899,
-      "lastKnownLng": 72.86401,
-      "lastLocationUpdatedAt": 1792475893869
+      "lastKnownLat": 19.29892,
+      "lastKnownLng": 72.86403,
+      "lastLocationUpdatedAt": 1792481544768
     }
   ],
   "broadcasts": [
@@ -884,6 +890,181 @@
     }
   ],
   "audit_logs": [
+    {
+      "id": "log-1792481169885-861",
+      "timestamp": 1792481169885,
+      "actor": "Sachin Kamble (Crew #105)",
+      "action": "Shift Status Change",
+      "details": "Shift updated to Idle / Off-Shift"
+    },
+    {
+      "id": "log-1792481169881-174",
+      "timestamp": 1792481169881,
+      "actor": "Sachin Kamble (Crew #105)",
+      "action": "SHIFT_TOGGLE",
+      "details": "Worker usr-10 shifted to off-shift."
+    },
+    {
+      "id": "log-1792481167128-999",
+      "timestamp": 1792481167128,
+      "actor": "Sachin Kamble (Crew #105)",
+      "action": "Shift Status Change",
+      "details": "Shift updated to Active Collection"
+    },
+    {
+      "id": "log-1792481167121-650",
+      "timestamp": 1792481167121,
+      "actor": "Sachin Kamble (Crew #105)",
+      "action": "SHIFT_TOGGLE",
+      "details": "Worker usr-10 shifted to active."
+    },
+    {
+      "id": "log-1792480509315-176",
+      "timestamp": 1792480509315,
+      "actor": "Sachin Kamble (Crew #105)",
+      "action": "Stop Skipped / Obstruction Reported",
+      "details": "Stop #REP-1009 skipped: Road Blocked / Civic Construction. Notes: None"
+    },
+    {
+      "id": "log-1792480335577-686",
+      "timestamp": 1792480335577,
+      "actor": "Sachin Kamble (Crew #105)",
+      "action": "Shift Status Change",
+      "details": "Shift updated to Active Collection"
+    },
+    {
+      "id": "log-1792480335567-600",
+      "timestamp": 1792480335567,
+      "actor": "Sachin Kamble (Crew #105)",
+      "action": "SHIFT_TOGGLE",
+      "details": "Worker usr-10 shifted to active."
+    },
+    {
+      "id": "log-1792480328632-125",
+      "timestamp": 1792480328632,
+      "actor": "Admin",
+      "action": "FLEET_UPDATE",
+      "details": "Updated status of vehicle FLT-MR-505 to In Depot Maintenance"
+    },
+    {
+      "id": "log-1792480328626-349",
+      "timestamp": 1792480328626,
+      "actor": "Admin",
+      "action": "FLEET_STATUS",
+      "details": "Vehicle MH-02-ET-5055 status set to \"In Depot Maintenance\""
+    },
+    {
+      "id": "log-1792480318740-592",
+      "timestamp": 1792480318740,
+      "actor": "Admin",
+      "action": "FLEET_UPDATE",
+      "details": "Updated status of vehicle FLT-CD-550 to Active Collection"
+    },
+    {
+      "id": "log-1792480318736-797",
+      "timestamp": 1792480318736,
+      "actor": "Admin",
+      "action": "FLEET_STATUS",
+      "details": "Vehicle MH-04-CD-5501 status set to \"Active Collection\""
+    },
+    {
+      "id": "log-1792480317254-375",
+      "timestamp": 1792480317254,
+      "actor": "Admin",
+      "action": "FLEET_UPDATE",
+      "details": "Updated status of vehicle FLT-BM-09 to Active Collection"
+    },
+    {
+      "id": "log-1792480317250-499",
+      "timestamp": 1792480317250,
+      "actor": "Admin",
+      "action": "FLEET_STATUS",
+      "details": "Vehicle MH-03-HA-0912 status set to \"Active Collection\""
+    },
+    {
+      "id": "log-1792480315753-186",
+      "timestamp": 1792480315753,
+      "actor": "Admin",
+      "action": "FLEET_UPDATE",
+      "details": "Updated status of vehicle FLT-ET-108 to Active Collection"
+    },
+    {
+      "id": "log-1792480315751-802",
+      "timestamp": 1792480315751,
+      "actor": "Admin",
+      "action": "FLEET_STATUS",
+      "details": "Vehicle MH-02-EV-1088 status set to \"Active Collection\""
+    },
+    {
+      "id": "log-1792480313391-541",
+      "timestamp": 1792480313391,
+      "actor": "Admin",
+      "action": "FLEET_UPDATE",
+      "details": "Updated status of vehicle FLT-CT-401 to Active Collection"
+    },
+    {
+      "id": "log-1792480313385-529",
+      "timestamp": 1792480313385,
+      "actor": "Admin",
+      "action": "FLEET_STATUS",
+      "details": "Vehicle MH-01-GA-4401 status set to \"Active Collection\""
+    },
+    {
+      "id": "log-1792480307879-498",
+      "timestamp": 1792480307879,
+      "actor": "Admin",
+      "action": "STATUTORY_ESCALATION",
+      "details": "Escalated EMG-403 to Zonal Municipal Commissioner"
+    },
+    {
+      "id": "log-1792480307874-490",
+      "timestamp": 1792480307874,
+      "actor": "Admin",
+      "action": "STATUTORY_ESCALATION",
+      "details": "Ticket EMG-403 escalated directly to Zonal Municipal Commissioner."
+    },
+    {
+      "id": "log-1792480307101-500",
+      "timestamp": 1792480307101,
+      "actor": "Admin",
+      "action": "STATUTORY_ESCALATION",
+      "details": "Escalated EMG-403 to Zonal Municipal Commissioner"
+    },
+    {
+      "id": "log-1792480307095-624",
+      "timestamp": 1792480307095,
+      "actor": "Admin",
+      "action": "STATUTORY_ESCALATION",
+      "details": "Ticket EMG-403 escalated directly to Zonal Municipal Commissioner."
+    },
+    {
+      "id": "log-1792480302894-501",
+      "timestamp": 1792480302894,
+      "actor": "Admin (MCGM)",
+      "action": "Force Clear Override",
+      "details": "Administrative force clear issued for report REP-1006 (Chakala Metro Station Footbridge Bin)"
+    },
+    {
+      "id": "log-1792480302874-449",
+      "timestamp": 1792480302874,
+      "actor": "Municipal Sanitation Officer",
+      "action": "REPORT_CLEARED",
+      "details": "Report REP-1006 marked cleared and sanitized"
+    },
+    {
+      "id": "log-1792480301039-794",
+      "timestamp": 1792480301039,
+      "actor": "Admin",
+      "action": "SLA_URGENCY_BOOST",
+      "details": "Urgency boost triggered on ticket REP-1006"
+    },
+    {
+      "id": "log-1792480301032-99",
+      "timestamp": 1792480301032,
+      "actor": "Admin",
+      "action": "SLA_URGENCY_BOOST",
+      "details": "Urgency boost triggered on ticket REP-1006. Priority elevated to High/Emergency."
+    },
     {
       "id": "log-1792479038607-707",
       "timestamp": 1792479038607,

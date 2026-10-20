@@ -2854,7 +2854,7 @@ function runSoftwareRouteOptimizer() {
   const optPriority = optimizeNearestNeighbor(priorityPickupStops, currentPos);
   const optRegular = optimizeNearestNeighbor(regularStops, optPriority.endPos);
 
-  const optimizedStandard = [...optPriority.ordered, ...optRegular.ordered];
+  const optimizedStandard = optRegular.ordered;
   const finalRoute = [...emergencyReports, ...priorityPassReports, ...optimizedStandard];
   const totalDistanceKm = optPriority.totalDist + optRegular.totalDist + (emergencyReports.length * 1.5);
 
@@ -2941,6 +2941,56 @@ function runSoftwareRouteOptimizer() {
   initWorkerRouteMap(finalRoute);
   startWorkerGeolocationWatch(finalRoute);
 }
+
+window.runSoftwareRouteOptimizer = runSoftwareRouteOptimizer;
+
+window.recalculateWorkerRoute = function(btn) {
+  if (typeof playCivicAudio === 'function') playCivicAudio('click');
+  const targetBtn = btn || document.getElementById('workerRecalculateRouteBtn') || document.querySelector("button[onclick*='RouteOptimizer'], button[onclick*='recalculateWorkerRoute']");
+  const origHtml = targetBtn ? targetBtn.innerHTML : '🗺️ Recalculate Route';
+
+  if (targetBtn) {
+    targetBtn.innerHTML = '🔄 Recalculating...';
+    targetBtn.disabled = true;
+  }
+
+  // Attempt to refresh live GPS position
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        workerCurrentPos.lat = Number(pos.coords.latitude.toFixed(5));
+        workerCurrentPos.lng = Number(pos.coords.longitude.toFixed(5));
+        workerCurrentPos.updatedAt = Date.now();
+        updateWorkerLocation(workerCurrentPos.lat, workerCurrentPos.lng);
+        finishRecalc();
+      },
+      () => {
+        finishRecalc();
+      },
+      { timeout: 2500, maximumAge: 10000, enableHighAccuracy: true }
+    );
+  } else {
+    finishRecalc();
+  }
+
+  function finishRecalc() {
+    runSoftwareRouteOptimizer();
+    if (typeof playCivicAudio === 'function') playCivicAudio('chime');
+    if (typeof showToast === 'function') {
+      showToast('🗺️ Route sequence optimized & recalculated from current GPS position!', 'success');
+    }
+    if (workerMapObj) {
+      workerMapObj.setView([workerCurrentPos.lat, workerCurrentPos.lng], 14, { animate: true });
+      workerMapObj.invalidateSize();
+    }
+    if (targetBtn) {
+      setTimeout(() => {
+        targetBtn.innerHTML = origHtml;
+        targetBtn.disabled = false;
+      }, 450);
+    }
+  }
+};
 
 window.toggleWorkerShift = function() {
   if (!currentUser) return;

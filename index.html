@@ -1137,7 +1137,7 @@
           <button id="workerShiftToggleBtn" type="button" class="btn btn-outline btn-sm" onclick="toggleWorkerShift()">
             ⏸️ End Shift
           </button>
-          <button class="btn btn-outline btn-sm" onclick="runSoftwareRouteOptimizer()">🗺️ Recalculate Route</button>
+          <button id="workerRecalculateRouteBtn" class="btn btn-outline btn-sm" onclick="recalculateWorkerRoute(this)">🗺️ Recalculate Route</button>
         </div>
       </div>
 
@@ -1278,8 +1278,9 @@
               </span>
             </div>
           </div>
-          <div style="display: flex; gap: 0.5rem; align-items: center;">
-            <button type="button" class="btn btn-outline btn-xs" onclick="refreshWorkerLiveLocation()">🔄 Refresh Location</button>
+          <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+            <button type="button" class="btn btn-outline btn-xs" onclick="recalculateWorkerRoute(this)">🗺️ Recalculate Route</button>
+            <button type="button" class="btn btn-outline btn-xs" onclick="refreshWorkerLiveLocation()">🔄 Refresh GPS</button>
             <button type="button" class="btn btn-outline btn-xs" onclick="recenterWorkerMap()">📍 Recenter Map</button>
           </div>
         </div>
