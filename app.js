@@ -1110,11 +1110,18 @@ function initAuth() {
     }, 380);
   });
 
-  logoutBtn.addEventListener('click', () => {
+  function handleLogout() {
     localStorage.removeItem('swm_current_user');
     currentUser = null;
+    if (window.history && window.history.replaceState) {
+      window.history.replaceState(null, '', window.location.pathname);
+    }
     checkSession();
-  });
+  }
+  window.logout = handleLogout;
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', handleLogout);
+  }
 }
 
 window.quickLogin = function(email) {
@@ -1144,6 +1151,7 @@ function demoSwitchRole(role) {
   if (found) setCurrentUser(found);
 }
 window.demoSwitchRole = demoSwitchRole;
+window.quickSwitchDemoRole = demoSwitchRole;
 
 function setCurrentUser(user) {
   currentUser = user;
@@ -2128,9 +2136,9 @@ function renderCitizenReportsFeed() {
           <span>⏱ ${formatTimeAgo(r.createdAt)}</span>
         </div>
         <div style="font-weight: 700; font-size: 1.05rem;">${r.landmark}</div>
-        <div style="font-size: 0.85rem; color: #556960;">${r.notes || 'No extra notes.'}</div>
-        <div style="font-size: 0.78rem; font-family: monospace; color: #64748b; margin-top: 0.2rem;">Coordinates: Lat ${r.latitude || r.coords?.lat || 19.0760}, Lng ${r.longitude || r.coords?.lng || 72.8777}</div>
-        ${r.assignedWorkerName ? `<div style="font-size: 0.82rem; color: var(--civic-cobalt-accent); margin-top: 0.2rem;">🚛 Field Crew: <strong>${r.assignedWorkerName}</strong></div>` : ''}
+        <div style="font-size: 0.85rem; color: #94a3b8; line-height: 1.4; margin-top: 0.15rem;">${r.notes || 'No extra notes.'}</div>
+        <div style="font-size: 0.78rem; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; color: #64748b; margin-top: 0.25rem;">Coordinates: Lat ${Number(r.latitude || r.coords?.lat || 19.0760).toFixed(3)}, Lng ${Number(r.longitude || r.coords?.lng || 72.8777).toFixed(3)}</div>
+        ${r.assignedWorkerName ? `<div class="stop-crew-row" style="font-size: 0.82rem; color: #94a3b8; margin-top: 0.35rem;">🚛 Field Crew: <span style="color: #60a5fa; font-weight: 700;">${r.assignedWorkerName}</span></div>` : ''}
       </div>
     </div>
   `).join('');
@@ -2876,30 +2884,33 @@ function runSoftwareRouteOptimizer() {
   if (container) {
     container.innerHTML = finalRoute.map((stop, idx) => {
       const isEmg = stop.isEmergency;
+      const isEscalated = stop.isEscalated;
       const isPriority = stop.isPriorityPickup;
       const isTarget = stop.id === activeWorkerTargetStopId;
-      const originLabel = stop.userRole === 'institution'
-        ? (stop.institutionType === 'school' ? `🏫 ${stop.schoolName || stop.userName}` : `🏢 ${stop.companyName || stop.userName}`)
-        : `👤 Resident (${stop.userName})`;
+      const crewName = stop.assignedWorkerName || (currentUser ? `${currentUser.name}${currentUser.crewNumber ? ` (Crew #${currentUser.crewNumber})` : ''}` : 'Sunita Devi (Crew #102)');
+      const latVal = typeof stop.latitude === 'number' ? stop.latitude : (stop.coords?.lat || 19.055);
+      const lngVal = typeof stop.longitude === 'number' ? stop.longitude : (stop.coords?.lng || 72.834);
+      const timeStr = stop.createdAt ? formatTimeAgo(stop.createdAt) : '13d ago';
 
       return `
-        <div class="route-stop-card ${isEmg ? 'emergency' : ''} ${isTarget ? 'highlighted-target-stop' : ''}" data-report-id="${stop.id}" onclick="selectWorkerTargetStop('${stop.id}')" style="cursor: pointer; ${isPriority && !isEmg ? 'border-left: 4px solid var(--civic-signal-amber);' : ''}">
-          <div class="stop-number ${isEmg ? 'emergency-stop' : ''}">${isEmg ? '🚨' : idx + 1}</div>
-          <div style="flex: 1;">
+        <div class="route-stop-card ${isEmg ? 'emergency' : ''} ${isTarget ? 'highlighted-target-stop' : ''}" data-report-id="${stop.id}" onclick="selectWorkerTargetStop('${stop.id}')" style="cursor: pointer;">
+          <div style="flex: 1; min-width: 0;">
             <div class="report-meta">
-              <span class="badge badge-${stop.status}">${stop.status}</span>
-              ${isEmg ? `<span class="badge badge-emergency">TOP PRIORITY EMERGENCY</span>` : ''}
-              ${isPriority && !isEmg ? `<span class="badge" style="background: var(--civic-signal-amber-soft); color: var(--civic-signal-amber); font-weight: 800;">⚡ PRIORITY PICKUP PASS</span>` : ''}
-              <span>📍 ${stop.area || stop.wardZone}</span>
-              <span>Origin: <strong>${originLabel}</strong></span>
+              ${renderStatusStepperHTML(stop.status || 'assigned')}
+              ${isEmg ? `<span class="badge badge-emergency">EMERGENCY</span>` : ''}
+              ${isEscalated ? `<span class="badge badge-escalated">ESCALATED (>24H)</span>` : ''}
+              ${isPriority && !isEmg ? `<span class="badge" style="background: rgba(245, 158, 11, 0.18); color: #f59e0b; border: 1px solid #f59e0b; font-weight: 800;">⚡ PRIORITY PICKUP</span>` : ''}
+              <span>📍 ${stop.area || stop.wardZone || 'Ward Area'}</span>
+              <span>🕒 ${timeStr}</span>
             </div>
             <div class="stop-landmark-title">${stop.landmark}</div>
             <div class="stop-notes-desc">${stop.notes || 'No extra notes.'}</div>
-            <div class="stop-coords-text">Coordinates: Lat ${stop.latitude || stop.coords?.lat || 19.0760}, Lng ${stop.longitude || stop.coords?.lng || 72.8777}</div>
+            <div class="stop-coords-text">Coordinates: Lat ${Number(latVal).toFixed(3)}, Lng ${Number(lngVal).toFixed(3)}</div>
+            <div class="stop-crew-row" style="font-size: 0.82rem; color: #94a3b8; margin-top: 0.35rem;">🚛 Field Crew: <span style="color: #60a5fa; font-weight: 700;">${crewName}</span></div>
           </div>
-          <div style="display: flex; flex-direction: column; gap: 0.4rem; align-items: flex-end;">
-            <button class="btn btn-outline btn-xs" onclick="event.stopPropagation(); selectWorkerTargetStop('${stop.id}')">🎯 Focus Stop</button>
-            <button class="btn btn-primary btn-sm" onclick="event.stopPropagation(); openWorkerProofModal('${stop.id}')">📷 Mark Collected</button>
+          <div class="stop-action-btns" style="display: flex; flex-direction: column; gap: 0.45rem; align-items: flex-end; justify-content: center; margin-left: 1rem; flex-shrink: 0;">
+            <button type="button" class="btn btn-outline btn-xs" onclick="event.stopPropagation(); selectWorkerTargetStop('${stop.id}')">🎯 Focus Stop</button>
+            <button type="button" class="btn btn-crew-collect btn-sm" onclick="event.stopPropagation(); openWorkerProofModal('${stop.id}')">📷 Mark Collected</button>
           </div>
         </div>
       `;
@@ -3321,51 +3332,70 @@ window.recenterWorkerMap = function() {
 };
 
 window.openWorkerProofModal = function(reportId) {
-  document.getElementById('proofReportId').value = reportId;
-  document.getElementById('workerProofModal').classList.add('active');
+  const reportInput = document.getElementById('proofReportId');
+  if (reportInput) reportInput.value = reportId;
+  const modal = document.getElementById('workerProofModal');
+  if (modal) modal.classList.add('active');
 
   const form = document.getElementById('workerProofForm');
-  form.onsubmit = (e) => {
-    e.preventDefault();
-    const id = document.getElementById('proofReportId').value;
-    
-    let reports = getReports();
-    const index = reports.findIndex(r => r.id === id);
-    if (index !== -1) {
-      const clearedStop = reports[index];
-      reports[index].status = 'cleared';
-      reports[index].clearedAt = Date.now();
-      reports[index].clearedByWorker = currentUser.name;
-      saveReports(reports);
+  if (form) {
+    form.onsubmit = (e) => {
+      e.preventDefault();
+      const id = document.getElementById('proofReportId')?.value || reportId;
+      
+      let reports = getReports();
+      const index = reports.findIndex(r => r.id === id);
+      if (index !== -1) {
+        const clearedStop = reports[index];
+        const workerName = currentUser ? currentUser.name : 'Rajesh Singh';
+        const workerId = currentUser ? currentUser.id : 'usr-4';
 
-      // Log stop location as worker's last known position
-      const stopLat = clearedStop.latitude || clearedStop.coords?.lat || workerCurrentPos.lat;
-      const stopLng = clearedStop.longitude || clearedStop.coords?.lng || workerCurrentPos.lng;
-      updateWorkerLocation(stopLat, stopLng);
+        reports[index].status = 'cleared';
+        reports[index].clearedAt = Date.now();
+        reports[index].clearedByWorker = workerName;
+        reports[index].assignedWorkerName = reports[index].assignedWorkerName || workerName;
+        reports[index].assignedWorkerId = reports[index].assignedWorkerId || workerId;
 
-      const card = document.querySelector(`.route-stop-card[data-report-id="${id}"]`);
-      if (card) {
-        card.classList.add('stop-card-collected');
-        const meta = card.querySelector('.report-meta');
-        if (meta) {
-          meta.insertAdjacentHTML('afterbegin', '<span class="stop-collected-badge">✓ Collected</span>');
+        const notesInput = document.getElementById('proofNotes');
+        if (notesInput && notesInput.value.trim()) {
+          reports[index].workerProofNotes = notesInput.value.trim();
+        }
+
+        saveReports(reports);
+
+        // Log stop location as worker's last known position
+        const stopLat = clearedStop.latitude || clearedStop.coords?.lat || workerCurrentPos.lat;
+        const stopLng = clearedStop.longitude || clearedStop.coords?.lng || workerCurrentPos.lng;
+        updateWorkerLocation(stopLat, stopLng);
+
+        const card = document.querySelector(`.route-stop-card[data-report-id="${id}"]`);
+        if (card) {
+          card.classList.add('stop-card-collected');
+          const meta = card.querySelector('.report-meta');
+          if (meta) {
+            meta.insertAdjacentHTML('afterbegin', '<span class="stop-collected-badge">✓ Collected</span>');
+          }
+        }
+
+        logAdminAction('Stop Clearance Verified', workerName, `Stop #${id} cleared and verified with field proof.`);
+
+        if (typeof showToast === 'function') {
+          showToast(`✅ Stop ${id} confirmed CLEARED! Photo proof logged.`, 'success');
+        } else {
+          alert(`Stop ${id} confirmed CLEARED! Photo proof logged.`);
         }
       }
 
-      if (typeof showToast === 'function') {
-        showToast(`✅ Stop ${id} confirmed CLEARED! Photo proof logged.`, 'success');
-      } else {
-        alert(`Stop ${id} confirmed CLEARED! Photo proof logged.`);
-      }
-    }
-
-    closeModal('workerProofModal');
-    // Clear active target so optimizer advances to next stop smoothly
-    activeWorkerTargetStopId = null;
-    setTimeout(() => {
-      renderWorkerDashboard();
-    }, 450);
-  };
+      form.reset();
+      closeModal('workerProofModal');
+      // Clear active target so optimizer advances to next stop smoothly
+      activeWorkerTargetStopId = null;
+      renderWorkerPhotoProofGallery();
+      setTimeout(() => {
+        renderWorkerDashboard();
+      }, 450);
+    };
+  }
 };
 
 /* ==========================================================================
@@ -6631,7 +6661,12 @@ window.openCreditLedgerModal = function() {
 };
 
 window.closeModal = function(modalId) {
-  document.getElementById(modalId).classList.remove('active');
+  if (!modalId) {
+    document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
+    return;
+  }
+  const elem = document.getElementById(modalId);
+  if (elem) elem.classList.remove('active');
 };
 
 function getTierCredit(num) {
@@ -8052,15 +8087,15 @@ function initKeyboardShortcuts() {
       closeAllModals();
       document.getElementById('notificationDropdown')?.classList.remove('active');
     } else if (e.key === '1') {
-      quickSwitchDemoRole('citizen');
+      demoSwitchRole('citizen');
     } else if (e.key === '2') {
-      quickSwitchDemoRole('institution');
+      demoSwitchRole('institution');
     } else if (e.key === '3') {
-      quickSwitchDemoRole('hospital');
+      demoSwitchRole('hospital');
     } else if (e.key === '4') {
-      quickSwitchDemoRole('worker');
+      demoSwitchRole('worker');
     } else if (e.key === '5') {
-      quickSwitchDemoRole('admin');
+      demoSwitchRole('admin');
     } else if (e.key.toLowerCase() === 't') {
       window.location.href = 'transparency.html';
     } else if (e.key.toLowerCase() === 'n') {
@@ -8069,6 +8104,13 @@ function initKeyboardShortcuts() {
       if (currentUser?.role === 'admin') {
         switchAdminTab('analytics');
       }
+    }
+  });
+
+  // Global backdrop click dismiss for all modals
+  document.addEventListener('click', (e) => {
+    if (e.target && e.target.classList && e.target.classList.contains('modal-overlay')) {
+      e.target.classList.remove('active');
     }
   });
 }

@@ -1117,24 +1117,25 @@
       </div>
 
       <!-- Worker Vehicle & Crew Info Banner -->
-      <div id="workerVehicleCrewBanner" class="card" style="margin-bottom: 1.25rem; background: var(--civic-cobalt-accent); color: white; padding: 0.9rem 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+      <div id="workerVehicleCrewBanner" class="card" style="margin-bottom: 1.25rem; border-left: 4px solid var(--civic-spruce-green); padding: 0.9rem 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
         <div style="display: flex; align-items: center; gap: 0.75rem;">
           <span style="font-size: 1.75rem;">🚛</span>
           <div>
-            <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.85; font-weight: 700;">Assigned Crew & Fleet Unit</div>
+            <div style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; font-weight: 700;">Assigned Crew & Fleet Unit</div>
             <div style="font-size: 1.15rem; font-weight: 800;">
               <span id="workerCrewNumBanner">Crew #101</span> &bull; <span id="workerNameBanner">Rajesh Singh</span>
             </div>
-            <div style="font-size: 0.82rem; opacity: 0.9; margin-top: 0.1rem;">
-              🚛 <span id="workerVehicleTypeBanner">Heavy Hydraulic Compactor (10T)</span> (<code id="workerVehicleRegBanner" style="color: #fff; background: rgba(0,0,0,0.2); padding: 1px 5px; border-radius: 3px;">MH-01-GA-4401</code>) &bull; 📍 <span id="workerWardBanner">Ward G/South - Dadar & Elphinstone</span>
+            <div style="font-size: 0.82rem; color: #64748b; margin-top: 0.1rem;">
+              🚛 <span id="workerVehicleTypeBanner">Heavy Hydraulic Compactor (10T)</span> (<code id="workerVehicleRegBanner" style="padding: 1px 5px; border-radius: 3px;">MH-01-GA-4401</code>) &bull; 📍 <span id="workerWardBanner">Ward G/South - Dadar & Elphinstone</span>
             </div>
           </div>
         </div>
         <div style="display: flex; align-items: center; gap: 0.5rem;">
-          <span id="workerShiftStatusBadge" class="badge" style="background: rgba(255,255,255,0.25); color: #fff; font-weight: 800; font-size: 0.82rem;">
+          <span id="workerShiftStatusBadge" class="badge" style="background: rgba(16, 185, 129, 0.2); color: #047857; font-weight: 800; font-size: 0.82rem;">
             🟢 On Shift - Active
           </span>
         </div>
+      </div>
       <!-- Worker Daily Pre-Shift Safety Checklist Log -->
       <div id="workerSafetyChecklistCard" class="card" style="margin-bottom: 1.25rem;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; flex-wrap: wrap; gap: 0.5rem;">
@@ -1199,7 +1200,7 @@
           </div>
           <div>
             <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">STOPS REMAINING</div>
-            <div id="workerSummaryRemaining" style="font-size: 1.4rem; font-weight: 800; color: var(--civic-cobalt-accent);">3</div>
+            <div id="workerSummaryRemaining" style="font-size: 1.4rem; font-weight: 800; color: #38bdf8;">3</div>
           </div>
           <div>
             <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">EST. COVERED</div>
@@ -1219,7 +1220,7 @@
       <div class="card" style="margin-bottom: 1.75rem;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
           <div>
-            <div style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--civic-cobalt-accent);">Software Route Engine</div>
+            <div style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--civic-spruce-green);">Software Route Engine</div>
             <div style="font-size: 1.1rem; font-weight: 800; margin-top: 0.15rem;">Nearest-Neighbor Heuristic Active</div>
             <div style="font-size: 0.82rem; color: #64748b;">Emergency spill reports automatically placed at Stop #1 regardless of driving distance.</div>
           </div>
@@ -1230,7 +1231,7 @@
             </div>
             <div>
               <div style="font-size: 0.75rem; font-weight: 700; color: #64748b;">Est. Distance</div>
-              <div id="workerEstDistance" style="font-size: 1.5rem; font-weight: 800; color: var(--civic-cobalt-accent);">0.0 km</div>
+              <div id="workerEstDistance" style="font-size: 1.5rem; font-weight: 800; color: var(--civic-forest-ink);">0.0 km</div>
             </div>
             <div>
               <div style="font-size: 0.75rem; font-weight: 700; color: #64748b;">Shift Completion</div>
@@ -1259,10 +1260,10 @@
         </div>
 
         <!-- Prominent Live Distance-Remaining Readout HUD -->
-        <div style="margin-bottom: 0.85rem; padding: 0.85rem 1rem; background: var(--civic-surface-muted); border: 2px solid var(--civic-cobalt-accent); border-radius: var(--radius-xs); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+        <div style="margin-bottom: 0.85rem; padding: 0.85rem 1rem; background: var(--civic-surface-muted); border: 1px solid var(--civic-border); border-left: 4px solid var(--civic-spruce-green); border-radius: var(--radius-xs); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
           <div>
             <div style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: #64748b; letter-spacing: 0.05em;">Live Navigation Proximity</div>
-            <div id="workerLiveDistanceReadout" style="font-size: 1.6rem; font-weight: 900; color: var(--civic-cobalt-accent); letter-spacing: -0.02em;">Calculating...</div>
+            <div id="workerLiveDistanceReadout" style="font-size: 1.6rem; font-weight: 900; color: var(--civic-spruce-green); letter-spacing: -0.02em;">Calculating...</div>
           </div>
           <div style="text-align: right;">
             <div style="font-size: 0.75rem; font-weight: 700; color: #64748b;">Target Threshold: 50m</div>
@@ -1273,13 +1274,13 @@
         <!-- Active Target Navigation HUD Banner -->
         <div id="workerActiveNavHUD" style="background: var(--civic-surface-muted); border: 1px solid var(--civic-border); border-radius: var(--radius-xs); padding: 0.85rem 1rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
           <div>
-            <div style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: var(--civic-cobalt-accent);">Current Target Destination</div>
+            <div style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: var(--civic-spruce-green);">Current Target Destination</div>
             <div id="workerTargetStopTitle" style="font-size: 1.05rem; font-weight: 800; margin-top: 0.15rem;">Stop #1: Initializing route...</div>
             <div id="workerTargetStopAddress" style="font-size: 0.82rem; color: #64748b;">Calculating straight-line distance...</div>
           </div>
           <div style="text-align: right;">
             <div style="font-size: 0.72rem; font-weight: 700; color: #64748b;">Distance Remaining</div>
-            <div id="workerTargetDistanceBadge" style="font-size: 1.35rem; font-weight: 800; color: var(--civic-cobalt-accent);">-- m</div>
+            <div id="workerTargetDistanceBadge" style="font-size: 1.35rem; font-weight: 800; color: var(--civic-spruce-green);">-- m</div>
           </div>
         </div>
 
@@ -1903,8 +1904,8 @@
       <form id="workerProofForm">
         <input type="hidden" id="proofReportId" value="">
         <div class="form-group">
-          <label for="proofPhotoInput" class="form-label">Completion Proof Photo <span style="color: var(--civic-signal-crimson);">*</span></label>
-          <input type="file" id="proofPhotoInput" class="form-control" accept="image/*" required>
+          <label for="proofPhotoInput" class="form-label">Completion Proof Photo <span style="font-size: 0.75rem; color: #64748b; font-weight: normal;">(Optional camera / image upload)</span></label>
+          <input type="file" id="proofPhotoInput" class="form-control" accept="image/*">
         </div>
         <div class="form-group">
           <label for="proofNotes" class="form-label">Field Notes</label>

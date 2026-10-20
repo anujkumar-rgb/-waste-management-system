@@ -884,84 +884,79 @@ button, input, select, textarea {
   color: #64748b;
 }
 
-/* Worker Dispatch Stops (Daylight High-Contrast UI) */
+/* Worker Dispatch Stops (Daylight High-Contrast UI & Pic 2 Dark Mode Sync) */
 .route-stop-card {
   background: var(--civic-surface);
-  border: 2px solid var(--civic-border-strong);
+  border: 1px solid var(--civic-border);
   border-radius: var(--radius-sm);
   padding: 1.15rem;
   margin-bottom: 0.85rem;
-  display: grid;
-  grid-template-columns: 54px 1fr auto;
-  gap: 1rem;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   color: var(--civic-forest-ink);
   transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
 
 .route-stop-card .stop-landmark-title {
-  font-weight: 800;
-  font-size: 1.12rem;
+  font-weight: 700;
+  font-size: 1.08rem;
   color: var(--civic-forest-ink);
+  margin-top: 0.35rem;
   margin-bottom: 0.2rem;
   line-height: 1.3;
 }
 
 .route-stop-card .stop-notes-desc {
-  font-size: 0.9rem;
-  color: #1e293b;
+  font-size: 0.86rem;
+  color: #64748b;
   line-height: 1.4;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.2rem;
 }
 
 .route-stop-card .stop-coords-text {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  color: #334155;
-  margin-top: 0.2rem;
+  color: #64748b;
+  margin-top: 0.25rem;
   letter-spacing: 0.01em;
 }
 
 .route-stop-card .report-meta {
-  color: #334155;
-  font-weight: 600;
-}
-
-.route-stop-card .report-meta strong {
-  color: var(--civic-forest-ink);
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.35rem;
+  flex-wrap: wrap;
+  font-size: 0.8rem;
+  color: #64748b;
 }
 
 .route-stop-card.emergency {
-  border: 2px solid #dc2626 !important;
-  background: #fff5f5 !important;
-  box-shadow: 0 4px 16px rgba(220, 38, 38, 0.16) !important;
+  border: 2px solid #ef4444 !important;
+  background: rgba(239, 68, 68, 0.03) !important;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.1) !important;
 }
 
 .route-stop-card.emergency .stop-landmark-title {
-  color: #991b1b !important;
+  color: var(--civic-forest-ink) !important;
 }
 
 .route-stop-card.emergency .stop-notes-desc {
-  color: #7f1d1d !important;
-  font-weight: 600;
+  color: #64748b !important;
 }
 
 .route-stop-card.emergency .stop-coords-text {
-  color: #b91c1c !important;
-  font-weight: 600;
+  color: #64748b !important;
 }
 
-.route-stop-card.emergency .report-meta {
-  color: #991b1b !important;
-}
-
-/* Dark Mode High-Contrast Overrides */
+/* Dark Mode Overrides matching Pic 2 Operational UI */
 [data-theme="dark"] .route-stop-card {
-  background: #14221b !important;
-  border-color: #2e4a3b !important;
+  background: #121e19 !important;
+  border: 1px solid #24382f !important;
   color: #f1f5f9 !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
 }
 
 [data-theme="dark"] .route-stop-card .stop-landmark-title {
@@ -969,41 +964,71 @@ button, input, select, textarea {
 }
 
 [data-theme="dark"] .route-stop-card .stop-notes-desc {
-  color: #e2e8f0 !important;
-}
-
-[data-theme="dark"] .route-stop-card .stop-coords-text {
   color: #94a3b8 !important;
 }
 
-[data-theme="dark"] .route-stop-card .report-meta {
-  color: #cbd5e1 !important;
+[data-theme="dark"] .route-stop-card .stop-coords-text {
+  color: #64748b !important;
 }
 
-[data-theme="dark"] .route-stop-card .report-meta strong {
-  color: #ffffff !important;
+[data-theme="dark"] .route-stop-card .report-meta {
+  color: #94a3b8 !important;
 }
 
 [data-theme="dark"] .route-stop-card.emergency {
-  background: #231215 !important;
-  border-color: #ef4444 !important;
-  box-shadow: 0 4px 18px rgba(239, 68, 68, 0.35) !important;
+  background: #141f1a !important;
+  border: 2px solid #ef4444 !important;
+  box-shadow: none !important;
 }
 
 [data-theme="dark"] .route-stop-card.emergency .stop-landmark-title {
-  color: #fca5a5 !important;
+  color: #ffffff !important;
 }
 
 [data-theme="dark"] .route-stop-card.emergency .stop-notes-desc {
-  color: #fee2e2 !important;
+  color: #94a3b8 !important;
 }
 
 [data-theme="dark"] .route-stop-card.emergency .stop-coords-text {
-  color: #f87171 !important;
+  color: #64748b !important;
 }
 
-[data-theme="dark"] .route-stop-card.emergency .report-meta {
-  color: #fca5a5 !important;
+/* Dark Mode Overrides for Citizen Report Cards matching Pic 2 */
+[data-theme="dark"] .report-item {
+  background: #121e19 !important;
+  border: 1px solid #1e3328 !important;
+  border-left: 4px solid var(--civic-spruce-green) !important;
+  color: #f1f5f9 !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25) !important;
+}
+
+[data-theme="dark"] .report-item.emergency {
+  border: 1.5px solid #ef4444 !important;
+  border-left: 1.5px solid #ef4444 !important;
+  background: rgba(239, 68, 68, 0.04) !important;
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.15) !important;
+}
+
+[data-theme="dark"] .report-item.escalated {
+  border: 1.5px solid #ef4444 !important;
+  border-left: 5px solid #ef4444 !important;
+}
+
+[data-theme="dark"] .report-item .report-meta {
+  color: #94a3b8 !important;
+}
+
+.btn-crew-collect {
+  background: #166534 !important;
+  border: 1px solid #22c55e !important;
+  color: #ffffff !important;
+  font-weight: 700;
+  transition: background 0.18s ease;
+}
+
+.btn-crew-collect:hover {
+  background: #15803d !important;
+  border-color: #4ade80 !important;
 }
 
 .stop-number {
@@ -1345,19 +1370,24 @@ button, input, select, textarea {
   }
 }
 
-/* --- Worker Route Map & Admin Live Tracking Additions --- */
 .highlighted-target-stop {
-  border: 2px solid var(--civic-cobalt-accent) !important;
-  background: #f0f7ff !important;
-  box-shadow: 0 4px 16px rgba(28, 82, 216, 0.22) !important;
-  transform: translateY(-2px);
+  border: 2px solid #166534 !important;
+  background: #f0fdf4 !important;
+  box-shadow: 0 4px 14px rgba(22, 101, 52, 0.15) !important;
+  transform: translateY(-1px);
   transition: all 0.2s ease;
 }
 
 [data-theme="dark"] .highlighted-target-stop {
-  border: 2px solid #60a5fa !important;
-  background: #102035 !important;
-  box-shadow: 0 4px 18px rgba(59, 130, 246, 0.35) !important;
+  border: 2px solid #22c55e !important;
+  background: #14241d !important;
+  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.2) !important;
+}
+
+[data-theme="dark"] .route-stop-card.emergency.highlighted-target-stop {
+  border: 2px solid #ef4444 !important;
+  background: rgba(239, 68, 68, 0.08) !important;
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.25) !important;
 }
 
 .worker-pulse-marker {

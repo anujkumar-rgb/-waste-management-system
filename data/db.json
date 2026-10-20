@@ -34,9 +34,9 @@
           "amount": 0
         }
       ],
-      "lastKnownLat": 19.29897,
-      "lastKnownLng": 72.86401,
-      "lastLocationUpdatedAt": 1792430457295
+      "lastKnownLat": 19.29899,
+      "lastKnownLng": 72.864,
+      "lastLocationUpdatedAt": 1792475192963
     },
     {
       "id": "usr-2",
@@ -139,7 +139,10 @@
           "reason": "Hazardous Stream Clearance Compliant",
           "amount": 50
         }
-      ]
+      ],
+      "lastKnownLat": 19.29894,
+      "lastKnownLng": 72.8639,
+      "lastLocationUpdatedAt": 1792476335517
     },
     {
       "id": "usr-4",
@@ -153,9 +156,9 @@
       "vehicleType": "Heavy Hydraulic Compactor (10T)",
       "vehicleRegistration": "MH-01-GA-4401",
       "shiftStatus": "active",
-      "lastKnownLat": 19.29894,
-      "lastKnownLng": 72.86403,
-      "lastLocationUpdatedAt": 1792430745912
+      "lastKnownLat": 19.299,
+      "lastKnownLng": 72.86402,
+      "lastLocationUpdatedAt": 1792475621777
     },
     {
       "id": "usr-7",
@@ -169,9 +172,9 @@
       "vehicleType": "Electric Multi-Bin Tipper Auto (1.5T)",
       "vehicleRegistration": "MH-02-EV-1088",
       "shiftStatus": "active",
-      "lastKnownLat": 19.29896,
-      "lastKnownLng": 72.86404,
-      "lastLocationUpdatedAt": 1792430368872
+      "lastKnownLat": 19.29898,
+      "lastKnownLng": 72.86401,
+      "lastLocationUpdatedAt": 1792434976532
     },
     {
       "id": "usr-8",
@@ -217,9 +220,9 @@
       "vehicleType": "Mini Tipper E-Rickshaw (0.8T)",
       "vehicleRegistration": "MH-02-ET-5055",
       "shiftStatus": "off-shift",
-      "lastKnownLat": 19.2307,
-      "lastKnownLng": 72.8567,
-      "lastLocationUpdatedAt": 1791304868273
+      "lastKnownLat": 19.29899,
+      "lastKnownLng": 72.86401,
+      "lastLocationUpdatedAt": 1792475893869
     },
     {
       "id": "usr-5",
@@ -228,9 +231,9 @@
       "name": "Municipal Sanitation Officer",
       "role": "admin",
       "verificationCode": "ADMIN2026",
-      "lastKnownLat": 19.299,
-      "lastKnownLng": 72.86396,
-      "lastLocationUpdatedAt": 1792434798929
+      "lastKnownLat": 19.29886,
+      "lastKnownLng": 72.86406,
+      "lastLocationUpdatedAt": 1792436183739
     }
   ],
   "reports": [
@@ -787,9 +790,9 @@
       "fuelPercent": 84,
       "status": "In Depot Maintenance",
       "icon": "🚛",
-      "lastKnownLat": 19.29894,
-      "lastKnownLng": 72.86403,
-      "lastLocationUpdatedAt": 1792430745912
+      "lastKnownLat": 19.299,
+      "lastKnownLng": 72.86402,
+      "lastLocationUpdatedAt": 1792475621777
     },
     {
       "id": "FLT-ET-108",
@@ -804,9 +807,9 @@
       "fuelPercent": 68,
       "status": "In Depot Maintenance",
       "icon": "🛺",
-      "lastKnownLat": 19.29896,
-      "lastKnownLng": 72.86404,
-      "lastLocationUpdatedAt": 1792430368872
+      "lastKnownLat": 19.29898,
+      "lastKnownLng": 72.86401,
+      "lastLocationUpdatedAt": 1792434976532
     },
     {
       "id": "FLT-BM-09",
@@ -853,11 +856,11 @@
       "capacityTon": 0.8,
       "currentPayloadTon": 0.2,
       "fuelPercent": 95,
-      "status": "In Depot Maintenance",
+      "status": "Idle / Off-Shift",
       "icon": "🛺",
-      "lastKnownLat": 19.2307,
-      "lastKnownLng": 72.8567,
-      "lastLocationUpdatedAt": 1791304868273
+      "lastKnownLat": 19.29899,
+      "lastKnownLng": 72.86401,
+      "lastLocationUpdatedAt": 1792475893869
     }
   ],
   "broadcasts": [
@@ -879,6 +882,76 @@
     }
   ],
   "audit_logs": [
+    {
+      "id": "log-1792475893739-386",
+      "timestamp": 1792475893739,
+      "actor": "Sachin Kamble (Crew #105)",
+      "action": "Shift Status Change",
+      "details": "Shift updated to Idle / Off-Shift"
+    },
+    {
+      "id": "log-1792475893722-877",
+      "timestamp": 1792475893722,
+      "actor": "Sachin Kamble (Crew #105)",
+      "action": "SHIFT_TOGGLE",
+      "details": "Worker usr-10 shifted to off-shift."
+    },
+    {
+      "id": "log-1792475891106-858",
+      "timestamp": 1792475891106,
+      "actor": "Sachin Kamble (Crew #105)",
+      "action": "Shift Status Change",
+      "details": "Shift updated to Active Collection"
+    },
+    {
+      "id": "log-1792475891098-738",
+      "timestamp": 1792475891098,
+      "actor": "Sachin Kamble (Crew #105)",
+      "action": "SHIFT_TOGGLE",
+      "details": "Worker usr-10 shifted to active."
+    },
+    {
+      "id": "log-1792435141383-790",
+      "timestamp": 1792435141383,
+      "actor": "CityCare Super Specialty Hospital",
+      "action": "Threshold Updated",
+      "details": "Biomedical hazard accumulation threshold adjusted to 38 kg"
+    },
+    {
+      "id": "log-1792435140878-471",
+      "timestamp": 1792435140878,
+      "actor": "CityCare Super Specialty Hospital",
+      "action": "Threshold Updated",
+      "details": "Biomedical hazard accumulation threshold adjusted to 38 kg"
+    },
+    {
+      "id": "log-1792435140700-2",
+      "timestamp": 1792435140700,
+      "actor": "CityCare Super Specialty Hospital",
+      "action": "Threshold Updated",
+      "details": "Biomedical hazard accumulation threshold adjusted to 38 kg"
+    },
+    {
+      "id": "log-1792435140523-899",
+      "timestamp": 1792435140523,
+      "actor": "CityCare Super Specialty Hospital",
+      "action": "Threshold Updated",
+      "details": "Biomedical hazard accumulation threshold adjusted to 38 kg"
+    },
+    {
+      "id": "log-1792435136436-331",
+      "timestamp": 1792435136436,
+      "actor": "CityCare Super Specialty Hospital",
+      "action": "Threshold Updated",
+      "details": "Biomedical hazard accumulation threshold adjusted to 24 kg"
+    },
+    {
+      "id": "log-1792435132723-739",
+      "timestamp": 1792435132723,
+      "actor": "CityCare Super Specialty Hospital",
+      "action": "Threshold Updated",
+      "details": "Biomedical hazard accumulation threshold adjusted to 25 kg"
+    },
     {
       "id": "log-1792431868397-77",
       "timestamp": 1792431868397,
