@@ -27,7 +27,7 @@
 <body>
 
   <!-- Sticky Municipal Navigation Bar -->
-  <header class="navbar">
+  <header class="navbar frosted-glass-nav">
     <div class="container nav-container">
       <div class="brand-logo" id="navBrandLogo">
         <div class="brand-icon">♻</div>
@@ -40,6 +40,9 @@
       <div class="nav-user-bar" id="navUserBar" style="display: none;">
         <!-- Multi-Language Toggle (EN / HI) -->
         <button type="button" class="lang-toggle-btn" id="langToggleBtn" onclick="toggleAppLanguage()" title="Switch Language / भाषा बदलें">🌐 EN | हिं</button>
+
+        <!-- Zero-Asset Civic Web Audio Toggle -->
+        <button type="button" id="soundToggleBtn" class="sound-toggle-btn" onclick="toggleCivicSound()" title="Audio Effects Toggle">🔊</button>
 
         <!-- Notification Bell & Dropdown Inbox -->
         <div class="notification-bell-wrapper">
@@ -76,6 +79,7 @@
 
       <div class="nav-user-bar" id="navGuestBar">
         <button type="button" class="lang-toggle-btn" id="guestLangToggleBtn" onclick="toggleAppLanguage()" title="Switch Language / भाषा बदलें">🌐 EN | हिं</button>
+        <button type="button" id="guestSoundToggleBtn" class="sound-toggle-btn" onclick="toggleCivicSound()" title="Audio Effects Toggle">🔊</button>
         <button type="button" class="btn btn-outline btn-xs" id="guestKeyboardShortcutsBtn" onclick="openKeyboardShortcutsModal()" title="Keyboard Shortcuts (Shift + ?)">⌨️ ?</button>
         <a href="transparency.html" class="btn btn-outline btn-xs" id="guestNavTransparencyBtn" title="Public City-Wide Transparency Dashboard">🌐 Public Transparency</a>
         <button type="button" class="btn btn-outline btn-xs" id="guestNavAboutBtn" onclick="openAboutProjectModal()">ℹ️ About Project</button>
@@ -306,7 +310,7 @@
                 <span class="role-check-badge">✓</span>
                 <svg class="role-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <rect x="1" y="3" width="15" height="13" rx="2"/>
-                  <polygon points="16 8 20 8 23 11 23 16 16 16 8"/>
+                  <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
                   <circle cx="5.5" cy="18.5" r="2.5"/>
                   <circle cx="18.5" cy="18.5" r="2.5"/>
                 </svg>
@@ -429,13 +433,19 @@
           </div>
           <p class="dashboard-subtitle">Report bin overflows, verify segregation, and redeem EcoCredits at the municipal store.</p>
         </div>
-        <div class="card" style="padding: 0.65rem 1.15rem; display: flex; align-items: center; gap: 1rem;">
+        <div class="card" id="citizenLoyaltyCard" style="padding: 0.85rem 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; border-left: 4px solid var(--civic-spruce-green); flex-wrap: wrap;">
           <div>
-            <div style="font-size: 0.72rem; font-weight: 800; color: var(--civic-forest-ink); text-transform: uppercase;">Wallet Balance</div>
-            <div id="citizenCreditBalance" style="font-size: 1.5rem; font-weight: 800; color: var(--civic-cobalt-accent); line-height: 1;">85 credits</div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span style="font-size: 0.72rem; font-weight: 800; color: #64748b; text-transform: uppercase;">Citizen EcoWallet</span>
+              <span id="citizenTierBadge" class="badge" style="background: rgba(16, 185, 129, 0.15); color: #047857; font-weight: 800; font-size: 0.72rem;">🌱 Eco Champion (Tier 2)</span>
+            </div>
+            <div id="citizenCreditBalance" style="font-size: 1.6rem; font-weight: 800; color: var(--civic-spruce-green); line-height: 1.1; margin-top: 0.2rem;">85 credits</div>
+            <div style="font-size: 0.72rem; color: #64748b; margin-top: 0.25rem;">Next Milestone: <strong>100 pts</strong> for Municipal Transit Pass</div>
           </div>
-          <button class="btn btn-outline btn-xs" onclick="openCreditLedgerModal()">📜 History</button>
-          <a href="#redemptionStoreSection" class="btn btn-primary btn-xs">🎁 Credit Store</a>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <button class="btn btn-outline btn-xs" onclick="openCreditLedgerModal()">📜 History</button>
+            <a href="#redemptionStoreSection" class="btn btn-primary btn-xs">🎁 Redeem Rewards</a>
+          </div>
         </div>
       </div>
 
@@ -601,29 +611,44 @@
                 <input type="hidden" id="citizenSeverity" value="getting_full" required>
               </div>
 
-              <!-- Functional Voice Message Report Component -->
-              <div class="voice-recorder-box">
-                <div style="font-size: 0.82rem; font-weight: 700; margin-bottom: 0.4rem;">
-                  🎙️ Voice Message Note (Optional)
+              <!-- Functional Voice Message Report Component (Streamlined Collapsible) -->
+              <details class="voice-recorder-box" style="cursor: pointer; padding: 0.65rem 0.85rem; border: 1px dashed var(--civic-border); border-radius: var(--radius-xs); margin-bottom: 1rem;">
+                <summary style="font-size: 0.82rem; font-weight: 700; color: #64748b; outline: none; list-style: none; display: flex; align-items: center; justify-content: space-between;">
+                  <span>🎙️ Add Verbal Audio Note (Optional)</span>
+                  <span style="font-size: 0.72rem; color: var(--civic-spruce-green);">+ Expand Recorder</span>
+                </summary>
+                <div style="margin-top: 0.65rem; text-align: center;">
+                  <button type="button" id="micRecordBtn" class="mic-btn" title="Click to record voice note">🎙️</button>
+                  <div id="micStatusText" style="font-size: 0.78rem; color: #64748b; margin-top: 0.25rem;">Click to record verbal observations</div>
+                  <div id="audioPlayerContainer" class="custom-player-wrapper" style="display: none; margin-top: 0.5rem;">
+                    <button type="button" id="audioPlayToggleBtn" class="btn btn-outline btn-xs" onclick="toggleAudioPlayback()">▶ Play</button>
+                    <input type="range" id="audioSeekBar" min="0" max="100" value="0" style="flex: 1;" oninput="seekAudioPlayback(this.value)">
+                    <span id="audioTimeDisplay" style="font-size: 0.72rem; font-family: monospace;">0:00 / 0:00</span>
+                    <input type="range" id="audioVolumeBar" min="0" max="1" step="0.1" value="1" style="width: 60px;" title="Volume" oninput="setAudioVolume(this.value)">
+                  </div>
+                  <audio id="audioPlayback" style="display: none;"></audio>
+                  <input type="hidden" id="citizenAudioData" value="">
                 </div>
-                <button type="button" id="micRecordBtn" class="mic-btn" title="Click to record voice note">🎙️</button>
-                <div id="micStatusText" style="font-size: 0.78rem; color: #64748b;">Click to record verbal observations</div>
-                <div id="audioPlayerContainer" class="custom-player-wrapper" style="display: none;">
-                  <button type="button" id="audioPlayToggleBtn" class="btn btn-outline btn-xs" onclick="toggleAudioPlayback()">▶ Play</button>
-                  <input type="range" id="audioSeekBar" min="0" max="100" value="0" style="flex: 1;" oninput="seekAudioPlayback(this.value)">
-                  <span id="audioTimeDisplay" style="font-size: 0.72rem; font-family: monospace;">0:00 / 0:00</span>
-                  <input type="range" id="audioVolumeBar" min="0" max="1" step="0.1" value="1" style="width: 60px;" title="Volume" oninput="setAudioVolume(this.value)">
-                </div>
-                <audio id="audioPlayback" style="display: none;"></audio>
-                <input type="hidden" id="citizenAudioData" value="">
-              </div>
+              </details>
 
               <div class="form-group">
                 <label for="citizenNotes" class="form-label">Details / Observations</label>
                 <textarea id="citizenNotes" class="form-control" rows="2" placeholder="e.g. Cardboard boxes and plastic bottles obstructing pedestrian path..."></textarea>
               </div>
 
-              <button type="submit" class="btn btn-primary" style="width: 100%;">Submit Bin Report (+5 Credits)</button>
+              <!-- WhatsApp / SMS Notification Opt-In -->
+              <div class="form-group" style="background: rgba(16, 185, 129, 0.06); padding: 0.65rem 0.85rem; border-radius: var(--radius-xs); border: 1px solid rgba(16, 185, 129, 0.2); margin-bottom: 1.15rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.82rem; font-weight: 700; margin: 0; color: var(--civic-forest-ink);">
+                  <input type="checkbox" id="citizenWhatsappOptin" checked style="accent-color: var(--civic-spruce-green); width: 16px; height: 16px;">
+                  <span>📱 Receive clearance verification photo & SMS via WhatsApp</span>
+                </label>
+                <div id="citizenWhatsappPhoneWrapper" style="margin-top: 0.35rem; display: flex; align-items: center; gap: 0.5rem;">
+                  <input type="tel" id="citizenWhatsappNumber" class="form-control" style="font-size: 0.78rem; padding: 0.3rem 0.5rem;" placeholder="e.g. +91 98200 12345" value="+91 98200 44102">
+                  <span style="font-size: 0.72rem; color: #64748b; white-space: nowrap;">Instant resolution proof</span>
+                </div>
+              </div>
+
+              <button type="submit" id="citizenSubmitReportBtn" class="btn btn-primary" style="width: 100%;">Submit Bin Report (+5 Credits)</button>
             </form>
           </div>
 
@@ -1278,9 +1303,12 @@
             <div id="workerTargetStopTitle" style="font-size: 1.05rem; font-weight: 800; margin-top: 0.15rem;">Stop #1: Initializing route...</div>
             <div id="workerTargetStopAddress" style="font-size: 0.82rem; color: #64748b;">Calculating straight-line distance...</div>
           </div>
-          <div style="text-align: right;">
-            <div style="font-size: 0.72rem; font-weight: 700; color: #64748b;">Distance Remaining</div>
-            <div id="workerTargetDistanceBadge" style="font-size: 1.35rem; font-weight: 800; color: var(--civic-spruce-green);">-- m</div>
+          <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <div style="text-align: right;">
+              <div style="font-size: 0.72rem; font-weight: 700; color: #64748b;">Distance Remaining</div>
+              <div id="workerTargetDistanceBadge" style="font-size: 1.35rem; font-weight: 800; color: var(--civic-spruce-green);">-- m</div>
+            </div>
+            <a id="workerTargetGoogleMapsLink" href="https://www.google.com/maps" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-xs" style="white-space: nowrap;" title="Open Turn-by-Turn GPS Voice Navigation">🗺️ Google Maps</a>
           </div>
         </div>
 
@@ -1320,6 +1348,7 @@
         </div>
         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
           <button class="btn btn-primary btn-sm" onclick="adminSmartAutoAssign()" title="Auto-assign pending tickets to nearest crew">⚡ Smart Auto-Assign Crews</button>
+          <button class="btn btn-outline btn-sm" onclick="openAdminShiftHandoverModal()" title="Generate printable Daily Crew Shift Handover protocol">📋 Daily Shift Handover</button>
           <button class="btn btn-outline btn-sm" onclick="syncWithBackend()" title="Force Refresh from Node.js REST API">🔄 Refresh Server</button>
           <button class="btn btn-outline btn-sm" onclick="exportAdminAnalyticsCSV()">📥 Export Operations CSV</button>
         </div>
@@ -1913,6 +1942,55 @@
         </div>
         <button type="submit" class="btn btn-primary" style="width: 100%;">Submit Verification & Complete Stop</button>
       </form>
+    </div>
+  </div>
+
+  <!-- Worker Skip Stop / Obstruction Modal -->
+  <div id="workerSkipStopModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 480px;">
+      <button class="modal-close" onclick="closeModal('workerSkipStopModal')">×</button>
+      <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+        <span style="font-size: 1.35rem;">⚠️</span>
+        <h3 style="margin: 0; font-size: 1.15rem;">Unable to Collect / Skip Stop</h3>
+      </div>
+      <p style="color: #64748b; font-size: 0.84rem; margin-bottom: 1rem;">Log road deviation or access restriction. Dispatch will be notified immediately to reassign or schedule alternate heavy machinery.</p>
+      <form id="workerSkipStopForm" onsubmit="handleWorkerSkipStopSubmit(event)">
+        <input type="hidden" id="skipReportId" value="">
+        <div class="form-group">
+          <label class="form-label">Obstruction Reason <span style="color: var(--civic-signal-crimson);">*</span></label>
+          <select id="skipReasonCategory" class="form-control" required>
+            <option value="Road Blocked / Civic Construction">🚧 Road Blocked / Heavy Civic Construction</option>
+            <option value="Vehicle Parked / Alley Inaccessible">🚗 Narrow Alley Blocked by Parked Vehicles</option>
+            <option value="Flooding / Severe Waterlogging">🌊 Monsoon Waterlogging / Inaccessible</option>
+            <option value="Chemical Hazard / Hazmat Required">☣️ Hazardous Chemical / Hazmat Unit Required</option>
+            <option value="Bin Stolen / Submerged / Missing">🗑️ Bin Missing or Vandalized</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Crew Notes / Observation</label>
+          <input type="text" id="skipCrewNotes" class="form-control" placeholder="e.g. Concrete mixer blocking lane 4, unable to reverse compactor.">
+        </div>
+        <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+          <button type="button" class="btn btn-outline btn-sm" onclick="closeModal('workerSkipStopModal')">Cancel</button>
+          <button type="submit" class="btn btn-emergency btn-sm">Confirm Skip & Alert Dispatch</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Admin Daily Shift Handover Report Modal (Printable) -->
+  <div id="adminShiftHandoverReportModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 680px; max-height: 88vh; overflow-y: auto;">
+      <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--civic-border); padding-bottom: 0.5rem;">
+        <h3 style="margin: 0; font-size: 1.15rem;">📋 Municipal Daily Crew Shift Handover Report</h3>
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="btn btn-primary btn-xs" onclick="window.print()">🖨️ Print / Save as PDF</button>
+          <button class="modal-close" style="position: static;" onclick="closeModal('adminShiftHandoverReportModal')">×</button>
+        </div>
+      </div>
+      <div id="adminShiftHandoverContent">
+        <!-- Rendered dynamically -->
+      </div>
     </div>
   </div>
 

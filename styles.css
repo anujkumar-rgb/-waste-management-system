@@ -2571,4 +2571,171 @@ html.theme-transitioning *::after {
   transition: color 0.4s ease;
 }
 
+/* ==========================================================================
+   20. SPECIAL EFFECTS SUITE (RADAR, GLOW, FLYING COIN, MORPH CHECKMARK)
+   ========================================================================== */
+
+/* Frosted Glass Accents */
+.frosted-glass-nav {
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  background: rgba(255, 255, 255, 0.88) !important;
+}
+
+[data-theme="dark"] .frosted-glass-nav {
+  background: rgba(14, 25, 20, 0.9) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.frosted-glass-hud {
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+
+/* Emergency Hazard Breathing Glow */
+.route-stop-card.emergency,
+.report-item.emergency {
+  animation: ambientEmergencyBreathe 2.8s ease-in-out infinite !important;
+}
+
+@keyframes ambientEmergencyBreathe {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.18);
+    border-color: #ef4444;
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.38);
+    border-color: #dc2626;
+  }
+}
+
+/* Live Vehicle Radar Sonar Rings */
+.vehicle-radar-ring {
+  pointer-events: none;
+  animation: radarSonarExpand 2.2s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+  transform-origin: center;
+}
+
+.vehicle-radar-ring.ring-2 {
+  animation-delay: 0.9s;
+}
+
+@keyframes radarSonarExpand {
+  0% {
+    transform: scale(0.65);
+    opacity: 0.85;
+    stroke-width: 3.5px;
+  }
+  75% {
+    transform: scale(2.2);
+    opacity: 0.15;
+    stroke-width: 1.5px;
+  }
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+    stroke-width: 0.5px;
+  }
+}
+
+/* Flying Eco-Credit Coin Animation */
+.flying-credit-coin {
+  position: fixed;
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 0.85rem;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.45);
+  pointer-events: none;
+  animation: flyCoinToWallet 1.1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes flyCoinToWallet {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.6);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(0, -25px) scale(1.15);
+  }
+  70% {
+    opacity: 1;
+    transform: translate(var(--target-x, 150px), var(--target-y, -250px)) scale(0.95);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--target-x, 150px), var(--target-y, -250px)) scale(0.4);
+  }
+}
+
+/* Morphing Checkmark on Collect Button */
+.btn-crew-collect.cleared-success {
+  background: #059669 !important;
+  border-color: #34d399 !important;
+  color: #ffffff !important;
+  pointer-events: none;
+}
+
+.morph-check-svg {
+  stroke-dasharray: 20;
+  stroke-dashoffset: 20;
+  animation: drawCheckSvg 0.45s ease forwards;
+}
+
+@keyframes drawCheckSvg {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Sound Toggle Button */
+.sound-toggle-btn {
+  background: var(--civic-surface-muted);
+  border: 1px solid var(--civic-border);
+  color: var(--civic-forest-ink);
+  font-size: 0.85rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.sound-toggle-btn:hover {
+  background: var(--civic-border);
+}
+
+/* Printable Municipal Shift Handover Report Modal */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #adminShiftHandoverReportModal,
+  #adminShiftHandoverReportModal * {
+    visibility: visible;
+  }
+  #adminShiftHandoverReportModal {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
+
 

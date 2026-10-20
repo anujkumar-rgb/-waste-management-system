@@ -897,6 +897,44 @@ runTest('Pacing, Reusable Interpolation & Reduced Motion', () => {
 });
 
 // --------------------------------------------------------------------------
+// 18. SPECIAL EFFECTS SUITE, AUDIO SYNTHESIZER & CIVIC UPGRADES
+// --------------------------------------------------------------------------
+console.log('\n✨ 18. Testing Special Effects Suite, Web Audio & Field Operations...');
+
+runTest('Web Audio Synthesizer & Sound Toggles: Zero-Asset AudioContext', () => {
+  assert(htmlContent.includes('id="soundToggleBtn"'), 'soundToggleBtn missing in index.html navbar');
+  assert(htmlContent.includes('id="guestSoundToggleBtn"'), 'guestSoundToggleBtn missing in index.html guest navbar');
+  assert(appContent.includes('function playCivicAudio('), 'playCivicAudio synthesizer missing in app.js');
+  assert(appContent.includes('function toggleCivicSound('), 'toggleCivicSound toggle missing in app.js');
+});
+
+runTest('Real-Time Radar Sonar Rings & Vehicle Markers', () => {
+  assert(stylesContent.includes('.vehicle-radar-ring'), 'vehicle-radar-ring styling missing in styles.css');
+  assert(stylesContent.includes('@keyframes radarSonarExpand'), 'radarSonarExpand animation missing in styles.css');
+  assert(appContent.includes('vehicle-radar-ring'), 'vehicle-radar-ring not rendered in vehicle markers in app.js');
+});
+
+runTest('Eco-Credit Flying Coin Animation & Tiered Loyalty Card', () => {
+  assert(stylesContent.includes('.flying-credit-coin'), 'flying-credit-coin styling missing in styles.css');
+  assert(stylesContent.includes('@keyframes flyCoinToWallet'), 'flyCoinToWallet keyframes missing in styles.css');
+  assert(htmlContent.includes('id="citizenLoyaltyCard"'), 'citizenLoyaltyCard missing in index.html');
+  assert(htmlContent.includes('id="citizenWhatsappOptin"'), 'citizenWhatsappOptin missing in index.html');
+});
+
+runTest('Driver Deviation & Road Obstruction Skip Workflow', () => {
+  assert(htmlContent.includes('id="workerSkipStopModal"'), 'workerSkipStopModal missing in index.html');
+  assert(htmlContent.includes('id="skipReasonCategory"'), 'skipReasonCategory missing in index.html');
+  assert(appContent.includes('openWorkerSkipStopModal'), 'openWorkerSkipStopModal handler missing in app.js');
+  assert(appContent.includes('handleWorkerSkipStopSubmit'), 'handleWorkerSkipStopSubmit handler missing in app.js');
+});
+
+runTest('Printable Municipal Shift Handover Report Modal', () => {
+  assert(htmlContent.includes('id="adminShiftHandoverReportModal"'), 'adminShiftHandoverReportModal missing in index.html');
+  assert(appContent.includes('openAdminShiftHandoverModal'), 'openAdminShiftHandoverModal handler missing in app.js');
+  assert(stylesContent.includes('#adminShiftHandoverReportModal'), 'print styles for handover report missing in styles.css');
+});
+
+// --------------------------------------------------------------------------
 // TEST SUMMARY
 // --------------------------------------------------------------------------
 console.log('\n======================================================');

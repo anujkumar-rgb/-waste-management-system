@@ -34,9 +34,9 @@
           "amount": 0
         }
       ],
-      "lastKnownLat": 19.29899,
-      "lastKnownLng": 72.864,
-      "lastLocationUpdatedAt": 1792475192963
+      "lastKnownLat": 19.299,
+      "lastKnownLng": 72.86396,
+      "lastLocationUpdatedAt": 1792478111422
     },
     {
       "id": "usr-2",
@@ -140,9 +140,9 @@
           "amount": 50
         }
       ],
-      "lastKnownLat": 19.29901,
-      "lastKnownLng": 72.86394,
-      "lastLocationUpdatedAt": 1792476372149
+      "lastKnownLat": 19.29899,
+      "lastKnownLng": 72.864,
+      "lastLocationUpdatedAt": 1792476648287
     },
     {
       "id": "usr-4",
@@ -190,7 +190,7 @@
       "shiftStatus": "active",
       "lastKnownLat": 19.299,
       "lastKnownLng": 72.86402,
-      "lastLocationUpdatedAt": 1792432313167
+      "lastLocationUpdatedAt": 1792478028561
     },
     {
       "id": "usr-9",
@@ -826,7 +826,7 @@
       "icon": "🚐",
       "lastKnownLat": 19.299,
       "lastKnownLng": 72.86402,
-      "lastLocationUpdatedAt": 1792432313167
+      "lastLocationUpdatedAt": 1792478028561
     },
     {
       "id": "FLT-CD-550",
@@ -882,6 +882,13 @@
     }
   ],
   "audit_logs": [
+    {
+      "id": "log-1792477332615-747",
+      "timestamp": 1792477332615,
+      "actor": "Amit Verma (Crew #103)",
+      "action": "Safety Log Verified",
+      "details": "Completed pre-shift inspection: 5 PPE/vehicle items verified at 12:22:12 AM"
+    },
     {
       "id": "log-1792475893739-386",
       "timestamp": 1792475893739,

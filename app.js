@@ -32,6 +32,7 @@ function initTheme() {
   themeToggleBtns.forEach(btn => {
     if (btn) {
       btn.addEventListener('click', () => {
+        if (typeof playCivicAudio === 'function') playCivicAudio('click');
         const currentTheme = document.documentElement.getAttribute('data-theme');
         const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
         
@@ -1148,7 +1149,10 @@ function demoSwitchRole(role) {
   const targetEmail = roleEmailMap[role] || (role && role.includes('@') ? role : 'citizen@ecoclear.org');
   const users = getUsers();
   const found = users.find(u => u.email.toLowerCase() === targetEmail.toLowerCase() || u.role === role);
-  if (found) setCurrentUser(found);
+  if (found) {
+    if (typeof playCivicAudio === 'function') playCivicAudio('click');
+    setCurrentUser(found);
+  }
 }
 window.demoSwitchRole = demoSwitchRole;
 window.quickSwitchDemoRole = demoSwitchRole;
@@ -1623,6 +1627,13 @@ function renderCitizenDashboard() {
 
         awardCredits(5, 'Base Bin Report Submitted');
         processReferralBonusOnFirstReport(newReport);
+
+        const waOptin = document.getElementById('citizenWhatsappOptin');
+        const waNum = document.getElementById('citizenWhatsappNumber')?.value;
+        if (waOptin && waOptin.checked && waNum) {
+          logAdminAction('Clearance SMS Opt-in', currentUser?.name || 'Citizen', `Clearance dispatch notification subscribed for ${waNum}`);
+        }
+
         alert(usedPriorityPass ? '⚡ Priority Bin Report Submitted! +5 EcoCredits credited & pass consumed.' : 'Bin Report Submitted Successfully! +5 EcoCredits credited.');
       }
 
@@ -2909,7 +2920,11 @@ function runSoftwareRouteOptimizer() {
             <div class="stop-crew-row" style="font-size: 0.82rem; color: #94a3b8; margin-top: 0.35rem;">🚛 Field Crew: <span style="color: #60a5fa; font-weight: 700;">${crewName}</span></div>
           </div>
           <div class="stop-action-btns" style="display: flex; flex-direction: column; gap: 0.45rem; align-items: flex-end; justify-content: center; margin-left: 1rem; flex-shrink: 0;">
-            <button type="button" class="btn btn-outline btn-xs" onclick="event.stopPropagation(); selectWorkerTargetStop('${stop.id}')">🎯 Focus Stop</button>
+            <div style="display: flex; gap: 0.35rem; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
+              <a href="https://www.google.com/maps/dir/?api=1&destination=${latVal},${lngVal}" target="_blank" rel="noopener noreferrer" class="btn btn-outline btn-xs" onclick="event.stopPropagation();" title="Turn-by-turn Navigation in Google Maps">🗺️ GPS</a>
+              <button type="button" class="btn btn-outline btn-xs" style="color: #f59e0b; border-color: rgba(245,158,11,0.5);" onclick="event.stopPropagation(); openWorkerSkipStopModal('${stop.id}')" title="Report Road Obstruction / Skip">⚠️ Skip</button>
+              <button type="button" class="btn btn-outline btn-xs" onclick="event.stopPropagation(); selectWorkerTargetStop('${stop.id}')">🎯 Focus Stop</button>
+            </div>
             <button type="button" class="btn btn-crew-collect btn-sm" onclick="event.stopPropagation(); openWorkerProofModal('${stop.id}')">📷 Mark Collected</button>
           </div>
         </div>
@@ -3238,6 +3253,11 @@ function updateWorkerNavigationGuidance(finalRoute) {
   const isNearby = distMeters <= PROXIMITY_THRESHOLD_METERS;
   if (proximityElem) proximityElem.style.display = isNearby ? 'block' : 'none';
 
+  const gmapsLink = document.getElementById('workerTargetGoogleMapsLink');
+  if (gmapsLink) {
+    gmapsLink.href = `https://www.google.com/maps/dir/?api=1&destination=${targetLat},${targetLng}`;
+  }
+
   // Highlight card in DOM
   const stopCards = document.querySelectorAll('.route-stop-card');
   stopCards.forEach(c => {
@@ -3371,12 +3391,23 @@ window.openWorkerProofModal = function(reportId) {
         const card = document.querySelector(`.route-stop-card[data-report-id="${id}"]`);
         if (card) {
           card.classList.add('stop-card-collected');
+          const collectBtn = card.querySelector('.btn-crew-collect');
+          if (collectBtn) {
+            collectBtn.classList.add('cleared-success');
+            collectBtn.innerHTML = `
+              <svg class="morph-check-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle; margin-right:4px;">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>Collected</span>
+            `;
+          }
           const meta = card.querySelector('.report-meta');
           if (meta) {
             meta.insertAdjacentHTML('afterbegin', '<span class="stop-collected-badge">✓ Collected</span>');
           }
         }
 
+        if (typeof playCivicAudio === 'function') playCivicAudio('beep');
         logAdminAction('Stop Clearance Verified', workerName, `Stop #${id} cleared and verified with field proof.`);
 
         if (typeof showToast === 'function') {
@@ -4407,6 +4438,10 @@ function createVehicleMarkerHtml(worker, vehicle, bearing = 0, isMoving = false,
 
   return `
     <div class="vehicle-marker-container ${isIdle ? 'vehicle-state-idle' : ''} ${isMoving ? 'vehicle-state-moving' : ''}" data-worker-id="${worker.id || ''}">
+      <svg class="vehicle-radar-svg" viewBox="0 0 80 80" style="position: absolute; top: -14px; left: -14px; width: 80px; height: 80px; pointer-events: none; z-index: 0; overflow: visible;">
+        <circle class="vehicle-radar-ring" cx="40" cy="40" r="16" fill="none" stroke="var(--civic-primary, #059669)" />
+        <circle class="vehicle-radar-ring ring-2" cx="40" cy="40" r="16" fill="none" stroke="var(--civic-accent, #10b981)" />
+      </svg>
       <div class="vehicle-icon-rotator" style="transform: rotate(${roundedBearing}deg);">
         <div class="vehicle-icon-body">
           ${vehicleSvg}
@@ -6615,6 +6650,10 @@ function triggerCreditAwardAnimation(amount, reason) {
   balanceElem.classList.remove('balance-count-bump');
   void balanceElem.offsetWidth;
   balanceElem.classList.add('balance-count-bump');
+
+  if (typeof triggerEcoCreditCoinFlyAnimation === 'function') {
+    triggerEcoCreditCoinFlyAnimation(amount);
+  }
 }
 
 function awardCredits(amount, reason) {
@@ -8130,3 +8169,240 @@ function initPWA() {
     });
   }
 }
+
+/* ==========================================================================
+   21. ZERO-ASSET WEB AUDIO API SYNTHESIZER & CIVIC SOUND EFFECTS
+   ========================================================================== */
+let isAudioMuted = (typeof localStorage !== 'undefined') ? (localStorage.getItem('swm_audio_muted') === 'true') : false;
+let civicAudioCtx = null;
+
+function getCivicAudioContext() {
+  if (!civicAudioCtx && typeof window !== 'undefined') {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (AudioCtx) civicAudioCtx = new AudioCtx();
+  }
+  if (civicAudioCtx && civicAudioCtx.state === 'suspended') {
+    civicAudioCtx.resume().catch(() => {});
+  }
+  return civicAudioCtx;
+}
+
+function toggleCivicSound() {
+  isAudioMuted = !isAudioMuted;
+  localStorage.setItem('swm_audio_muted', String(isAudioMuted));
+  updateSoundButtons();
+  if (!isAudioMuted) {
+    playCivicAudio('chime');
+  }
+}
+window.toggleCivicSound = toggleCivicSound;
+
+function updateSoundButtons() {
+  const btns = document.querySelectorAll('.sound-toggle-btn');
+  btns.forEach(btn => {
+    btn.innerHTML = isAudioMuted ? '🔇 Audio Off' : '🔊 Audio On';
+    btn.title = isAudioMuted ? 'Click to Enable Civic Audio Effects' : 'Click to Mute Audio';
+  });
+}
+
+function playCivicAudio(type) {
+  if (isAudioMuted) return;
+  try {
+    const ctx = getCivicAudioContext();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+
+    if (type === 'chime') {
+      // Two-tone Marimba: 523Hz (C5) -> 659Hz (E5)
+      const osc1 = ctx.createOscillator();
+      const gain1 = ctx.createGain();
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(523.25, now);
+      osc1.frequency.exponentialRampToValueAtTime(659.25, now + 0.12);
+      gain1.gain.setValueAtTime(0.18, now);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+      osc1.connect(gain1);
+      gain1.connect(ctx.destination);
+      osc1.start(now);
+      osc1.stop(now + 0.46);
+    } else if (type === 'beep') {
+      // Radio chirp: 880Hz -> 1174Hz
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, now);
+      osc.frequency.setValueAtTime(1174, now + 0.05);
+      gain.gain.setValueAtTime(0.12, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.16);
+    } else if (type === 'click') {
+      // Subtle 15ms click
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(320, now);
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.035);
+    }
+  } catch (e) {}
+}
+window.playCivicAudio = playCivicAudio;
+
+/* Eco-Credit Flying Coin Animation */
+window.triggerEcoCreditCoinFlyAnimation = function(amount = 5, startElement) {
+  if (typeof document === 'undefined') return;
+  const coin = document.createElement('div');
+  coin.className = 'flying-credit-coin';
+  coin.innerHTML = `<span>🪙</span> <span>+${amount} EcoCredits</span>`;
+
+  const startRect = startElement ? startElement.getBoundingClientRect() : { left: window.innerWidth / 2 - 60, top: window.innerHeight / 2 };
+  const walletElem = document.getElementById('citizenCreditBalance') || document.getElementById('navUserName');
+  const endRect = walletElem ? walletElem.getBoundingClientRect() : { left: window.innerWidth - 120, top: 40 };
+
+  const targetX = endRect.left - startRect.left;
+  const targetY = endRect.top - startRect.top;
+
+  coin.style.setProperty('--target-x', `${targetX}px`);
+  coin.style.setProperty('--target-y', `${targetY}px`);
+  coin.style.left = `${startRect.left}px`;
+  coin.style.top = `${startRect.top}px`;
+
+  document.body.appendChild(coin);
+  playCivicAudio('chime');
+
+  setTimeout(() => {
+    coin.remove();
+  }, 1150);
+};
+
+/* ==========================================================================
+   22. DRIVER DEVIATION, SKIP REASON LOG & EXTERNAL NAVIGATION
+   ========================================================================== */
+window.openWorkerSkipStopModal = function(stopId) {
+  const input = document.getElementById('skipReportId');
+  if (input) input.value = stopId;
+  const modal = document.getElementById('workerSkipStopModal');
+  if (modal) modal.classList.add('active');
+  playCivicAudio('beep');
+};
+
+window.handleWorkerSkipStopSubmit = function(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  const stopId = document.getElementById('skipReportId')?.value;
+  const reason = document.getElementById('skipReasonCategory')?.value || 'Road Blocked';
+  const notes = document.getElementById('skipCrewNotes')?.value || '';
+
+  let reports = getReports();
+  const idx = reports.findIndex(r => r.id === stopId);
+  if (idx !== -1) {
+    reports[idx].status = 'skipped';
+    reports[idx].skipReason = reason;
+    reports[idx].skipNotes = notes;
+    reports[idx].skippedAt = Date.now();
+    reports[idx].skippedByWorker = currentUser?.name || 'Field Crew';
+    saveReports(reports);
+
+    logAdminAction('Stop Skipped / Obstruction Reported', currentUser?.name || 'Worker', `Stop #${stopId} skipped: ${reason}. Notes: ${notes || 'None'}`);
+    addNotification('⚠️ Route Obstruction Logged', `Stop #${stopId} marked skipped (${reason}) and flagged for dispatch.`, 'warning');
+    if (typeof showToast === 'function') {
+      showToast(`⚠️ Stop ${stopId} marked skipped (${reason}). Dispatch notified.`, 'warning');
+    }
+  }
+  closeModal('workerSkipStopModal');
+  renderWorkerDashboard();
+};
+
+/* ==========================================================================
+   23. AUTOMATED DAILY CREW SHIFT HANDOVER REPORT (PRINTABLE PDF VIEW)
+   ========================================================================== */
+window.openAdminShiftHandoverModal = function() {
+  const modal = document.getElementById('adminShiftHandoverReportModal');
+  const container = document.getElementById('adminShiftHandoverContent');
+  if (!modal || !container) return;
+
+  const reports = getReports();
+  const clearedToday = reports.filter(r => r.status === 'cleared');
+  const emergencies = reports.filter(r => r.isEmergency);
+  const skipped = reports.filter(r => r.status === 'skipped');
+  const fleet = getFleet();
+  const activeCrews = fleet.filter(f => f.status === 'Active Collection').length;
+
+  const estTons = (clearedToday.length * 1.8).toFixed(1);
+  const estFuelLiters = (clearedToday.length * 6.2).toFixed(1);
+
+  container.innerHTML = `
+    <div style="border-bottom: 2px solid var(--civic-forest-ink); padding-bottom: 0.75rem; margin-bottom: 1rem;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem;">
+        <div>
+          <h2 style="margin: 0; font-size: 1.35rem; color: var(--civic-forest-ink);">MUNICIPAL SANITATION OPERATIONS</h2>
+          <div style="font-size: 0.85rem; font-weight: 700; color: #64748b;">Daily Crew Shift Handover Log & Transfer Protocol</div>
+        </div>
+        <div style="text-align: right; font-size: 0.82rem;">
+          <div><strong>Date:</strong> ${new Date().toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' })}</div>
+          <div><strong>Shift:</strong> General Operations (06:00 - 22:00)</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.75rem; margin-bottom: 1.25rem;">
+      <div style="background: var(--civic-surface-muted); padding: 0.65rem; border: 1px solid var(--civic-border); border-radius: 4px; text-align: center;">
+        <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">TOTAL TONNAGE</div>
+        <div style="font-size: 1.3rem; font-weight: 800; color: var(--civic-spruce-green);">${estTons} MT</div>
+      </div>
+      <div style="background: var(--civic-surface-muted); padding: 0.65rem; border: 1px solid var(--civic-border); border-radius: 4px; text-align: center;">
+        <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">ACTIVE FLEET CREWS</div>
+        <div style="font-size: 1.3rem; font-weight: 800; color: var(--civic-forest-ink);">${activeCrews} / ${fleet.length}</div>
+      </div>
+      <div style="background: var(--civic-surface-muted); padding: 0.65rem; border: 1px solid var(--civic-border); border-radius: 4px; text-align: center;">
+        <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">CLEARED STOPS</div>
+        <div style="font-size: 1.3rem; font-weight: 800; color: #10b981;">${clearedToday.length}</div>
+      </div>
+      <div style="background: var(--civic-surface-muted); padding: 0.65rem; border: 1px solid var(--civic-border); border-radius: 4px; text-align: center;">
+        <div style="font-size: 0.72rem; color: #64748b; font-weight: 700;">EST. FUEL BURNDOWN</div>
+        <div style="font-size: 1.3rem; font-weight: 800; color: #f59e0b;">${estFuelLiters} L</div>
+      </div>
+    </div>
+
+    <h4 style="margin: 0.75rem 0 0.35rem 0; font-size: 0.95rem;">Active Fleet Crew Status:</h4>
+    <table class="table" style="font-size: 0.8rem; margin-bottom: 1rem; width: 100%;">
+      <thead>
+        <tr><th>Vehicle Reg</th><th>Crew Unit</th><th>Locality Ward</th><th>Fuel %</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        ${fleet.map(f => `
+          <tr>
+            <td><code>${f.regNumber}</code></td>
+            <td><strong>${f.driver}</strong></td>
+            <td>${f.assignedWard || 'Mumbai'}</td>
+            <td>${f.fuelPercent}%</td>
+            <td><span class="badge ${f.status === 'Active Collection' ? 'badge-cleared' : ''}">${f.status}</span></td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+
+    <h4 style="margin: 0.75rem 0 0.35rem 0; font-size: 0.95rem;">Unresolved Emergency Hazards / Obstructed Stops:</h4>
+    <div style="font-size: 0.82rem; margin-bottom: 1.25rem;">
+      ${emergencies.filter(e => e.status !== 'cleared').length === 0 && skipped.length === 0
+        ? `<div style="color: #059669; font-weight: 700;">✓ All statutory emergency spills cleared for current shift. Zero road deviations.</div>`
+        : `<div>Pending Escalations: <strong>${emergencies.filter(e => e.status !== 'cleared').length}</strong> emergency spills, <strong>${skipped.length}</strong> skipped stops recorded.</div>`
+      }
+    </div>
+
+    <div style="display: flex; justify-content: space-between; border-top: 1px solid var(--civic-border); padding-top: 1rem; font-size: 0.78rem; color: #64748b; flex-wrap: wrap; gap: 0.5rem;">
+      <div><strong>Outgoing Shift In-Charge:</strong> ______________________</div>
+      <div><strong>Incoming Shift In-Charge:</strong> ______________________</div>
+      <div><strong>Timestamp:</strong> ${new Date().toLocaleTimeString('en-IN')}</div>
+    </div>
+  `;
+
+  modal.classList.add('active');
+  playCivicAudio('beep');
+};
