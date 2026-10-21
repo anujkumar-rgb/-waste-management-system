@@ -59,6 +59,7 @@
       </div>
       <div class="nav-user-bar">
         <span class="backend-status-pill" id="publicApiPill">🟢 Public Real-Time Feed</span>
+        <button type="button" class="btn btn-outline btn-sm nav-3d-btn" onclick="EcoClear3D.openCityTwin()" title="Explore 3D Digital Twin City Model">🧊 3D City Twin</button>
         <a href="index.html" class="btn btn-outline btn-sm">← Back to Portal / Login</a>
       </div>
     </div>
@@ -180,5 +181,48 @@
       } catch (e) {}
     });
   </script>
+
+  <!-- ==========================================
+       FULLSCREEN 3D MUNICIPAL DIGITAL TWIN EXPLORER MODAL
+       ========================================== -->
+  <div id="threeCityModal">
+    <div class="city-twin-modal-card">
+      <div class="city-twin-topbar">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <div style="font-size: 1.5rem;">🧊</div>
+          <div>
+            <h3 style="margin: 0; font-size: 1.15rem; line-height: 1.2;">Municipal 3D Digital Twin City Explorer</h3>
+            <p style="margin: 0; font-size: 0.76rem; color: #64748b;">Real-time 3D simulation of Mumbai municipal wards, active electric compactor routes, and central recycling plant.</p>
+          </div>
+        </div>
+        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+          <div style="display: flex; gap: 0.25rem;">
+            <button type="button" class="city-twin-time-btn active" data-time="day" onclick="EcoClear3D.setCityTimeOfDay('day')">☀️ Daylight</button>
+            <button type="button" class="city-twin-time-btn" data-time="night" onclick="EcoClear3D.setCityTimeOfDay('night')">🌙 Cyber Night</button>
+          </div>
+          <div style="display: flex; gap: 0.25rem;">
+            <button type="button" class="city-twin-preset-btn active" data-preset="iso" onclick="EcoClear3D.setCityCameraPreset('iso')">🏙️ Isometric</button>
+            <button type="button" class="city-twin-preset-btn" data-preset="top" onclick="EcoClear3D.setCityCameraPreset('top')">🦅 Overhead</button>
+            <button type="button" class="city-twin-preset-btn" data-preset="plant" onclick="EcoClear3D.setCityCameraPreset('plant')">♻️ Eco-Plant</button>
+            <button type="button" class="city-twin-preset-btn" data-preset="truck" onclick="EcoClear3D.setCityCameraPreset('truck')">🚛 Follow Fleet</button>
+          </div>
+          <button type="button" class="btn btn-outline btn-xs" onclick="EcoClear3D.closeCityTwin()">✕ Close 3D Explorer</button>
+        </div>
+      </div>
+
+      <div id="cityTwin3DViewport">
+        <!-- Floating Telemetry Inspection Card -->
+        <div id="cityTwinInfoHUD"></div>
+        <div class="hero-3d-drag-hint" style="top: 16px; left: 16px; right: auto;">
+          <span>🖱️ Left-Click + Drag: Orbit | Right-Click: Pan | Scroll: Zoom | Click any Ward or Truck for telemetry</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Three.js 3D Engine & OrbitControls -->
+  <script src="three.min.js"></script>
+  <script src="OrbitControls.js"></script>
+  <script src="three_engine.js?v=1.0"></script>
 </body>
 </html>

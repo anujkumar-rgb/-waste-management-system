@@ -2739,4 +2739,323 @@ html.theme-transitioning *::after {
   }
 }
 
+/* ==========================================================================
+   THREE.JS 3D MUNICIPAL DIGITAL TWIN & INTERACTIVE VISUALIZATIONS
+   ========================================================================== */
+
+/* Navbar 3D Twin Accent Button */
+.nav-3d-btn {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(59, 130, 246, 0.18)) !important;
+  border: 1px solid rgba(34, 197, 94, 0.4) !important;
+  color: var(--civic-forest-ink) !important;
+  font-weight: 700 !important;
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.2);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-3d-btn:hover {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.3), rgba(59, 130, 246, 0.3)) !important;
+  border-color: var(--civic-spruce-green) !important;
+  box-shadow: 0 0 14px rgba(34, 197, 94, 0.4);
+  transform: translateY(-1px);
+}
+
+/* Hero 3D Card Wrapper */
+.hero-3d-wrapper {
+  margin: 1.25rem 0;
+  background: rgba(13, 36, 23, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(52, 211, 153, 0.25);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  position: relative;
+}
+
+[data-theme="light"] .hero-3d-wrapper {
+  background: rgba(235, 242, 237, 0.85);
+  border-color: rgba(22, 101, 52, 0.25);
+  box-shadow: 0 8px 24px rgba(22, 101, 52, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* 3D Header Bar */
+.hero-3d-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0.85rem;
+  background: rgba(0, 0, 0, 0.25);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+[data-theme="light"] .hero-3d-header {
+  background: rgba(255, 255, 255, 0.6);
+  border-bottom-color: rgba(0, 0, 0, 0.06);
+}
+
+.hero-3d-tabs {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.hero-3d-tab-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+[data-theme="light"] .hero-3d-tab-btn {
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #334155;
+}
+
+.hero-3d-tab-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: white;
+}
+
+[data-theme="light"] .hero-3d-tab-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #0f172a;
+}
+
+.hero-3d-tab-btn.active {
+  background: rgba(34, 197, 94, 0.25);
+  border-color: #22c55e;
+  color: #4ade80;
+  font-weight: 700;
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.35);
+}
+
+[data-theme="light"] .hero-3d-tab-btn.active {
+  background: #166534;
+  border-color: #166534;
+  color: #ffffff;
+}
+
+/* 3D Canvas Box */
+#hero3DCanvasContainer {
+  width: 100%;
+  height: 240px;
+  position: relative;
+  cursor: grab;
+  touch-action: none;
+}
+
+#hero3DCanvasContainer:active {
+  cursor: grabbing;
+}
+
+/* Hint floating badge */
+.hero-3d-drag-hint {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(6px);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.7rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Bottom Contextual Toolbars */
+.hero-3d-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 0.85rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.8rem;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+[data-theme="light"] .hero-3d-toolbar {
+  background: rgba(255, 255, 255, 0.6);
+  border-top-color: rgba(0, 0, 0, 0.06);
+}
+
+.hero-bin-cat-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-xs);
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+[data-theme="light"] .hero-bin-cat-btn {
+  border-color: rgba(0, 0, 0, 0.2);
+  color: #1e293b;
+}
+
+.hero-bin-cat-btn.active {
+  background: #22c55e;
+  border-color: #22c55e;
+  color: white;
+  font-weight: 700;
+}
+
+/* Interactive Ward Info Banner */
+#hero3DWardInfoBanner {
+  display: none;
+  background: rgba(16, 185, 129, 0.2);
+  border-top: 1px solid rgba(16, 185, 129, 0.4);
+  padding: 0.45rem 0.85rem;
+  font-size: 0.82rem;
+  color: #ecfdf5;
+  animation: fadeIn 0.3s ease;
+}
+
+/* ==========================================================================
+   FULLSCREEN 3D MUNICIPAL DIGITAL TWIN MODAL
+   ========================================================================== */
+#threeCityModal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(4, 9, 7, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+#threeCityModal.active {
+  display: flex;
+}
+
+.city-twin-modal-card {
+  width: 95vw;
+  max-width: 1400px;
+  height: 90vh;
+  background: var(--civic-surface);
+  border: 1px solid var(--civic-border-strong);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+  position: relative;
+}
+
+.city-twin-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.25rem;
+  background: var(--civic-surface-muted);
+  border-bottom: 1px solid var(--civic-border);
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+#cityTwin3DViewport {
+  flex: 1;
+  width: 100%;
+  position: relative;
+  background: #08100c;
+  cursor: grab;
+}
+
+#cityTwin3DViewport:active {
+  cursor: grabbing;
+}
+
+/* Floating Telemetry HUD */
+#cityTwinInfoHUD {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 320px;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(52, 211, 153, 0.4);
+  border-radius: var(--radius-sm);
+  padding: 1rem;
+  color: white;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
+  z-index: 10;
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+
+/* Preset buttons in 3D modal */
+.city-twin-preset-btn,
+.city-twin-time-btn {
+  background: var(--civic-surface);
+  border: 1px solid var(--civic-border);
+  color: var(--civic-forest-ink);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.3rem 0.65rem;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.city-twin-preset-btn:hover,
+.city-twin-time-btn:hover {
+  background: var(--civic-surface-muted);
+  border-color: var(--civic-border-strong);
+}
+
+.city-twin-preset-btn.active,
+.city-twin-time-btn.active {
+  background: var(--civic-spruce-green);
+  border-color: var(--civic-spruce-green);
+  color: white;
+}
+
+/* Citizen Dashboard 3D Segregation Studio Card */
+.citizen-3d-studio-card {
+  background: var(--civic-surface);
+  border: 1px solid var(--civic-border);
+  border-radius: var(--radius-sm);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+#citizen3DSegregationCanvas {
+  width: 100%;
+  height: 220px;
+  background: radial-gradient(circle at center, rgba(34, 197, 94, 0.12) 0%, rgba(0, 0, 0, 0.2) 100%);
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--civic-border);
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
 

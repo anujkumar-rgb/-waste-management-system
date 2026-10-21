@@ -64,6 +64,7 @@
         <!-- Keyboard Shortcut Help Trigger -->
         <button type="button" class="btn btn-outline btn-xs" id="keyboardShortcutsBtn" onclick="openKeyboardShortcutsModal()" title="Keyboard Shortcuts (Shift + ?)">⌨️ ?</button>
 
+        <button type="button" class="btn btn-outline btn-xs nav-3d-btn" id="nav3DTwinBtn" onclick="EcoClear3D.openCityTwin()" title="Explore 3D Digital Twin City Model">🧊 3D Twin</button>
         <a href="transparency.html" class="btn btn-outline btn-xs" id="navTransparencyBtn" title="Public City-Wide Transparency Dashboard">🌐 Transparency</a>
         <button type="button" class="btn btn-outline btn-xs" id="navAboutBtn" onclick="openAboutProjectModal()">ℹ️ About Project</button>
         <span id="backendStatusPill" class="backend-status-pill" title="Live status of Node.js REST API server">🟢 REST API Online</span>
@@ -81,6 +82,7 @@
         <button type="button" class="lang-toggle-btn" id="guestLangToggleBtn" onclick="toggleAppLanguage()" title="Switch Language / भाषा बदलें">🌐 EN | हिं</button>
         <button type="button" id="guestSoundToggleBtn" class="sound-toggle-btn" onclick="toggleCivicSound()" title="Audio Effects Toggle">🔊</button>
         <button type="button" class="btn btn-outline btn-xs" id="guestKeyboardShortcutsBtn" onclick="openKeyboardShortcutsModal()" title="Keyboard Shortcuts (Shift + ?)">⌨️ ?</button>
+        <button type="button" class="btn btn-outline btn-xs nav-3d-btn" id="guestNav3DTwinBtn" onclick="EcoClear3D.openCityTwin()" title="Explore 3D Digital Twin City Model">🧊 3D Twin</button>
         <a href="transparency.html" class="btn btn-outline btn-xs" id="guestNavTransparencyBtn" title="Public City-Wide Transparency Dashboard">🌐 Public Transparency</a>
         <button type="button" class="btn btn-outline btn-xs" id="guestNavAboutBtn" onclick="openAboutProjectModal()">ℹ️ About Project</button>
         <span id="guestBackendStatusPill" class="backend-status-pill" title="Live status of Node.js REST API server">🟢 REST API Online</span>
@@ -116,74 +118,54 @@
           <p style="opacity: 0.9; font-size: 0.95rem; line-height: 1.5;">An urban digital framework replacing high-cost hardware with crowdsourced reporting, precise GPS verification, route optimization, and statutory biomedical waste tracking.</p>
         </div>
 
-        <!-- Custom Hero SVG Illustration (Mumbai Civic Skyline, Smart Truck, Citizen Reporting) -->
-        <div style="margin: 1rem 0; text-align: center;">
-          <svg class="hero-svg-graphic auth-hero-svg" viewBox="0 0 460 170" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: auto; max-height: 165px; border-radius: var(--radius-xs);">
-            <title>Mumbai Skyline & Smart Waste Operations</title>
-            <desc>Smart Waste Compactor Truck and Citizen Source Segregation</desc>
-            <!-- Background Sky Glow -->
-            <rect width="460" height="170" rx="10" fill="#0d2417" />
-            <circle cx="390" cy="40" r="30" fill="rgba(34, 197, 94, 0.12)" />
-            
-            <!-- City Skyline Silhouettes -->
-            <path d="M20 125 V75 H45 V85 H70 V60 H105 V125 Z" fill="#133d26" opacity="0.7"/>
-            <path d="M105 125 V70 H130 V50 H160 V80 H180 V125 Z" fill="#1b4d32" opacity="0.6"/>
-            <path d="M280 125 V65 H310 V45 H340 V75 H370 V125 Z" fill="#133d26" opacity="0.7"/>
-            <path d="M370 125 V80 H400 V60 H440 V125 Z" fill="#1b4d32" opacity="0.6"/>
-            <!-- Sea Link Cable Stays Motif -->
-            <path d="M190 125 L235 30 L280 125" stroke="#22c55e" stroke-width="2" opacity="0.5" stroke-dasharray="3,3"/>
-            <line x1="235" y1="30" x2="235" y2="125" stroke="#22c55e" stroke-width="3" opacity="0.7"/>
-            <line x1="235" y1="50" x2="210" y2="125" stroke="#22c55e" stroke-width="1.2" opacity="0.4"/>
-            <line x1="235" y1="50" x2="260" y2="125" stroke="#22c55e" stroke-width="1.2" opacity="0.4"/>
+        <!-- Interactive Three.js 3D Viewport Component -->
+        <div class="hero-3d-wrapper">
+          <div class="hero-3d-header">
+            <div class="hero-3d-tabs">
+              <button type="button" class="hero-3d-tab-btn active" data-mode="globe" onclick="EcoClear3D.setHeroMode('globe')">🌍 Eco-Globe</button>
+              <button type="button" class="hero-3d-tab-btn" data-mode="bin" onclick="EcoClear3D.setHeroMode('bin')">🗑️ Smart Bin</button>
+              <button type="button" class="hero-3d-tab-btn" data-mode="truck" onclick="EcoClear3D.setHeroMode('truck')">🚛 EV Compactor</button>
+            </div>
+            <button type="button" class="btn btn-outline btn-xs nav-3d-btn" onclick="EcoClear3D.openCityTwin()" title="Open Fullscreen 3D City Twin">⛶ 3D Digital Twin</button>
+          </div>
 
-            <!-- Road Infrastructure -->
-            <rect x="0" y="125" width="460" height="45" fill="#091810"/>
-            <line x1="10" y1="148" x2="450" y2="148" stroke="#34d399" stroke-width="2" stroke-dasharray="14,14" opacity="0.6"/>
+          <div id="hero3DCanvasContainer">
+            <div class="hero-3d-drag-hint"><span>🖱️ Drag to rotate 3D</span></div>
+          </div>
 
-            <!-- Citizen Reporting via Smartphone on Left -->
-            <g transform="translate(42, 78)">
-              <!-- Resident Silhouette -->
-              <circle cx="16" cy="12" r="7" fill="#86efac"/>
-              <path d="M8 38 C8 26 24 26 24 38 Z" fill="#86efac"/>
-              <!-- Smartphone with GPS signal waves -->
-              <rect x="23" y="15" width="10" height="18" rx="2" fill="#ffffff"/>
-              <rect x="25" y="17" width="6" height="12" fill="#166534"/>
-              <circle cx="28" cy="23" r="1.5" fill="#22c55e"/>
-              <!-- Broadcast Wave -->
-              <path d="M36 18 C39 20 39 26 36 28" stroke="#4ade80" stroke-width="1.5" fill="none"/>
-              <path d="M40 15 C45 19 45 29 40 33" stroke="#4ade80" stroke-width="1.2" fill="none" opacity="0.7"/>
-            </g>
+          <!-- Ward Info Banner for Globe Mode -->
+          <div id="hero3DWardInfoBanner"></div>
 
-            <!-- Smart Segregation Bins in Middle -->
-            <g transform="translate(140, 92)">
-              <!-- Wet Waste Green Bin -->
-              <rect x="0" y="8" width="16" height="25" rx="3" fill="#15803d"/>
-              <rect x="-2" y="5" width="20" height="4" rx="2" fill="#22c55e"/>
-              <text x="8" y="24" font-size="9" fill="#ffffff" text-anchor="middle" font-family="sans-serif">🌱</text>
-              <!-- Dry Waste Blue Bin -->
-              <rect x="24" y="8" width="16" height="25" rx="3" fill="#1d4ed8"/>
-              <rect x="22" y="5" width="20" height="4" rx="2" fill="#3b82f6"/>
-              <text x="32" y="24" font-size="9" fill="#ffffff" text-anchor="middle" font-family="sans-serif">♻</text>
-            </g>
+          <!-- Contextual Toolbar: Globe Mode -->
+          <div id="hero3DGlobeToolbar" class="hero-3d-toolbar">
+            <span style="font-size: 0.75rem; color: #86efac; display: flex; align-items: center; gap: 4px;">
+              <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#22c55e;"></span>
+              5 Mumbai Ward Beacons Active (Click any node)
+            </span>
+            <span style="font-size: 0.72rem; opacity: 0.8;">Orbital Transfer Circuits</span>
+          </div>
 
-            <!-- Municipal Waste Truck En Route on Right -->
-            <g transform="translate(265, 82)">
-              <!-- Truck Chassis & Cabin -->
-              <rect x="0" y="15" width="75" height="34" rx="4" fill="#166534"/>
-              <rect x="75" y="24" width="26" height="25" rx="3" fill="#15803d"/>
-              <!-- Cabin Window -->
-              <rect x="80" y="27" width="16" height="11" rx="2" fill="#bfdbfe"/>
-              <!-- Emblem -->
-              <circle cx="36" cy="32" r="9" fill="#0d2417" stroke="#4ade80" stroke-width="1.5"/>
-              <text x="36" y="36" font-size="11" fill="#4ade80" text-anchor="middle" font-family="sans-serif">♻</text>
-              <!-- Wheels -->
-              <circle cx="18" cy="52" r="7" fill="#1e293b" stroke="#64748b" stroke-width="2"/>
-              <circle cx="56" cy="52" r="7" fill="#1e293b" stroke="#64748b" stroke-width="2"/>
-              <circle cx="86" cy="52" r="7" fill="#1e293b" stroke="#64748b" stroke-width="2"/>
-              <!-- Headlight Beam -->
-              <polygon points="101,36 135,30 135,46 101,42" fill="#fef08a" opacity="0.35"/>
-            </g>
-          </svg>
+          <!-- Contextual Toolbar: Bin Mode -->
+          <div id="hero3DBinToolbar" class="hero-3d-toolbar" style="display: none;">
+            <div style="display: flex; align-items: center; gap: 0.4rem;">
+              <span style="font-size: 0.72rem; opacity: 0.85;">Fill Level:</span>
+              <input type="range" id="heroBinFillSlider" min="0" max="100" value="45" style="width: 80px; accent-color: #22c55e;" oninput="EcoClear3D.setBinFill(this.value)">
+              <strong id="heroBinFillLabel" style="font-size: 0.75rem; color: #4ade80;">45%</strong>
+            </div>
+            <div style="display: flex; gap: 0.3rem;">
+              <button type="button" id="heroToggleLidBtn" class="hero-bin-cat-btn" onclick="EcoClear3D.toggleBinLid()">Open Lid</button>
+              <button type="button" class="hero-bin-cat-btn active" data-cat="wet" onclick="EcoClear3D.setBinCategory('wet')">🟢 Wet</button>
+              <button type="button" class="hero-bin-cat-btn" data-cat="dry" onclick="EcoClear3D.setBinCategory('dry')">🔵 Dry</button>
+              <button type="button" class="hero-bin-cat-btn" data-cat="hazardous" onclick="EcoClear3D.setBinCategory('hazardous')">🟡 Hazard</button>
+              <button type="button" class="hero-bin-cat-btn" data-cat="biomedical" onclick="EcoClear3D.setBinCategory('biomedical')">🔴 Bio</button>
+            </div>
+          </div>
+
+          <!-- Contextual Toolbar: Truck Mode -->
+          <div id="hero3DTruckToolbar" class="hero-3d-toolbar" style="display: none;">
+            <span style="font-size: 0.75rem; color: #86efac;">⚡ Municipal Zero-Emission EV Compactor</span>
+            <button type="button" class="btn btn-outline btn-xs" style="color: white; border-color: rgba(255,255,255,0.3);" onclick="EcoClear3D.triggerCompactorCycle()">⚙️ Cycle Compactor</button>
+          </div>
         </div>
 
         <div style="background: rgba(255,255,255,0.08); padding: 1.25rem; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.18);">
@@ -521,6 +503,33 @@
             <div style="height: 180px; position: relative;">
               <canvas id="citizenReportStatusChart" height="180"></canvas>
             </div>
+          </div>
+        </div>
+      <!-- 3D Interactive Virtual Waste Segregation Studio -->
+      <div class="citizen-3d-studio-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span class="badge" style="background: rgba(34, 197, 94, 0.15); color: #22c55e; font-weight: 800; font-size: 0.72rem;">WebGL 3D Interactive</span>
+              <h3 style="margin: 0; font-size: 1.15rem;">🎮 3D Virtual Waste Segregation Studio</h3>
+            </div>
+            <p style="color: #64748b; font-size: 0.82rem; margin: 0.25rem 0 0 0;">Practice source segregation in real-time 3D physics! Click an item below to drop it into the designated municipal bin and earn instant EcoCredits.</p>
+          </div>
+          <div style="display: flex; gap: 0.4rem; align-items: center;">
+            <button type="button" class="btn btn-outline btn-xs nav-3d-btn" onclick="EcoClear3D.openCityTwin()">🧊 Open 3D City Twin</button>
+          </div>
+        </div>
+
+        <div id="citizen3DSegregationCanvas"></div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button type="button" class="btn btn-outline btn-xs" onclick="EcoClear3D.dropSegregationItem('organic')" title="Drop into Green Wet Waste Bin">🍎 Organic Food Peels (+10 pts)</button>
+            <button type="button" class="btn btn-outline btn-xs" onclick="EcoClear3D.dropSegregationItem('plastic')" title="Drop into Blue Dry Recyclable Bin">🥤 Clean Plastic Bottle (+10 pts)</button>
+            <button type="button" class="btn btn-outline btn-xs" onclick="EcoClear3D.dropSegregationItem('battery')" title="Drop into Amber Hazardous Bin">🔋 Lithium Battery (+10 pts)</button>
+          </div>
+          <div style="font-size: 0.76rem; color: #64748b;">
+            💡 Earns +10 EcoCredits directly to your Citizen EcoWallet.
           </div>
         </div>
       </div>
@@ -1635,6 +1644,7 @@
               <p style="color: #64748b; font-size: 0.82rem; margin: 0;">Live GPS positions of active field collection crews, assigned fleet vehicles, and on-demand route overlays.</p>
             </div>
             <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+              <button type="button" class="btn btn-outline btn-xs nav-3d-btn" onclick="EcoClear3D.openCityTwin()" title="Launch 3D Municipal Fleet Digital Twin">🧊 3D Fleet Twin</button>
               <button type="button" id="btnAdminLiveSimulationToggle" class="btn btn-outline btn-xs" onclick="toggleAdminLiveWorkerSimulation()"><span id="adminLiveSimulationDot" style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#10b981; margin-right:4px;"></span><span id="adminLiveSimulationText">Live Stream: Active</span></button>
               <button type="button" id="btnAdminRefreshWorkerMap" class="btn btn-outline btn-xs" onclick="renderAdminWorkerLocationsMap(true)"><span class="refresh-icon">🔄</span> Refresh Live Positions</button>
               <button type="button" class="btn btn-outline btn-xs" onclick="clearAllWorkerRouteOverlays()">Clear All Overlays</button>
@@ -2525,12 +2535,54 @@
     </div>
   </div>
 
+  <!-- ==========================================
+       FULLSCREEN 3D MUNICIPAL DIGITAL TWIN EXPLORER MODAL
+       ========================================== -->
+  <div id="threeCityModal">
+    <div class="city-twin-modal-card">
+      <div class="city-twin-topbar">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <div style="font-size: 1.5rem;">🧊</div>
+          <div>
+            <h3 style="margin: 0; font-size: 1.15rem; line-height: 1.2;">Municipal 3D Digital Twin City Explorer</h3>
+            <p style="margin: 0; font-size: 0.76rem; color: #64748b;">Real-time 3D simulation of Mumbai municipal wards, active electric compactor routes, and central recycling plant.</p>
+          </div>
+        </div>
+        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+          <div style="display: flex; gap: 0.25rem;">
+            <button type="button" class="city-twin-time-btn active" data-time="day" onclick="EcoClear3D.setCityTimeOfDay('day')">☀️ Daylight</button>
+            <button type="button" class="city-twin-time-btn" data-time="night" onclick="EcoClear3D.setCityTimeOfDay('night')">🌙 Cyber Night</button>
+          </div>
+          <div style="display: flex; gap: 0.25rem;">
+            <button type="button" class="city-twin-preset-btn active" data-preset="iso" onclick="EcoClear3D.setCityCameraPreset('iso')">🏙️ Isometric</button>
+            <button type="button" class="city-twin-preset-btn" data-preset="top" onclick="EcoClear3D.setCityCameraPreset('top')">🦅 Overhead</button>
+            <button type="button" class="city-twin-preset-btn" data-preset="plant" onclick="EcoClear3D.setCityCameraPreset('plant')">♻️ Eco-Plant</button>
+            <button type="button" class="city-twin-preset-btn" data-preset="truck" onclick="EcoClear3D.setCityCameraPreset('truck')">🚛 Follow Fleet</button>
+          </div>
+          <button type="button" class="btn btn-outline btn-xs" onclick="EcoClear3D.closeCityTwin()">✕ Close 3D Explorer</button>
+        </div>
+      </div>
+
+      <div id="cityTwin3DViewport">
+        <!-- Floating Telemetry Inspection Card -->
+        <div id="cityTwinInfoHUD"></div>
+        <div class="hero-3d-drag-hint" style="top: 16px; left: 16px; right: auto;">
+          <span>🖱️ Left-Click + Drag: Orbit | Right-Click: Pan | Scroll: Zoom | Click any Ward or Truck for telemetry</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Leaflet Map JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <!-- Chart.js for Impact Visualizer -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- Precomputed Road Network Geometry -->
   <script src="road_geometry.js?v=2.6"></script>
+  <!-- Three.js 3D Engine & OrbitControls -->
+  <script src="three.min.js"></script>
+  <script src="OrbitControls.js"></script>
+  <script src="three_engine.js?v=1.0"></script>
   <!-- App JS Engine -->
   <script src="app.js?v=2.6"></script>
 </body>
