@@ -10,7 +10,25 @@
   'use strict';
 
   // Global namespace
+  
+  // Expose directly on window for global access
+  window.initAll3D = initAll3D;
+  window.initHero3D = initHero3D;
+  window.initCitizenSegregationStudio = initCitizenSegregationStudio;
+  window.open3DCityTwinModal = open3DCityTwinModal;
+  window.close3DCityTwinModal = close3DCityTwinModal;
+  window.setHeroMode = setHeroMode;
+  window.setBinFill = setBinFill;
+  window.toggleBinLid = toggleBinLid;
+  window.setBinCategory = setBinCategory;
+  window.triggerCompactorCycle = triggerCompactorCycle;
+  window.triggerDepotInspection = triggerDepotInspection;
+  window.setCityTimeOfDay = setCityTimeOfDay;
+  window.setCityCameraPreset = setCityCameraPreset;
+  window.dropSegregationItem = dropSegregationItem;
+
   window.EcoClear3D = {
+    initSegregationStudio: initCitizenSegregationStudio,
     hero: null,
     cityTwin: null,
     segregationStudio: null,
@@ -22,6 +40,7 @@
     toggleBinLid: toggleBinLid,
     setBinCategory: setBinCategory,
     triggerCompactorCycle: triggerCompactorCycle,
+    triggerDepotInspection: triggerDepotInspection,
     setCityTimeOfDay: setCityTimeOfDay,
     setCityCameraPreset: setCityCameraPreset,
     dropSegregationItem: dropSegregationItem
@@ -142,13 +161,16 @@
     const rootGlobe = new THREE.Group();
     const rootBin = new THREE.Group();
     const rootTruck = new THREE.Group();
+    const rootDepot = new THREE.Group();
 
     scene.add(rootGlobe);
     scene.add(rootBin);
     scene.add(rootTruck);
+    scene.add(rootDepot);
 
     rootBin.visible = false;
     rootTruck.visible = false;
+    rootDepot.visible = false;
 
     // --- Build Model A: Eco-Globe Digital Twin ---
     const globeComponents = buildEcoGlobe(rootGlobe);
@@ -158,6 +180,7 @@
 
     // --- Build Model C: Municipal EV Compactor Truck ---
     const truckComponents = buildEVTruck(rootTruck);
+    const depotComponents = buildDepotGear(rootDepot);
 
     // Particles Cloud (Floating Eco Sparkles)
     const particleGeo = new THREE.BufferGeometry();
@@ -267,6 +290,7 @@
         rootGlobe.visible = (mode === 'globe');
         rootBin.visible = (mode === 'bin');
         rootTruck.visible = (mode === 'truck');
+        rootDepot.visible = (mode === 'depot');
 
         if (mode === 'globe') {
           camera.position.set(0, 1.8, 5.5);
@@ -352,16 +376,21 @@
     const wards = [
       { name: 'Ward G/South (Dadar)', lat: 19.02, lng: 72.84, color: 0x22c55e, status: '94% Diverted', score: 'A+' },
       { name: 'Ward S (Powai)', lat: 19.12, lng: 72.91, color: 0x38bdf8, status: '89% Diverted', score: 'A' },
-      { name: 'Ward K/East (Andheri)', lat: 19.11, lng: 72.86, color: 0xf59e0b, status: '82% Diverted', score: 'B+' },
+      { name: 'Ward K/East (Andheri E)', lat: 19.11, lng: 72.86, color: 0xf59e0b, status: '82% Diverted', score: 'B+' },
       { name: 'Ward H/West (Bandra)', lat: 19.05, lng: 72.83, color: 0x22c55e, status: '96% Diverted', score: 'A+' },
-      { name: 'Ward A (Colaba)', lat: 18.91, lng: 72.81, color: 0xa855f7, status: '91% Diverted', score: 'A' }
+      { name: 'Ward A (Colaba)', lat: 18.91, lng: 72.81, color: 0xa855f7, status: '91% Diverted', score: 'A' },
+      { name: 'Ward D (Malabar Hill)', lat: 18.96, lng: 72.80, color: 0x10b981, status: '95% Diverted', score: 'A+' },
+      { name: 'Ward K/West (Andheri W / Juhu)', lat: 19.12, lng: 72.82, color: 0x06b6d4, status: '87% Diverted', score: 'A' },
+      { name: 'Ward F/North (Matunga & Sion)', lat: 19.03, lng: 72.85, color: 0xec4899, status: '90% Diverted', score: 'A' },
+      { name: 'Ward M/East (Chembur & Govandi)', lat: 19.05, lng: 72.90, color: 0x8b5cf6, status: '83% Diverted', score: 'B+' },
+      { name: 'Ward T (Mulund)', lat: 19.17, lng: 72.95, color: 0x14b8a6, status: '93% Diverted', score: 'A' }
     ];
 
     const wardMeshes = [];
     wards.forEach((w, idx) => {
       // Map spherical coordinates
       const phi = (90 - (w.lat - 19.0) * 12) * (Math.PI / 180);
-      const theta = ((w.lng - 72.85) * 15 + idx * 72) * (Math.PI / 180);
+      const theta = ((w.lng - 72.85) * 15 + idx * 36) * (Math.PI / 180);
       const r = 1.63;
 
       const x = r * Math.sin(phi) * Math.cos(theta);
@@ -806,6 +835,256 @@
   /* ==========================================================================
      HERO CONTROLLER APIS
      ========================================================================== */
+  
+  // --- Sub-builder: 3D Crew Safety Depot & PPE Gear ---
+  function buildDepotGear(group) {
+    // Pedestal floor with hazard warning stripes
+    const baseGeo = new THREE.CylinderGeometry(2.2, 2.3, 0.12, 32);
+    const baseMat = new THREE.MeshStandardMaterial({
+      color: 0x1e293b,
+      roughness: 0.8,
+      metalness: 0.2
+    });
+    const base = new THREE.Mesh(baseGeo, baseMat);
+    base.position.y = -1.2;
+    base.receiveShadow = true;
+    group.add(base);
+
+    // Hazard ring stripe on base
+    const ringGeo = new THREE.RingGeometry(1.8, 1.95, 32);
+    const ringMat = new THREE.MeshBasicMaterial({ color: 0xfacc15, side: THREE.DoubleSide });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.rotation.x = -Math.PI / 2;
+    ring.position.y = -1.13;
+    group.add(ring);
+
+    // Central Mannequin / Gear Stand Pillar
+    const standGeo = new THREE.CylinderGeometry(0.1, 0.12, 2.2, 16);
+    const standMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.8, roughness: 0.3 });
+    const stand = new THREE.Mesh(standGeo, standMat);
+    stand.position.y = -0.1;
+    group.add(stand);
+
+    // 1. High-Visibility Fluorescent Safety Vest / PPE Jacket
+    const vestGroup = new THREE.Group();
+    vestGroup.position.set(0, 0.25, 0);
+
+    const vestBodyGeo = new THREE.BoxGeometry(1.2, 1.1, 0.55);
+    const vestBodyMat = new THREE.MeshStandardMaterial({
+      color: 0x84cc16, // Fluorescent neon yellow-green
+      roughness: 0.5,
+      emissive: 0x4d7c0f,
+      emissiveIntensity: 0.2
+    });
+    const vestBody = new THREE.Mesh(vestBodyGeo, vestBodyMat);
+    vestBody.castShadow = true;
+    vestGroup.add(vestBody);
+
+    // Reflective Silver Chevron Stripes
+    const stripeMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.1, metalness: 0.9 });
+    [-0.2, 0.2].forEach(y => {
+      const sGeo = new THREE.BoxGeometry(1.22, 0.1, 0.57);
+      const s = new THREE.Mesh(sGeo, stripeMat);
+      s.position.y = y;
+      vestGroup.add(s);
+    });
+
+    // MCGM Municipal Badge on Left Chest
+    const badgeGeo = new THREE.BoxGeometry(0.2, 0.2, 0.02);
+    const badgeMat = new THREE.MeshBasicMaterial({ color: 0x0284c7 });
+    const badge = new THREE.Mesh(badgeGeo, badgeMat);
+    badge.position.set(-0.35, 0.25, 0.29);
+    vestGroup.add(badge);
+
+    group.add(vestGroup);
+
+    // 2. Sanitation Hard Hat / Safety Helmet with Headlamp
+    const helmetGroup = new THREE.Group();
+    helmetGroup.position.set(0, 1.1, 0);
+
+    const helmetGeo = new THREE.SphereGeometry(0.48, 24, 16, 0, Math.PI * 2, 0, Math.PI / 1.7);
+    const helmetMat = new THREE.MeshStandardMaterial({
+      color: 0xfacc15, // Bright municipal yellow
+      roughness: 0.3,
+      metalness: 0.1
+    });
+    const helmet = new THREE.Mesh(helmetGeo, helmetMat);
+    helmet.rotation.x = Math.PI;
+    helmet.castShadow = true;
+    helmetGroup.add(helmet);
+
+    // Helmet brim
+    const brimGeo = new THREE.CylinderGeometry(0.58, 0.58, 0.04, 24);
+    const brimMat = new THREE.MeshStandardMaterial({ color: 0xeab308, roughness: 0.4 });
+    const brim = new THREE.Mesh(brimGeo, brimMat);
+    brim.position.y = 0.02;
+    helmetGroup.add(brim);
+
+    // LED Headlamp mounted on front
+    const lampGeo = new THREE.BoxGeometry(0.16, 0.1, 0.12);
+    const lampMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.5 });
+    const lamp = new THREE.Mesh(lampGeo, lampMat);
+    lamp.position.set(0, 0.12, 0.48);
+
+    const lensGeo = new THREE.CircleGeometry(0.06, 16);
+    const lensMat = new THREE.MeshBasicMaterial({ color: 0x67e8f9 });
+    const lens = new THREE.Mesh(lensGeo, lensMat);
+    lens.position.set(0, 0, 0.065);
+    lamp.add(lens);
+
+    helmetGroup.add(lamp);
+    group.add(helmetGroup);
+
+    // 3. Heavy-Duty Kevlar Protective Gloves (Left and Right)
+    const gloveMat = new THREE.MeshStandardMaterial({
+      color: 0xf97316, // Safety orange
+      roughness: 0.6
+    });
+    [-0.85, 0.85].forEach(x => {
+      const gGroup = new THREE.Group();
+      gGroup.position.set(x, 0.05, 0);
+
+      const palmGeo = new THREE.BoxGeometry(0.24, 0.35, 0.14);
+      const palm = new THREE.Mesh(palmGeo, gloveMat);
+      palm.castShadow = true;
+      gGroup.add(palm);
+
+      // Reinforced rubber grip coating
+      const gripGeo = new THREE.BoxGeometry(0.25, 0.18, 0.15);
+      const gripMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.9 });
+      const grip = new THREE.Mesh(gripGeo, gripMat);
+      grip.position.y = -0.06;
+      gGroup.add(grip);
+
+      group.add(gGroup);
+    });
+
+    // 4. Steel-Toe Puncture-Resistant Work Boots (Ground level)
+    const bootMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.7 });
+    const soleMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.9 }); // Amber durable rubber sole
+    [-0.32, 0.32].forEach(x => {
+      const bGroup = new THREE.Group();
+      bGroup.position.set(x, -0.9, 0.1);
+
+      const bootBodyGeo = new THREE.BoxGeometry(0.3, 0.45, 0.6);
+      const bootBody = new THREE.Mesh(bootBodyGeo, bootMat);
+      bootBody.castShadow = true;
+      bGroup.add(bootBody);
+
+      // Steel-toe cap highlight
+      const toeGeo = new THREE.BoxGeometry(0.31, 0.22, 0.22);
+      const toeMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.8, roughness: 0.2 });
+      const toe = new THREE.Mesh(toeGeo, toeMat);
+      toe.position.set(0, -0.1, 0.2);
+      bGroup.add(toe);
+
+      // Tread Sole
+      const soleGeo = new THREE.BoxGeometry(0.32, 0.08, 0.64);
+      const sole = new THREE.Mesh(soleGeo, soleMat);
+      sole.position.y = -0.24;
+      bGroup.add(sole);
+
+      group.add(bGroup);
+    });
+
+    // 5. Industrial Anti-Dust N95 Respirator Mask
+    const maskGeo = new THREE.BoxGeometry(0.28, 0.2, 0.18);
+    const maskMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.6 });
+    const mask = new THREE.Mesh(maskGeo, maskMat);
+    mask.position.set(0, 0.85, 0.35);
+    group.add(mask);
+
+    // 6. Rugged Handheld RFID / GPS Route Terminal Scanner
+    const terminalGroup = new THREE.Group();
+    terminalGroup.position.set(0.72, -0.2, 0.45);
+    terminalGroup.rotation.y = -Math.PI / 6;
+
+    const termBodyGeo = new THREE.BoxGeometry(0.26, 0.48, 0.1);
+    const termBodyMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.4, roughness: 0.3 });
+    const termBody = new THREE.Mesh(termBodyGeo, termBodyMat);
+    termBody.castShadow = true;
+    terminalGroup.add(termBody);
+
+    // Glowing holographic display
+    const screenGeo = new THREE.PlaneGeometry(0.22, 0.32);
+    const screenMat = new THREE.MeshBasicMaterial({ color: 0x06b6d4 });
+    const screen = new THREE.Mesh(screenGeo, screenMat);
+    screen.position.set(0, 0.04, 0.052);
+    terminalGroup.add(screen);
+
+    group.add(terminalGroup);
+
+    // Inspection holographic pulse rings on pedestal
+    const pulseRingGeo = new THREE.RingGeometry(0.6, 0.7, 32);
+    const pulseRingMat = new THREE.MeshBasicMaterial({
+      color: 0x22c55e,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.7
+    });
+    const pulseRing = new THREE.Mesh(pulseRingGeo, pulseRingMat);
+    pulseRing.rotation.x = -Math.PI / 2;
+    pulseRing.position.y = -1.12;
+    group.add(pulseRing);
+
+    let inspectionActive = false;
+    let inspectionTime = 0;
+
+    return {
+      group,
+      update(delta, elapsed) {
+        // Slow gentle idle hover of terminal scanner
+        terminalGroup.position.y = -0.2 + Math.sin(elapsed * 2) * 0.03;
+        terminalGroup.rotation.y = -Math.PI / 6 + Math.sin(elapsed * 1.5) * 0.08;
+
+        // Pulse holographic ground ring
+        if (pulseRing) {
+          const s = 1.0 + 0.3 * Math.sin(elapsed * 3);
+          pulseRing.scale.set(s, s, s);
+          pulseRing.material.opacity = 0.4 + 0.4 * Math.cos(elapsed * 3);
+        }
+
+        // Inspection highlighting rotation
+        if (inspectionActive) {
+          inspectionTime += delta * 2;
+          group.rotation.y += delta * 3;
+          vestBodyMat.emissiveIntensity = 0.5 + 0.5 * Math.sin(inspectionTime * 8);
+          if (inspectionTime >= 2.5) {
+            inspectionActive = false;
+            vestBodyMat.emissiveIntensity = 0.2;
+          }
+        }
+      },
+      triggerInspection() {
+        inspectionActive = true;
+        inspectionTime = 0;
+        if (typeof playCivicAudio === 'function') playCivicAudio('success');
+
+        const banner = document.getElementById('hero3DWardInfoBanner');
+        if (banner) {
+          banner.innerHTML = `
+            <div style="background: rgba(16, 185, 129, 0.95); color: white; padding: 0.65rem 1rem; border-radius: 8px; font-size: 0.8rem; box-shadow: 0 4px 14px rgba(0,0,0,0.3); text-align: left;">
+              <strong style="display: block; font-size: 0.88rem; margin-bottom: 0.2rem;">🦺 100% Pre-Shift PPE Compliance Verified</strong>
+              <div>✓ Hi-Vis Neon Vest &bull; ✓ Kevlar Heavy-Duty Gloves &bull; ✓ Steel-Toe Boots &bull; ✓ N95 Mask &bull; ✓ GPS Route Terminal Active</div>
+            </div>
+          `;
+          banner.style.display = 'block';
+          setTimeout(() => { if (banner) banner.style.display = 'none'; }, 4500);
+        }
+
+        if (typeof showToast === 'function') {
+          showToast('✓ Sanitation Crew Safety Gear Inspection Complete — 100% Compliant!', 'success');
+        }
+      }
+    };
+  }
+
+  function triggerDepotInspection() {
+    if (window.EcoClear3D.hero && window.EcoClear3D.hero.depotComponents) {
+      window.EcoClear3D.hero.depotComponents.triggerInspection();
+    }
+  }
+
   function setHeroMode(mode) {
     if (!window.EcoClear3D.hero) return;
     window.EcoClear3D.hero.setMode(mode);
@@ -819,10 +1098,12 @@
     const binToolbar = document.getElementById('hero3DBinToolbar');
     const globeToolbar = document.getElementById('hero3DGlobeToolbar');
     const truckToolbar = document.getElementById('hero3DTruckToolbar');
+    const depotToolbar = document.getElementById('hero3DDepotToolbar');
 
     if (binToolbar) binToolbar.style.display = (mode === 'bin') ? 'flex' : 'none';
     if (globeToolbar) globeToolbar.style.display = (mode === 'globe') ? 'flex' : 'none';
     if (truckToolbar) truckToolbar.style.display = (mode === 'truck') ? 'flex' : 'none';
+    if (depotToolbar) depotToolbar.style.display = (mode === 'depot') ? 'flex' : 'none';
   }
 
   function setBinFill(value) {
@@ -1047,8 +1328,9 @@
           gsapOrLerpCamera(camera, controls, { x: 0, y: 12, z: 14 }, { x: 0, y: 3, z: 0 });
         } else if (preset === 'truck') {
           const t = cityData.trucks[0];
-          if (t) {
-            gsapOrLerpCamera(camera, controls, { x: t.position.x + 8, y: t.position.y + 6, z: t.position.z + 8 }, { x: t.position.x, y: t.position.y, z: t.position.z });
+          if (t && t.group) {
+            const pos = t.group.position;
+            gsapOrLerpCamera(camera, controls, { x: pos.x + 8, y: pos.y + 6, z: pos.z + 8 }, { x: pos.x, y: pos.y, z: pos.z });
           }
         }
       },
@@ -1122,7 +1404,12 @@
       { name: 'Ward S (Powai Lake & Tech Enclave)', x: 16, z: -14, color: 0x38bdf8, segRate: '85%', trucks: 2, cleared: '98%' },
       { name: 'Ward K/East (Andheri Industrial)', x: -18, z: 14, color: 0xf59e0b, segRate: '68%', trucks: 4, cleared: '88%' },
       { name: 'Ward H/West (Bandra Residential)', x: 18, z: 14, color: 0x10b981, segRate: '91%', trucks: 3, cleared: '99%' },
-      { name: 'Ward A (Colaba & Fort Commercial)', x: 0, z: 22, color: 0xa855f7, segRate: '82%', trucks: 2, cleared: '93%' }
+      { name: 'Ward A (Colaba & Fort Commercial)', x: 0, z: 22, color: 0xa855f7, segRate: '82%', trucks: 2, cleared: '93%' },
+      { name: 'Ward D (Malabar Hill & Breach Candy)', x: -22, z: 0, color: 0x10b981, segRate: '92%', trucks: 2, cleared: '97%' },
+      { name: 'Ward K/West (Andheri West & Juhu)', x: 22, z: 0, color: 0x06b6d4, segRate: '84%', trucks: 3, cleared: '91%' },
+      { name: 'Ward F/North (Matunga & Sion Central)', x: -10, z: -22, color: 0xec4899, segRate: '88%', trucks: 3, cleared: '95%' },
+      { name: 'Ward M/East (Chembur & Govandi Hub)', x: 10, z: -22, color: 0x8b5cf6, segRate: '74%', trucks: 3, cleared: '89%' },
+      { name: 'Ward T (Mulund Green Corridor)', x: 0, z: -26, color: 0x14b8a6, segRate: '90%', trucks: 2, cleared: '96%' }
     ];
 
     const nightLights = [];
@@ -1412,7 +1699,9 @@
         const itemMap = {
           organic: { binType: 'wet', color: 0x84cc16, geo: new THREE.SphereGeometry(0.18, 12, 12) },
           plastic: { binType: 'dry', color: 0x38bdf8, geo: new THREE.CylinderGeometry(0.12, 0.12, 0.35, 12) },
-          battery: { binType: 'hazardous', color: 0xf59e0b, geo: new THREE.BoxGeometry(0.2, 0.3, 0.15) }
+          battery: { binType: 'hazardous', color: 0xf59e0b, geo: new THREE.BoxGeometry(0.2, 0.3, 0.15) },
+          ewaste: { binType: 'hazardous', color: 0xa855f7, geo: new THREE.BoxGeometry(0.28, 0.05, 0.28) },
+          paper: { binType: 'dry', color: 0xfbbf24, geo: new THREE.BoxGeometry(0.25, 0.22, 0.25) }
         };
 
         const def = itemMap[itemType] || itemMap.organic;

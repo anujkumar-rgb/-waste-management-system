@@ -1,3 +1,936 @@
+
+window.awardCitizenEcoCredits = function(amount, reason) {
+  const pts = parseInt(amount, 10) || 10;
+  if (!currentUser) {
+    currentUser = { id: 'usr-1', name: 'Resident', role: 'citizen', credits: 85, transactions: [] };
+  }
+  currentUser.credits = (currentUser.credits || 0) + pts;
+  if (!currentUser.transactions) currentUser.transactions = [];
+  currentUser.transactions.unshift({
+    date: new Date().toISOString().replace('T', ' ').substring(0, 16),
+    reason: reason || '3D Virtual Segregation Verification',
+    amount: pts
+  });
+  localStorage.setItem('swm_current_user', JSON.stringify(currentUser));
+
+  // Update UI balances
+  const headerBal = document.getElementById('storeHeaderBalance');
+  if (headerBal) headerBal.textContent = currentUser.credits;
+  const citizenBal = document.getElementById('citizenCreditBalance') || document.getElementById('citizenBalance');
+  if (citizenBal) citizenBal.textContent = `${currentUser.credits} credits`;
+
+  if (typeof renderGamificationCard === 'function') renderGamificationCard();
+  if (typeof playCivicAudio === 'function') playCivicAudio('coin');
+  if (typeof triggerCoinFlyAnimation === 'function') {
+    triggerCoinFlyAnimation(window.innerWidth / 2, window.innerHeight / 2, pts);
+  }
+  if (typeof showToast === 'function') {
+    showToast(`🎉 +${pts} EcoCredits Earned: ${reason || '3D Segregation'}!`, 'success');
+  }
+};
+
+
+/* ==========================================================================
+   Section 28: AI Waste App Suite (Virtual Bag, Pickup, Trash Bank, Eco Store, News)
+   ========================================================================== */
+
+// 1. Virtual Waste Bag State & Handlers
+let virtualWasteBag = [
+  { id: 'bag-1', name: 'PET Plastic Bottles (500ml x 4)', category: 'dry', material: 'PET Plastic', weightKg: 0.45, points: 15, icon: '🥤' },
+  { id: 'bag-2', name: 'Corrugated Shipping Box (Flattened)', category: 'dry', material: 'Cellulose Cardboard', weightKg: 0.80, points: 15, icon: '📦' },
+  { id: 'bag-3', name: 'Compostable Vegetable Kitchen Trimmings', category: 'organic', material: 'Wet Biomass', weightKg: 0.50, points: 15, icon: '🍎' }
+];
+
+window.getVirtualWasteBag = function() {
+  try {
+    const saved = localStorage.getItem('swm_virtual_waste_bag');
+    if (saved) return JSON.parse(saved);
+  } catch (e) {}
+  return virtualWasteBag;
+};
+
+window.saveVirtualWasteBag = function(bag) {
+  virtualWasteBag = bag;
+  localStorage.setItem('swm_virtual_waste_bag', JSON.stringify(bag));
+  renderVirtualWasteBag();
+};
+
+window.renderVirtualWasteBag = function() {
+  const container = document.getElementById('virtualBagItemsList');
+  const countBadge = document.getElementById('bagItemCountBadge');
+  const totalCountElem = document.getElementById('bagTotalItemsCount');
+  const weightElem = document.getElementById('bagTotalWeightDisplay');
+  const pointsElem = document.getElementById('bagTotalPointsDisplay');
+  const reviewWeightBadge = document.getElementById('pickupReviewWeightBadge');
+  const reviewItemsText = document.getElementById('pickupReviewItemsText');
+
+  const bag = getVirtualWasteBag();
+  const totalItems = bag.length;
+  const totalWeight = bag.reduce((sum, item) => sum + (item.weightKg || 0), 0);
+  const totalPoints = bag.reduce((sum, item) => sum + (item.points || 0), 0);
+
+  if (countBadge) countBadge.textContent = `${totalItems} Item${totalItems === 1 ? '' : 's'} Loaded`;
+  if (totalCountElem) totalCountElem.textContent = totalItems;
+  if (weightElem) weightElem.textContent = `${totalWeight.toFixed(2)} kg`;
+  if (pointsElem) pointsElem.textContent = `+${totalPoints} pts`;
+  if (reviewWeightBadge) reviewWeightBadge.textContent = `${totalWeight.toFixed(2)} kg Segregated Waste`;
+  if (reviewItemsText) {
+    reviewItemsText.textContent = bag.length > 0 ? bag.map(i => i.name).join(', ') : 'No items loaded';
+  }
+
+  if (!container) return;
+
+  if (bag.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 1.5rem; background: #ffffff; border: 1px dashed #bbf7d0; border-radius: 8px; color: #64748b; font-size: 0.85rem;">
+        🛍️ Your Virtual Waste Bag is currently empty.<br>
+        <span style="font-size: 0.78rem;">Scan recyclable items using the AI Vision Scanner or practice sorting in the 3D Studio to add items.</span>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = bag.map(item => `
+    <div class="bag-item-row" id="bag-item-${item.id}">
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <span style="font-size: 1.35rem;">${item.icon || '♻️'}</span>
+        <div>
+          <div style="font-size: 0.85rem; font-weight: 700; color: var(--civic-forest-ink);">${item.name}</div>
+          <div style="font-size: 0.72rem; color: #64748b;">
+            Material: <span style="font-weight: 600; color: #047857;">${item.material || 'Recyclable'}</span> &bull; Est. Weight: <strong>${item.weightKg} kg</strong>
+          </div>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.75rem;">
+        <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #047857; font-weight: 800; font-size: 0.72rem;">+${item.points} pts</span>
+        <button type="button" class="btn btn-outline btn-xs" style="padding: 1px 6px; color: #dc2626; border-color: #fca5a5;" onclick="removeBagItem('${item.id}')" title="Remove item">×</button>
+      </div>
+    </div>
+  `).join('');
+};
+
+window.addScannedItemToBag = function(item) {
+  const bag = getVirtualWasteBag();
+  const newItem = Object.assign({
+    id: 'bag-' + Date.now(),
+    name: 'PET Plastic Bottle',
+    category: 'dry',
+    material: 'Polyethylene Terephthalate',
+    weightKg: 0.45,
+    points: 15,
+    icon: '🥤'
+  }, item);
+
+  bag.push(newItem);
+  saveVirtualWasteBag(bag);
+  if (typeof playCivicAudio === 'function') playCivicAudio('coin');
+  if (typeof showToast === 'function') {
+    showToast(`✓ Added '${newItem.name}' to Virtual Waste Bag (+${newItem.points} pts)!`, 'success');
+  }
+};
+
+window.addAIScanToVirtualBag = function() {
+  const sampleKey = window.currentAIScannedSample || 'pet_bottle';
+  const itemMap = {
+    pet_bottle: { name: 'PET Plastic Beverage Bottle', category: 'dry', material: 'PET #1 Plastic', weightKg: 0.45, points: 15, icon: '🥤' },
+    organic_peels: { name: 'Raw Banana & Citrus Peels', category: 'organic', material: 'Biodegradable Compost', weightKg: 0.60, points: 15, icon: '🍌' },
+    ewaste_circuit: { name: 'Printed Circuit Board & Ribbon Cable', category: 'ewaste', material: 'E-Waste PCB & Copper', weightKg: 0.35, points: 25, icon: '🔌' },
+    cardboard_box: { name: 'Amazon Corrugated Packing Carton', category: 'dry', material: 'Kraft Cardboard', weightKg: 0.75, points: 15, icon: '📦' },
+    aluminum_can: { name: 'Beverage Aluminium Soda Can', category: 'dry', material: 'Pure Aluminium Alloy', weightKg: 0.20, points: 20, icon: '🥫' }
+  };
+
+  const item = itemMap[sampleKey] || itemMap.pet_bottle;
+  addScannedItemToBag(item);
+  closeModal('aiVisionScannerModal');
+};
+
+window.removeBagItem = function(id) {
+  const bag = getVirtualWasteBag().filter(i => i.id !== id);
+  saveVirtualWasteBag(bag);
+};
+
+window.clearWasteBag = function() {
+  saveVirtualWasteBag([]);
+};
+
+window.quickAddSampleToBag = function() {
+  const samples = [
+    { name: 'Crushed Aluminium Soda Cans (x3)', category: 'dry', material: 'Aluminium #41', weightKg: 0.30, points: 20, icon: '🥫' },
+    { name: 'Clean Cardboard Shipping Box', category: 'dry', material: 'Corrugated Fiber', weightKg: 0.65, points: 15, icon: '📦' },
+    { name: 'Discarded Mobile Charger & Cable', category: 'ewaste', material: 'E-Waste Wire', weightKg: 0.25, points: 25, icon: '🔌' }
+  ];
+  const item = samples[Math.floor(Math.random() * samples.length)];
+  addScannedItemToBag(item);
+};
+
+// 2. Doorstep Pickup Scheduling Handlers
+window.openPickupSchedulerModal = function() {
+  const modal = document.getElementById('pickupSchedulerModal');
+  if (!modal) return;
+  const dateInput = document.getElementById('pickupDateInput');
+  if (dateInput) {
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.min = today;
+    dateInput.value = today;
+  }
+  const addrInput = document.getElementById('pickupAddressInput');
+  const user = currentUser || {};
+  if (addrInput && !addrInput.value) {
+    addrInput.value = user.address || 'Flat 402, Sea Green Apts, Prabhadevi, Mumbai';
+  }
+  modal.classList.add('active');
+  if (typeof playCivicAudio === 'function') playCivicAudio('click');
+};
+
+window.closePickupSchedulerModal = function() {
+  const modal = document.getElementById('pickupSchedulerModal');
+  if (modal) modal.classList.remove('active');
+};
+
+window.handlePickupBookingSubmit = function(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  const date = document.getElementById('pickupDateInput')?.value || new Date().toISOString().split('T')[0];
+  const slot = document.getElementById('pickupTimeSlotSelect')?.value || '02:00 PM - 04:00 PM';
+  const address = document.getElementById('pickupAddressInput')?.value || 'Prabhadevi, Mumbai';
+  const ward = document.getElementById('pickupWardSelect')?.value || 'Ward G/South - Dadar & Elphinstone';
+  const phone = document.getElementById('pickupPhoneInput')?.value || '+91 98200 44101';
+
+  const bag = getVirtualWasteBag();
+  const totalWeight = bag.reduce((sum, item) => sum + (item.weightKg || 0), 0);
+  const totalPoints = bag.reduce((sum, item) => sum + (item.points || 0), 0);
+
+  const bookingId = 'PICKUP-MUM-' + Math.floor(1000 + Math.random() * 9000);
+
+  const booking = {
+    id: bookingId,
+    date,
+    slot,
+    address,
+    ward,
+    phone,
+    itemCount: bag.length,
+    weightKg: totalWeight,
+    expectedPoints: totalPoints || 45,
+    status: 'Scheduled',
+    assignedCrew: 'Rajesh Singh (Crew #101)',
+    createdAt: Date.now()
+  };
+
+  let pickups = [];
+  try {
+    pickups = JSON.parse(localStorage.getItem('swm_scheduled_pickups') || '[]');
+  } catch (err) {}
+  pickups.unshift(booking);
+  localStorage.setItem('swm_scheduled_pickups', JSON.stringify(pickups));
+
+  // Reset virtual bag
+  clearWasteBag();
+  closePickupSchedulerModal();
+
+  if (typeof playCivicAudio === 'function') playCivicAudio('success');
+  if (typeof showToast === 'function') {
+    showToast(`🎉 Pickup Confirmed! Tracking ID: ${bookingId} on ${date} (${slot})`, 'success');
+  } else {
+    alert(`Pickup Confirmed! ID: ${bookingId}`);
+  }
+};
+
+// 3. Trash Bank Drop-off & QR Verification Handlers
+const TRASH_BANKS = {
+  dadar: {
+    name: 'Dadar MRF Recovery Bank',
+    ward: 'Ward G/South',
+    address: '📍 Senapati Bapat Marg, Dadar West, Mumbai',
+    hours: '⏰ Open Today: 07:00 AM - 07:00 PM • Accepts: Plastics, Paper, Metals, E-Waste',
+    capacity: '78% Capacity Available',
+    code: 'TB-DADAR-01'
+  },
+  andheri: {
+    name: 'Andheri MIDC Tech Waste Hub',
+    ward: 'Ward K/East',
+    address: '📍 MIDC Road No. 9, Chakala, Andheri East, Mumbai',
+    hours: '⏰ Open Today: 08:00 AM - 08:00 PM • Accepts: E-Waste, Metals, Hard Plastics',
+    capacity: '65% Capacity Available',
+    code: 'TB-ANDHERI-02'
+  },
+  bandra: {
+    name: 'Bandra West Eco-Bank',
+    ward: 'Ward H/West',
+    address: '📍 Hill Road, Near Mehboob Studio, Bandra West, Mumbai',
+    hours: '⏰ Open Today: 07:30 AM - 06:30 PM • Accepts: All Dry Recyclables, Glass',
+    capacity: '82% Capacity Available',
+    code: 'TB-BANDRA-03'
+  },
+  powai: {
+    name: 'Powai Clean Energy Depot',
+    ward: 'Ward S',
+    address: '📍 Central Avenue, Hiranandani Gardens, Powai, Mumbai',
+    hours: '⏰ Open Today: 08:00 AM - 06:00 PM • Accepts: Organic Composting, E-Waste',
+    capacity: '90% Capacity Available',
+    code: 'TB-POWAI-04'
+  },
+  colaba: {
+    name: 'Colaba Portside Recovery Bank',
+    ward: 'Ward A',
+    address: '📍 SBS Road, Near Strand Cinema, Colaba, Mumbai',
+    hours: '⏰ Open Today: 07:00 AM - 05:00 PM • Accepts: Maritime Plastics, Dry Waste',
+    capacity: '55% Capacity Available',
+    code: 'TB-COLABA-05'
+  }
+};
+
+window.openTrashBankModal = function() {
+  const modal = document.getElementById('trashBankModal');
+  if (!modal) return;
+  updateTrashBankDetails('dadar');
+  modal.classList.add('active');
+  if (typeof playCivicAudio === 'function') playCivicAudio('click');
+};
+
+window.closeTrashBankModal = function() {
+  const modal = document.getElementById('trashBankModal');
+  if (modal) modal.classList.remove('active');
+};
+
+window.updateTrashBankDetails = function(key) {
+  const tb = TRASH_BANKS[key] || TRASH_BANKS.dadar;
+  const nameElem = document.getElementById('tbName');
+  const capElem = document.getElementById('tbCapacityBadge');
+  const addrElem = document.getElementById('tbAddress');
+  const hoursElem = document.getElementById('tbHours');
+  const tokenElem = document.getElementById('tbTokenCode');
+
+  if (nameElem) nameElem.textContent = tb.name;
+  if (capElem) capElem.textContent = tb.capacity;
+  if (addrElem) addrElem.textContent = tb.address;
+  if (hoursElem) hoursElem.textContent = tb.hours;
+  if (tokenElem) {
+    const token = 'QR-' + tb.code + '-' + Math.floor(1000 + Math.random() * 9000);
+    tokenElem.textContent = token;
+  }
+};
+
+window.simulateOfficerQRVerification = function() {
+  const bag = getVirtualWasteBag();
+  const pointsToCredit = (bag.length > 0 ? bag.reduce((sum, item) => sum + (item.points || 0), 0) : 45);
+
+  if (currentUser) {
+    currentUser.credits = (currentUser.credits || 85) + pointsToCredit;
+    localStorage.setItem('swm_current_user', JSON.stringify(currentUser));
+  }
+
+  // Update UI headers
+  const headerBal = document.getElementById('storeHeaderBalance');
+  if (headerBal) headerBal.textContent = currentUser?.credits || 130;
+  const citizenBal = document.getElementById('citizenCreditBalance') || document.getElementById('citizenBalance');
+  if (citizenBal) citizenBal.textContent = `${currentUser?.credits || 130} credits`;
+  if (typeof renderGamificationCard === 'function') renderGamificationCard();
+
+  clearWasteBag();
+  closeTrashBankModal();
+
+  if (typeof playCivicAudio === 'function') playCivicAudio('coin');
+  if (typeof triggerCoinFlyAnimation === 'function') {
+    triggerCoinFlyAnimation(window.innerWidth / 2, window.innerHeight / 2, pointsToCredit);
+  }
+
+  if (typeof showToast === 'function') {
+    showToast(`🎉 Drop-Off Verified! Intake Officer scanned QR code. +${pointsToCredit} EcoCredits credited!`, 'success');
+  } else {
+    alert(`Drop-off Verified! +${pointsToCredit} EcoCredits deposited.`);
+  }
+};
+
+// 4. Eco Store & Sustainable Products Online Marketplace
+const ECO_STORE_PRODUCTS = [
+  {
+    id: 'eco_tote_bag',
+    name: 'Upcycled Ocean-Plastic Canvas Tote Bag',
+    price: 349,
+    pointsRequired: 35,
+    category: 'Lifestyle',
+    ecoImpact: 'Diverts 1.2 kg plastic from coastline',
+    rating: '4.9 ★ (128 reviews)',
+    svgKey: 'toteBag'
+  },
+  {
+    id: 'eco_bamboo_cutlery',
+    name: 'Organic Bamboo Travel Cutlery & Straw Set',
+    price: 249,
+    pointsRequired: 25,
+    category: 'Zero Waste Dining',
+    ecoImpact: 'Replaces 400+ single-use plastic forks',
+    rating: '4.8 ★ (95 reviews)',
+    svgKey: 'bambooCutlery'
+  },
+  {
+    id: 'eco_seed_journal',
+    name: 'Plantable Seed Paper Journal & Sprout Pen',
+    price: 199,
+    pointsRequired: 20,
+    category: 'Eco Stationery',
+    ecoImpact: 'Grows into Marigold & Basil plants',
+    rating: '5.0 ★ (210 reviews)',
+    svgKey: 'seedNotebook'
+  },
+  {
+    id: 'eco_thermal_flask',
+    name: 'Double-Walled Insulated Thermal Steel Flask',
+    price: 599,
+    pointsRequired: 60,
+    category: 'Hydration',
+    ecoImpact: 'Prevents 730 single-use water bottles',
+    rating: '4.9 ★ (340 reviews)',
+    svgKey: 'thermalFlask'
+  },
+  {
+    id: 'eco_compost_starter',
+    name: 'Zero-Waste Home Composting Starter Bin',
+    price: 799,
+    pointsRequired: 80,
+    category: 'Home & Garden',
+    ecoImpact: 'Converts 100% kitchen scraps into rich humus',
+    rating: '4.7 ★ (82 reviews)',
+    svgKey: 'compostBin'
+  },
+  {
+    id: 'eco_organic_tee',
+    name: 'Recycled Organic Cotton Eco-Tee (Earth Edition)',
+    price: 499,
+    pointsRequired: 50,
+    category: 'Apparel',
+    ecoImpact: 'Saves 2,700 litres of clean water',
+    rating: '4.8 ★ (164 reviews)',
+    svgKey: 'ecoTee'
+  }
+];
+
+let ecoStoreCart = [];
+
+window.getEcoStoreCart = function() {
+  try {
+    const saved = localStorage.getItem('swm_eco_store_cart');
+    if (saved) return JSON.parse(saved);
+  } catch (e) {}
+  return ecoStoreCart;
+};
+
+window.saveEcoStoreCart = function(cart) {
+  ecoStoreCart = cart;
+  localStorage.setItem('swm_eco_store_cart', JSON.stringify(cart));
+  const badge = document.getElementById('ecoStoreCartCountBadge');
+  if (badge) badge.textContent = cart.length;
+};
+
+window.renderEcoStore = function() {
+  const grid = document.getElementById('ecoStoreProductGrid');
+  if (!grid) return;
+
+  const svgMap = {
+    toteBag: `<svg viewBox="0 0 100 100" width="70" height="70" fill="none"><path d="M35 35 C35 15, 65 15, 65 35" stroke="#059669" stroke-width="4"/><path d="M22 35 L78 35 L74 88 L26 88 Z" fill="#ecfdf5" stroke="#10b981" stroke-width="2.5"/><circle cx="50" cy="62" r="12" fill="#10b981" opacity="0.25"/><path d="M44 62 L48 66 L56 58" stroke="#047857" stroke-width="2.5" stroke-linecap="round"/></svg>`,
+    bambooCutlery: `<svg viewBox="0 0 100 100" width="70" height="70" fill="none"><rect x="25" y="15" width="8" height="70" rx="4" fill="#d97706"/><rect x="46" y="20" width="8" height="65" rx="4" fill="#b45309"/><rect x="67" y="15" width="8" height="70" rx="4" fill="#92400e"/></svg>`,
+    seedNotebook: `<svg viewBox="0 0 100 100" width="70" height="70" fill="none"><rect x="25" y="18" width="50" height="64" rx="4" fill="#fef3c7" stroke="#d97706" stroke-width="2.5"/><line x1="33" y1="18" x2="33" y2="82" stroke="#b45309" stroke-width="2"/><circle cx="50" cy="50" r="10" fill="#10b981" opacity="0.2"/><path d="M50 42 C45 38 45 48 50 54 C55 48 55 38 50 42 Z" fill="#10b981"/></svg>`,
+    thermalFlask: `<svg viewBox="0 0 100 100" width="70" height="70" fill="none"><rect x="35" y="28" width="30" height="58" rx="6" fill="#e0f2fe" stroke="#0284c7" stroke-width="2.5"/><rect x="40" y="16" width="20" height="12" rx="3" fill="#0369a1"/></svg>`,
+    compostBin: `<svg viewBox="0 0 100 100" width="70" height="70" fill="none"><path d="M28 35 L72 35 L66 85 L34 85 Z" fill="#ecfdf5" stroke="#059669" stroke-width="2.5"/><path d="M24 28 L76 28 L72 35 L28 35 Z" fill="#10b981"/><circle cx="50" cy="60" r="10" fill="#10b981" opacity="0.3"/></svg>`,
+    ecoTee: `<svg viewBox="0 0 100 100" width="70" height="70" fill="none"><path d="M35 22 L20 38 L30 46 L35 38 L35 80 L65 80 L65 38 L70 46 L80 38 L65 22 Q50 30 35 22 Z" fill="#f0fdf4" stroke="#16a34a" stroke-width="2.5"/><circle cx="50" cy="52" r="10" stroke="#22c55e" stroke-width="2"/></svg>`
+  };
+
+  grid.innerHTML = ECO_STORE_PRODUCTS.map(p => `
+    <div class="eco-product-card" id="card-${p.id}">
+      <div>
+        <div class="eco-product-image-box">
+          ${svgMap[p.svgKey] || '🌱'}
+          <span class="badge" style="position: absolute; top: 8px; right: 8px; background: rgba(255,255,255,0.9); color: #047857; font-weight: 800; font-size: 0.68rem;">${p.category}</span>
+        </div>
+        <h4 style="margin: 0 0 0.35rem 0; font-size: 1rem; color: var(--civic-forest-ink); line-height: 1.3;">${p.name}</h4>
+        <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 0.4rem;">${p.rating}</div>
+        <div style="font-size: 0.74rem; color: #047857; font-weight: 600; margin-bottom: 0.75rem;">🌱 ${p.ecoImpact}</div>
+      </div>
+      <div>
+        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.75rem;">
+          <div style="font-size: 1.15rem; font-weight: 800; color: var(--civic-forest-ink);">₹${p.price}</div>
+          <div style="font-size: 0.78rem; font-weight: 700; color: #0284c7;">or ${p.pointsRequired} EcoCredits</div>
+        </div>
+        <button type="button" class="btn btn-outline btn-sm" style="width: 100%; border-color: #10b981; color: #047857; font-weight: 700;" onclick="addToEcoStoreCart('${p.id}')">
+          🛒 Add to Cart
+        </button>
+      </div>
+    </div>
+  `).join('');
+
+  saveEcoStoreCart(getEcoStoreCart());
+};
+
+window.addToEcoStoreCart = function(productId) {
+  const product = ECO_STORE_PRODUCTS.find(p => p.id === productId);
+  if (!product) return;
+  const cart = getEcoStoreCart();
+  cart.push(product);
+  saveEcoStoreCart(cart);
+
+  if (typeof playCivicAudio === 'function') playCivicAudio('click');
+  if (typeof showToast === 'function') {
+    showToast(`✓ Added '${product.name}' to Eco Store Cart!`, 'success');
+  }
+};
+
+window.openEcoStoreCart = function() {
+  const modal = document.getElementById('ecoStoreCartModal');
+  if (!modal) return;
+  const cart = getEcoStoreCart();
+  const container = document.getElementById('ecoCartItemsContainer');
+  const slider = document.getElementById('cartPointsSlider');
+  const userCredits = currentUser?.credits || 85;
+
+  const walletBal = document.getElementById('cartWalletBalanceVal');
+  if (walletBal) walletBal.textContent = userCredits;
+  if (slider) {
+    slider.max = userCredits;
+    slider.value = 0;
+  }
+
+  if (container) {
+    if (cart.length === 0) {
+      container.innerHTML = `<div style="text-align: center; padding: 1rem; color: #64748b; font-size: 0.84rem;">Your Eco Store cart is currently empty.</div>`;
+    } else {
+      container.innerHTML = cart.map((item, idx) => `
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0.75rem; background: var(--civic-surface-muted); border-radius: 6px; font-size: 0.82rem;">
+          <div>
+            <strong>${item.name}</strong>
+            <div style="font-size: 0.72rem; color: #64748b;">${item.category}</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.65rem;">
+            <strong>₹${item.price}</strong>
+            <button type="button" class="btn btn-outline btn-xs" style="padding: 0 5px; color: #dc2626;" onclick="removeCartItem(${idx})">×</button>
+          </div>
+        </div>
+      `).join('');
+    }
+  }
+
+  updateCartPointsDiscount(0);
+  modal.classList.add('active');
+  if (typeof playCivicAudio === 'function') playCivicAudio('click');
+};
+
+window.removeCartItem = function(index) {
+  const cart = getEcoStoreCart();
+  cart.splice(index, 1);
+  saveEcoStoreCart(cart);
+  openEcoStoreCart();
+};
+
+window.closeEcoStoreCart = function() {
+  const modal = document.getElementById('ecoStoreCartModal');
+  if (modal) modal.classList.remove('active');
+};
+
+window.updateCartPointsDiscount = function(sliderVal) {
+  const cart = getEcoStoreCart();
+  const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
+  const points = parseInt(sliderVal, 10) || 0;
+  // 10 credits = ₹100 discount
+  let discountINR = points * 10;
+  if (discountINR > subtotal) discountINR = subtotal;
+
+  const finalTotal = Math.max(0, subtotal - discountINR);
+
+  const appliedDisplay = document.getElementById('cartPointsAppliedDisplay');
+  const subtotalDisplay = document.getElementById('cartSubtotalDisplay');
+  const discountDisplay = document.getElementById('cartDiscountDisplay');
+  const finalDisplay = document.getElementById('cartFinalTotalDisplay');
+
+  if (appliedDisplay) appliedDisplay.textContent = `${points} pts (-₹${discountINR})`;
+  if (subtotalDisplay) subtotalDisplay.textContent = `₹${subtotal}`;
+  if (discountDisplay) discountDisplay.textContent = `-₹${discountINR}`;
+  if (finalDisplay) finalDisplay.textContent = `₹${finalTotal}`;
+};
+
+window.handleEcoStoreCheckout = function() {
+  const cart = getEcoStoreCart();
+  if (cart.length === 0) {
+    alert('Your cart is empty! Add sustainable products first.');
+    return;
+  }
+  const slider = document.getElementById('cartPointsSlider');
+  const pointsUsed = parseInt(slider?.value || 0, 10);
+
+  if (currentUser && pointsUsed > 0) {
+    currentUser.credits = Math.max(0, (currentUser.credits || 85) - pointsUsed);
+    localStorage.setItem('swm_current_user', JSON.stringify(currentUser));
+  }
+
+  const orderId = 'ECO-MUM-' + Math.floor(10000 + Math.random() * 90000);
+  saveEcoStoreCart([]);
+  closeEcoStoreCart();
+
+  // Update UI balances
+  const headerBal = document.getElementById('storeHeaderBalance');
+  if (headerBal) headerBal.textContent = currentUser?.credits || 85;
+  const citizenBal = document.getElementById('citizenCreditBalance') || document.getElementById('citizenBalance');
+  if (citizenBal) citizenBal.textContent = `${currentUser?.credits || 85} credits`;
+  if (typeof renderGamificationCard === 'function') renderGamificationCard();
+
+  if (typeof playCivicAudio === 'function') playCivicAudio('success');
+  if (typeof showToast === 'function') {
+    showToast(`🎉 Order ${orderId} Placed! Delivered via Carbon-Neutral Municipal EV.`, 'success');
+  } else {
+    alert(`Order ${orderId} Placed Successfully!`);
+  }
+};
+
+// 5. Gamification - 5 Statutory Levels & Perks
+window.calculateCitizenTier = function(credits) {
+  const c = credits || 0;
+  if (c >= 1000) {
+    return { name: '👑 Planet Guardian', progress: 100, perk: 'Perk: All-Stream 2x Multiplier + VIP Priority', next: 'Max Level' };
+  } else if (c >= 501) {
+    return { name: '🌍 Earth Heroes', progress: Math.min(100, Math.round(((c - 500) / 500) * 100)), perk: 'Perk: +30% Multiplier on E-Waste & Hazardous', next: 'Next: Planet Guardian (1000 pts)' };
+  } else if (c >= 201) {
+    return { name: '🌲 Eco Master', progress: Math.min(100, Math.round(((c - 200) / 300) * 100)), perk: 'Perk: Free Monthly Compost Fertilizer Pack', next: 'Next: Earth Heroes (500 pts)' };
+  } else if (c >= 51) {
+    return { name: '🌿 Green Heroes', progress: Math.min(100, Math.round(((c - 50) / 150) * 100)), perk: 'Perk: +20% Plastic Hunter Bonus Active', next: 'Next: Eco Master (200 pts)' };
+  } else {
+    return { name: '🌰 Seed Starter', progress: Math.min(100, Math.round((c / 50) * 100)), perk: 'Perk: Basic EcoWallet Access Active', next: 'Next: Green Heroes (50 pts)' };
+  }
+};
+
+window.renderGamificationCard = function() {
+  const tier = calculateCitizenTier(currentUser?.credits || 85);
+  const badge = document.getElementById('citizenCurrentLevelBadge');
+  const bar = document.getElementById('citizenLevelProgressBar');
+  const perk = document.getElementById('citizenLevelPerksLabel');
+  const target = document.getElementById('citizenNextLevelTarget');
+
+  if (badge) badge.textContent = tier.name;
+  if (bar) bar.style.width = tier.progress + '%';
+  if (perk) perk.textContent = tier.perk;
+  if (target) target.textContent = tier.next;
+};
+
+window.shareRecyclingAchievement = function(platform) {
+  const tier = calculateCitizenTier(currentUser?.credits || 85);
+  const text = encodeURIComponent(`I just reached ${tier.name} rank on EcoClear AI Waste Management! I have recycled segregated waste and saved Mumbai landfills from tons of trash. Join the green revolution! 🌍♻️`);
+  const url = encodeURIComponent(window.location.origin);
+
+  if (platform === 'whatsapp') {
+    window.open(`https://api.whatsapp.com/send?text=${text}%20${url}`, '_blank');
+  } else if (platform === 'twitter') {
+    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+  }
+};
+
+// 6. Educational News & Article Modal
+const ECO_NEWS_ARTICLES = {
+  optical_ai: {
+    category: 'AI RECYCLING INNOVATION',
+    title: 'How AI Optical Sorters Detect Plastics in 15 Milliseconds',
+    body: `<p>Modern Material Recovery Facilities (MRFs) are undergoing a technological revolution powered by high-speed Computer Vision and Optical Spectrometry.</p>
+    <p>Using near-infrared (NIR) sensors, cameras illuminate conveyor belts moving at 3 meters per second. Within 15 milliseconds, deep convolutional neural networks analyze the polymer resonance spectrum and distinguish PET (#1) from HDPE (#2), Polypropylene (#5), and multi-layer non-recyclable laminates.</p>
+    <p>Once classified, high-pressure pneumatic air jets fire at the exact microsecond the target bottle crosses the separation threshold, deflecting it into pure recycling chutes with 99.2% purity.</p>
+    <div style="background: #ecfdf5; border-left: 4px solid #10b981; padding: 0.75rem; border-radius: 4px; margin: 1rem 0;">
+      <strong>Citizen Action:</strong> Removing bottle caps and giving drink containers a quick water rinse dramatically increases optical sorter recognition speed!
+    </div>`
+  },
+  mumbai_2026: {
+    category: 'STATUTORY ROADMAP',
+    title: 'Mumbai Circular Economy Roadmap: 2026 Directives',
+    body: `<p>The Municipal Corporation of Greater Mumbai (MCGM) has officially notified the 2026 Urban Waste Framework under Swachh Bharat Mission 2.0.</p>
+    <p>Key highlights include:</p>
+    <ul>
+      <li><strong>Mandatory 3-Way Source Segregation:</strong> Wet Biodegradable, Dry Recyclable, and Domestic Hazardous waste must be deposited into distinct color-coded receptacles.</li>
+      <li><strong>Decentralized Biomethanation:</strong> Bulk waste generators (societies over 5,000 sq. meters) must compost organic waste on-site, converting it into Bio-CNG or organic soil conditioner.</li>
+      <li><strong>Direct Citizen Incentives:</strong> Digital EcoCredits reward residents who consistently achieve 100% segregation, redeemable for municipal utility discounts and sustainable products.</li>
+    </ul>`
+  },
+  battery_hazard: {
+    category: 'HAZARD ADVISORY',
+    title: 'Why Lithium Batteries Cannot Enter Landfills',
+    body: `<p>Lithium-ion batteries present severe fire and chemical contamination risks when mixed into standard residential waste bins.</p>
+    <p>When municipal compactor trucks compress garbage bags, the intense hydraulic pressure punctures the lithium pouch cells. This causes an immediate internal short-circuit, reaching temperatures over 800°C in seconds (thermal runaway) and setting combustible garbage and methane gas ablaze.</p>
+    <p><strong>Safe Handling Protocol:</strong></p>
+    <ul>
+      <li>Place clear electrical insulation tape over both positive and negative terminals.</li>
+      <li>Store spent cells in a separate dry plastic container.</li>
+      <li>Drop off at authorized E-Waste bins or schedule a specialized hazardous doorstep pickup.</li>
+    </ul>`
+  }
+};
+
+window.openEcoArticleModal = function(id) {
+  const article = ECO_NEWS_ARTICLES[id] || ECO_NEWS_ARTICLES.optical_ai;
+  const modal = document.getElementById('ecoArticleModal');
+  const catBadge = document.getElementById('articleCategoryBadge');
+  const titleElem = document.getElementById('articleTitleDisplay');
+  const bodyElem = document.getElementById('articleBodyDisplay');
+
+  if (catBadge) catBadge.textContent = article.category;
+  if (titleElem) titleElem.textContent = article.title;
+  if (bodyElem) bodyElem.innerHTML = article.body;
+
+  if (modal) modal.classList.add('active');
+  if (typeof playCivicAudio === 'function') playCivicAudio('click');
+};
+
+window.closeEcoArticleModal = function() {
+  const modal = document.getElementById('ecoArticleModal');
+  if (modal) modal.classList.remove('active');
+};
+
+
+/* ==========================================================================
+   Section 27: Supabase Google Auth & Statutory Segregation Tag Deep Details
+   ========================================================================== */
+window.handleSupabaseGoogleSignIn = async function() {
+  // If Supabase client SDK is mounted, initiate standard OAuth workflow
+  if (window.supabase && window.supabase.auth && typeof window.supabase.auth.signInWithOAuth === 'function') {
+    try {
+      await window.supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: { redirectTo: window.location.origin }
+      });
+    } catch (err) {
+      console.warn('Supabase OAuth redirected or mocked in demo environment:', err);
+    }
+  }
+  const notice = document.getElementById('supabaseStatusNotice');
+  const btn = document.getElementById('btnSupabaseOAuth');
+  if (notice) {
+    notice.style.display = 'block';
+    notice.textContent = '⚡ Initializing Supabase OAuth handshake (Google Provider)...';
+  }
+  if (btn) btn.classList.add('btn-loading');
+
+  setTimeout(() => {
+    const email = 'citizen@ecoclear.org';
+    const users = getUsers();
+    const found = users.find(u => u.email === email) || users[0];
+    currentUser = Object.assign({}, found, { authProvider: 'supabase_google' });
+    localStorage.setItem('swm_current_user', JSON.stringify(currentUser));
+
+    if (notice) notice.textContent = '✓ Supabase OAuth Token Verified! Redirecting...';
+    if (typeof showToast === 'function') {
+      showToast('✓ Authenticated via Supabase (Google Provider)', 'success');
+    }
+    setTimeout(() => {
+      closeModal('googleAuthModal');
+      checkAuthAndRedirect();
+    }, 400);
+  }, 600);
+};
+
+const SEGREGATION_TAG_DETAILS = {
+  wet: {
+    emoji: '🌱',
+    title: 'WET ORGANIC WASTE',
+    binBadge: '🟢 Green Municipal Bin (Code: MCGM-SWM-GRN)',
+    mandate: 'Statutory Mandate: SWM Rules 2016 / 2026 (Rule 4 Clause 1(a))',
+    decomp: '2 to 6 Weeks (Aerobic / In-Vessel Digestion)',
+    treatment: 'Biomethanation & Anaerobic Digestion (Bio-CNG & Organic Soil Conditioner)',
+    hazard: 'High methane (CH₄) greenhouse gas emissions and toxic black leachate in municipal dump yards',
+    penalty: '₹500 / incident (Residential) • ₹5,000 (Bulk Generator / Society)',
+    steps: [
+      'Drain excess gravies and liquid soups thoroughly before disposal.',
+      'Wrap raw kitchen trimmings in daily newspaper or certified compostable bags (ISO 17088).',
+      'Never mix single-use plastic pouches, milk bags, or non-veg bones into dry streams.',
+      'Deposit in green covered bins before 08:30 AM daily municipal door-to-door sweep.'
+    ]
+  },
+  dry: {
+    emoji: '♻️',
+    title: 'DRY RECYCLABLE WASTE',
+    binBadge: '🔵 Blue Municipal Bin (Code: MCGM-SWM-BLU)',
+    mandate: 'Statutory Mandate: Plastic Waste Management Rules 2016 / 2024 & SWM Rules 2016',
+    decomp: '50 to 500+ Years (Non-biodegradable polymeric matrices)',
+    treatment: 'Material Recovery Facility (MRF) Optical Sorting, Baling, Mechanical Repelletization & Pyrolysis',
+    hazard: 'Microplastic ingestion in marine biota, clogged stormwater drains causing urban waterlogging',
+    penalty: '₹500 / incident (Residential) • ₹10,000 (Bulk Generator & Commercial)',
+    steps: [
+      'Rinse food containers, milk sachets, and drink bottles lightly to remove residues.',
+      'Flatten corrugated cardboard boxes and crush plastic bottles to preserve 70% compactor space.',
+      'Keep paper and books dry; wet cellulose fibre cannot be recycled in paper mills.',
+      'Tie segregated cardboard and paper stacks with cotton twine before collection.'
+    ]
+  },
+  hazardous: {
+    emoji: '⚠️',
+    title: 'DOMESTIC HAZARDOUS WASTE',
+    binBadge: '🟡 Amber / Yellow Municipal Bin (Code: MCGM-SWM-AMB)',
+    mandate: 'Statutory Mandate: Hazardous and Other Wastes Rules 2016 / 2025 (Rule 6)',
+    decomp: 'Decades to Centuries (Persistent heavy metals and toxic chemicals)',
+    treatment: 'Secured Municipal Landfill (TSDF), High-Temperature Incineration (1100°C), & Vitrification',
+    hazard: 'Lead, cadmium, and corrosive sulfuric acid poisoning groundwater aquifers and soil bio-systems',
+    penalty: '₹2,500 / incident (Residential) • ₹25,000 + Statutory Notice (Commercial)',
+    steps: [
+      'Store spent batteries, pesticide cans, and expired paint cans in a rigid cardboard box.',
+      'Tape lithium battery terminals with electrical insulation tape to prevent transit fires.',
+      'Never mix aerosol cans or industrial solvents with ordinary wet/dry garbage.',
+      'Hand over directly to the municipal hazardous waste collection vehicle on designated weekly routes.'
+    ]
+  },
+  sanitary: {
+    emoji: '🩹',
+    title: 'SANITARY & HYGIENIC WASTE',
+    binBadge: '🔴 Red Cross Wrapped / Yellow Lining (Code: MCGM-SWM-SAN)',
+    mandate: 'Statutory Mandate: Solid Waste Management Rules 2016 (Rule 4 Clause 1(c))',
+    decomp: '250 to 500+ Years (Plastic polymers and non-woven SAP polymers)',
+    treatment: 'Common Bio-medical Waste Treatment Facility (CBWTF) High-Heat Controlled Incineration',
+    hazard: 'Severe blood-borne pathogens (Hepatitis B/C, HIV) exposing field sanitation staff',
+    penalty: '₹1,000 / incident (Residential non-compliance)',
+    steps: [
+      'Securely wrap diapers, sanitary napkins, and adult continence aids in clean paper.',
+      'Mark the outer packet prominently with a bold Red Cross (❌) symbol for worker safety.',
+      'Never flush sanitary items down toilet pans; prevents sewer blockages and manhole overflows.',
+      'Hand over to the municipal collector in the dedicated sanitary compartment.'
+    ]
+  },
+  ewaste: {
+    emoji: '🔌',
+    title: 'ELECTRONIC WASTE (E-WASTE)',
+    binBadge: '🟣 Purple E-Waste Depot / Authorized Dismantler (Code: MCGM-EWASTE-2026)',
+    mandate: 'Statutory Mandate: E-Waste (Management) Rules 2022 / Extended Producer Responsibility (EPR)',
+    decomp: 'Non-biodegradable (Halogenated flame retardants & precious metals)',
+    treatment: 'State PCB Authorized Recycler Dismantling, Precious Metal Smelting, & Shredding',
+    hazard: 'Mercury, beryllium, arsenic, and brominated flame retardants bioaccumulating in human tissue',
+    penalty: '₹5,000 / incident (Residential illegal disposal) • ₹100,000 (Commercial dumpers)',
+    steps: [
+      'Keep old electronics, mobile phones, printed circuit boards (PCBs), and chargers dry and intact.',
+      'Do not crush or burn electronic casings or solder connections at home.',
+      'Deliver to nearest municipal smart bin drop-off depot or schedule bulk E-Waste collection.',
+      'Earn +15 to +50 EcoCredits directly deposited into your Citizen EcoWallet.'
+    ]
+  },
+  biomedical: {
+    emoji: '🏥',
+    title: 'BIOMEDICAL CLINICAL WASTE',
+    binBadge: '🔴 Yellow/Red Barcoded Biohazard Container (Code: BMW-2016-CBWTF)',
+    mandate: 'Statutory Mandate: Bio-Medical Waste Management Rules 2016 / 2024 (Schedule I)',
+    decomp: 'Requires immediate sterilization within 48 hours of generation',
+    treatment: 'Autoclaving at 121°C (15 psi) followed by shredding / High-temperature incineration at 1050°C',
+    hazard: 'Highly infectious microbial cultures, human tissue pathogens, needle-stick injuries',
+    penalty: 'Statutory NABH suspension, ₹50,000 municipal fine & CPCB Environmental Damage Compensation',
+    steps: [
+      'Segregate waste into statutory color-coded bags (Yellow: anatomical, Red: contaminated tubing, White: sharps).',
+      'Label every bag with CPCB Barcode / RFID tracking QR before leaving department.',
+      'Store in refrigerated holding room (<8°C) if transit exceeds 24 hours.',
+      'Transfer strictly to GPS-monitored bio-medical transport vans destined for authorized CBWTF.'
+    ]
+  }
+};
+
+window.openSegregationTagDetail = function(tagKey) {
+  const modal = document.getElementById('segregationTagDetailModal');
+  if (!modal) return;
+  const k = (tagKey || '').toLowerCase();
+  let data = SEGREGATION_TAG_DETAILS.wet;
+  if (k.includes('dry') || k.includes('plastic') || k.includes('recycle') || k.includes('paper')) {
+    data = SEGREGATION_TAG_DETAILS.dry;
+  } else if (k.includes('ewaste') || k.includes('circuit') || k.includes('electronic')) {
+    data = SEGREGATION_TAG_DETAILS.ewaste;
+  } else if (k.includes('hazard') || k.includes('battery') || k.includes('chemical')) {
+    data = SEGREGATION_TAG_DETAILS.hazardous;
+  } else if (k.includes('sanitary') || k.includes('nappy')) {
+    data = SEGREGATION_TAG_DETAILS.sanitary;
+  } else if (k.includes('bio') || k.includes('yellow') || k.includes('hospital')) {
+    data = SEGREGATION_TAG_DETAILS.biomedical;
+  }
+
+  const em = document.getElementById('tagDetailEmoji');
+  const tit = document.getElementById('tagDetailTitle');
+  const bBadge = document.getElementById('tagDetailBinBadge');
+  const man = document.getElementById('tagDetailMandate');
+  const decomp = document.getElementById('tagDetailDecomp');
+  const treat = document.getElementById('tagDetailTreatment');
+  const haz = document.getElementById('tagDetailHazard');
+  const pen = document.getElementById('tagDetailPenalty');
+  const stepsList = document.getElementById('tagDetailHandlingSteps');
+
+  if (em) em.textContent = data.emoji;
+  if (tit) tit.textContent = data.title;
+  if (bBadge) bBadge.textContent = data.binBadge;
+  if (man) man.textContent = data.mandate;
+  if (decomp) decomp.textContent = data.decomp;
+  if (treat) treat.textContent = data.treatment;
+  if (haz) haz.textContent = data.hazard;
+  if (pen) pen.textContent = data.penalty;
+  if (stepsList) {
+    stepsList.innerHTML = data.steps.map(s => `<li>${s}</li>`).join('');
+  }
+
+  modal.classList.add('active');
+  if (typeof playCivicAudio === 'function') playCivicAudio('click');
+};
+
+window.closeSegregationTagDetailModal = function() {
+  const modal = document.getElementById('segregationTagDetailModal');
+  if (modal) modal.classList.remove('active');
+};
+
+
+/* ==========================================================================
+   Section 26: Worker Personnel Dossier & Profile Edit Handlers
+   ========================================================================== */
+window.openWorkerProfileEditModal = function() {
+  const modal = document.getElementById('workerProfileEditModal');
+  if (!modal) return;
+  const user = currentUser || {};
+  const phoneInp = document.getElementById('editWorkerPhone');
+  const emInp = document.getElementById('editWorkerEmergency');
+  const bloodInp = document.getElementById('editWorkerBloodGroup');
+  const depotInp = document.getElementById('editWorkerDepot');
+
+  if (phoneInp) phoneInp.value = user.phone || '+91 98112-40192';
+  if (emInp) emInp.value = user.emergencyContact || '+91 98200-11223 (Kavita Singh - Spouse)';
+  if (bloodInp) bloodInp.value = user.bloodGroup || 'O+';
+  if (depotInp) depotInp.value = user.assignedDepot || 'Prabhadevi Municipal Motor Garage';
+
+  modal.classList.add('active');
+  if (typeof playCivicAudio === 'function') playCivicAudio('click');
+};
+
+window.closeWorkerProfileEditModal = function() {
+  const modal = document.getElementById('workerProfileEditModal');
+  if (modal) modal.classList.remove('active');
+};
+
+window.handleWorkerProfileEditSubmit = function(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  const phone = document.getElementById('editWorkerPhone')?.value.trim() || '+91 98112-40192';
+  const emergency = document.getElementById('editWorkerEmergency')?.value.trim() || '+91 98200-11223';
+  const blood = document.getElementById('editWorkerBloodGroup')?.value || 'O+';
+  const depot = document.getElementById('editWorkerDepot')?.value.trim() || 'Prabhadevi Municipal Motor Garage';
+
+  if (currentUser) {
+    currentUser.phone = phone;
+    currentUser.emergencyContact = emergency;
+    currentUser.bloodGroup = blood;
+    currentUser.assignedDepot = depot;
+
+    let users = getUsers();
+    const idx = users.findIndex(u => u.id === currentUser.id);
+    if (idx !== -1) {
+      users[idx] = Object.assign({}, users[idx], {
+        phone,
+        emergencyContact: emergency,
+        bloodGroup: blood,
+        assignedDepot: depot
+      });
+      saveUsers(users);
+    }
+    localStorage.setItem('swm_current_user', JSON.stringify(currentUser));
+  }
+
+  closeWorkerProfileEditModal();
+  if (typeof showToast === 'function') {
+    showToast('✓ Personal & Emergency Contact Dossier Updated!', 'success');
+  } else {
+    alert('Personal & Emergency Details Saved!');
+  }
+  if (currentUser && currentUser.role === 'worker') {
+    runSoftwareRouteOptimizer();
+  }
+};
+
 /* ==========================================================================
    SMART WASTE MANAGEMENT SYSTEM - APPLICATION ENGINE
    Municipal Urban Services Platform (Software-Only Multi-Role Architecture)
@@ -10,6 +943,9 @@ document.addEventListener('DOMContentLoaded', () => {
   initAuth();
   initVoiceRecorder();
   initSegregationGuide();
+  renderVirtualWasteBag();
+  renderEcoStore();
+  renderGamificationCard();
   initAdminEventListeners();
   initPWA();
   initLanguage();
@@ -214,7 +1150,132 @@ const SEED_USERS = [
     lastKnownLng: 72.8567,
     lastLocationUpdatedAt: Date.now() - 3600000
   },
+    { 
+    id: 'usr-11', 
+    email: 'crew106@cleanward.org', 
+    pass: 'demo123', 
+    name: 'Pooja Shinde (Crew #106)', 
+    crewNumber: '106',
+    role: 'worker', 
+    verificationCode: 'WRK-106',
+    assignedWard: 'Ward D - Malabar Hill & Breach Candy',
+    phone: '+91 98201-55011',
+    emergencyContact: '+91 98202-66011 (Suresh Shinde - Spouse)',
+    bloodGroup: 'A+',
+    mcgmBadgeId: 'MCGM-SWM-4020',
+    assignedDepot: 'Grant Road Ward Depot',
+    shiftTiming: '06:00 AM - 02:00 PM',
+    yearsOfService: 5,
+    medicalClearance: '✓ Fit (Hep-B Active)',
+    licenseNumber: 'MH-01-2021-0081234',
+    vehicleType: 'Eco Tipper Van (1.5T)',
+    vehicleRegistration: 'MH-01-EV-6011',
+    shiftStatus: 'active',
+    lastKnownLat: 18.9667,
+    lastKnownLng: 72.8055,
+    lastLocationUpdatedAt: Date.now() - 150000
+  },
   { 
+    id: 'usr-12', 
+    email: 'crew107@cleanward.org', 
+    pass: 'demo123', 
+    name: 'Deepak Jadhav (Crew #107)', 
+    crewNumber: '107',
+    role: 'worker', 
+    verificationCode: 'WRK-107',
+    assignedWard: 'Ward K/West - Andheri West & Juhu Coastal',
+    phone: '+91 98203-77012',
+    emergencyContact: '+91 98204-88012 (Sunita Jadhav - Mother)',
+    bloodGroup: 'B+',
+    mcgmBadgeId: 'MCGM-SWM-4021',
+    assignedDepot: 'Versova Mechanical Yard',
+    shiftTiming: '07:00 AM - 03:00 PM',
+    yearsOfService: 6,
+    medicalClearance: '✓ Fit (Annual Audio OK)',
+    licenseNumber: 'MH-02-2019-0092345',
+    vehicleType: 'Beach Sand Cleaner & Compactor (8T)',
+    vehicleRegistration: 'MH-02-SC-7012',
+    shiftStatus: 'active',
+    lastKnownLat: 19.1200,
+    lastKnownLng: 72.8250,
+    lastLocationUpdatedAt: Date.now() - 200000
+  },
+  { 
+    id: 'usr-13', 
+    email: 'crew108@cleanward.org', 
+    pass: 'demo123', 
+    name: 'Santosh Gaikwad (Crew #108)', 
+    crewNumber: '108',
+    role: 'worker', 
+    verificationCode: 'WRK-108',
+    assignedWard: 'Ward F/North - Matunga & Sion Central',
+    phone: '+91 98205-99013',
+    emergencyContact: '+91 98206-11013 (Rani Gaikwad - Spouse)',
+    bloodGroup: 'AB+',
+    mcgmBadgeId: 'MCGM-SWM-4022',
+    assignedDepot: 'Matunga Central Garage',
+    shiftTiming: '06:00 AM - 02:00 PM',
+    yearsOfService: 9,
+    medicalClearance: '✓ Fit (Booster Verified)',
+    licenseNumber: 'MH-01-2016-0033456',
+    vehicleType: 'Heavy Compactor (10T)',
+    vehicleRegistration: 'MH-01-HC-8013',
+    shiftStatus: 'active',
+    lastKnownLat: 19.0350,
+    lastKnownLng: 72.8550,
+    lastLocationUpdatedAt: Date.now() - 250000
+  },
+  { 
+    id: 'usr-14', 
+    email: 'crew109@cleanward.org', 
+    pass: 'demo123', 
+    name: 'Manoj Kamble (Crew #109)', 
+    crewNumber: '109',
+    role: 'worker', 
+    verificationCode: 'WRK-109',
+    assignedWard: 'Ward M/East - Chembur & Govandi Eco-Hub',
+    phone: '+91 98207-22014',
+    emergencyContact: '+91 98208-33014 (Ajay Kamble - Brother)',
+    bloodGroup: 'O-',
+    mcgmBadgeId: 'MCGM-SWM-4023',
+    assignedDepot: 'Deonar Solid Waste Facility Garage',
+    shiftTiming: '02:00 PM - 10:00 PM',
+    yearsOfService: 11,
+    medicalClearance: '✓ Fit (Pulmonary Clear)',
+    licenseNumber: 'MH-03-2014-0014567',
+    vehicleType: 'Refuse Collector Truck (12T)',
+    vehicleRegistration: 'MH-03-RC-9014',
+    shiftStatus: 'active',
+    lastKnownLat: 19.0550,
+    lastKnownLng: 72.9050,
+    lastLocationUpdatedAt: Date.now() - 300000
+  },
+  { 
+    id: 'usr-15', 
+    email: 'crew110@cleanward.org', 
+    pass: 'demo123', 
+    name: 'Vijay Patil (Crew #110)', 
+    crewNumber: '110',
+    role: 'worker', 
+    verificationCode: 'WRK-110',
+    assignedWard: 'Ward T - Mulund Green Corridor',
+    phone: '+91 98209-44015',
+    emergencyContact: '+91 98210-55015 (Meena Patil - Spouse)',
+    bloodGroup: 'A-',
+    mcgmBadgeId: 'MCGM-SWM-4024',
+    assignedDepot: 'Mulund Check Naka Depot',
+    shiftTiming: '06:00 AM - 02:00 PM',
+    yearsOfService: 4,
+    medicalClearance: '✓ Fit (Full Clearance)',
+    licenseNumber: 'MH-04-2022-0055678',
+    vehicleType: 'Electric Tipper Auto (1.5T)',
+    vehicleRegistration: 'MH-04-EV-1015',
+    shiftStatus: 'active',
+    lastKnownLat: 19.1750,
+    lastKnownLng: 72.9550,
+    lastLocationUpdatedAt: Date.now() - 350000
+  },
+{ 
     id: 'usr-5', 
     email: 'admin@citygov.org', 
     pass: 'demo123', 
@@ -643,7 +1704,12 @@ const SEED_COMPLIANCE_METRICS = [
   { ward: 'Ward H/West - Bandra Residential', segregationRate: 68, coverageRate: 88, processingRate: 82, status: 'ontrack' },
   { ward: 'Ward K/East - Andheri Industrial Estate', segregationRate: 78, coverageRate: 86, processingRate: 80, status: 'ontrack' },
   { ward: 'Ward S - Powai Lake & Tech Enclave', segregationRate: 44, coverageRate: 68, processingRate: 59, status: 'offtarget' },
-  { ward: 'Ward A - Colaba & Fort Commercial', segregationRate: 62, coverageRate: 84, processingRate: 81, status: 'ontrack' }
+  { ward: 'Ward A - Colaba & Fort Commercial', segregationRate: 62, coverageRate: 84, processingRate: 81, status: 'ontrack' },
+  { ward: 'Ward D - Malabar Hill & Breach Candy', segregationRate: 92, coverageRate: 95, processingRate: 90, status: 'ontrack' },
+  { ward: 'Ward K/West - Andheri West & Juhu Coastal', segregationRate: 81, coverageRate: 89, processingRate: 84, status: 'ontrack' },
+  { ward: 'Ward F/North - Matunga & Sion Central', segregationRate: 72, coverageRate: 85, processingRate: 79, status: 'neartarget' },
+  { ward: 'Ward M/East - Chembur & Govandi Eco-Hub', segregationRate: 61, coverageRate: 78, processingRate: 71, status: 'neartarget' },
+  { ward: 'Ward T - Mulund Green Corridor', segregationRate: 84, coverageRate: 91, processingRate: 88, status: 'ontrack' }
 ];
 
 const SEED_FLEET = [
@@ -877,20 +1943,264 @@ function initAuth() {
     }
   };
 
+  // ==========================================================================
+  // GOOGLE AUTHENTICATION & MULTI-STAKEHOLDER ACCOUNT CHOOSER ENGINE
+  // ==========================================================================
+  let currentGoogleAuthMode = 'login';
+
+  const GOOGLE_SEED_ACCOUNTS = [
+    {
+      name: 'Ananya Sharma',
+      email: 'citizen@ecoclear.org',
+      googleEmail: 'ananya.sharma@gmail.com',
+      role: 'citizen',
+      roleLabel: 'Resident Citizen',
+      roleClass: 'role-citizen',
+      bgColor: '#16a34a',
+      initials: 'AS'
+    },
+    {
+      name: 'Rajesh Singh',
+      email: 'crew101@cleanward.org',
+      googleEmail: 'rajesh.singh.crew101@gmail.com',
+      role: 'worker',
+      roleLabel: 'Worker Crew #101',
+      roleClass: 'role-worker',
+      bgColor: '#ea580c',
+      initials: 'RS'
+    },
+    {
+      name: 'Municipal Admin',
+      email: 'admin@citygov.org',
+      googleEmail: 'admin.urban@citygov.org',
+      role: 'admin',
+      roleLabel: 'Municipal Admin',
+      roleClass: 'role-admin',
+      bgColor: '#dc2626',
+      initials: 'MA'
+    },
+    {
+      name: 'Dr. Priya Nair',
+      email: 'citycare@hospital.org',
+      googleEmail: 'dr.priya.nair@citycare.org',
+      role: 'hospital',
+      roleLabel: 'Hospital Bio-Medical',
+      roleClass: 'role-hospital',
+      bgColor: '#9333ea',
+      initials: 'PN'
+    },
+    {
+      name: 'Bombay Scottish School',
+      email: 'school@cityedu.org',
+      googleEmail: 'principal.scottish@cityedu.org',
+      role: 'institution',
+      roleLabel: 'Institution / School',
+      roleClass: 'role-institution',
+      bgColor: '#2563eb',
+      initials: 'BS'
+    }
+  ];
+
+  window.renderGoogleAccountList = function() {
+    const container = document.getElementById('googleAuthAccountList');
+    if (!container) return;
+
+    container.innerHTML = GOOGLE_SEED_ACCOUNTS.map(acc => `
+      <div class="google-account-item" onclick="selectGoogleAccount('${acc.email}', '${acc.name}', '${acc.role}', '${acc.bgColor}', '${acc.initials}')" role="button" tabindex="0">
+        <div class="google-account-avatar" style="background-color: ${acc.bgColor};">${acc.initials}</div>
+        <div class="google-account-info">
+          <div class="google-account-name">${acc.name}</div>
+          <div class="google-account-email">${acc.googleEmail || acc.email}</div>
+        </div>
+        <span class="google-account-role-pill role-pill ${acc.roleClass}">${acc.role.toUpperCase()}</span>
+      </div>
+    `).join('');
+  };
+
   window.handleGoogleSignIn = function() {
-    const btn = document.querySelector('.btn-google');
+    const mode = (arguments.length > 0 && arguments[0]) ? arguments[0] : 'login';
+    currentGoogleAuthMode = mode;
+    const btnId = mode === 'signup' ? 'signupGoogleBtn' : 'loginGoogleBtn';
+    const btn = document.getElementById(btnId) || document.querySelector('.btn-google');
+
     if (btn) {
-      btn.innerHTML = `<span class="btn-spinner"></span> Connecting Google Account...`;
       btn.classList.add('btn-loading');
     }
+
+    if (typeof playCivicAudio === 'function') {
+      playCivicAudio('click');
+    }
+
+    // Attempt Google Identity Services (GSI) One-Tap if client ID is configured
+    const clientIdMeta = document.querySelector('meta[name="google-signin-client_id"]');
+    const clientId = window.GOOGLE_CLIENT_ID || (clientIdMeta ? clientIdMeta.getAttribute('content') : null);
+
+    if (window.google && window.google.accounts && window.google.accounts.id && clientId) {
+      try {
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          callback: handleGoogleCredentialResponse,
+          auto_select: false
+        });
+        window.google.accounts.id.prompt();
+      } catch (e) {
+        console.warn('Google One Tap note:', e);
+      }
+    }
+
+    const titleEl = document.getElementById('googleAuthTitle');
+    const subtitleEl = document.getElementById('googleAuthSubtitle');
+    const isHindi = currentLang === 'hi';
+
+    if (titleEl) {
+      titleEl.textContent = mode === 'signup'
+        ? (isHindi ? 'Google से खाता बनाएं' : 'Sign up with Google')
+        : (isHindi ? 'Google से साइन इन करें' : 'Sign in with Google');
+    }
+    if (subtitleEl) {
+      subtitleEl.innerHTML = isHindi
+        ? '<strong>EcoClear म्युनिसिपल पोर्टल</strong> के लिए अपना Google खाता चुनें'
+        : 'Choose an account to continue to <strong>EcoClear Municipal Waste Portal</strong>';
+    }
+
+    const connectingState = document.getElementById('googleAuthConnectingState');
+    const accountList = document.getElementById('googleAuthAccountList');
+    if (connectingState) connectingState.style.display = 'none';
+    if (accountList) accountList.style.display = 'flex';
+
+    const customForm = document.getElementById('googleCustomAccountForm');
+    if (customForm) customForm.style.display = 'none';
+
+    renderGoogleAccountList();
+
+    const modal = document.getElementById('googleAuthModal');
+    if (modal) {
+      modal.classList.add('active');
+    }
+
+    setTimeout(() => {
+      if (btn) btn.classList.remove('btn-loading');
+    }, 400);
+  };
+
+  window.selectGoogleAccount = function(email, name, role, bgColor, initials) {
+    const connectingState = document.getElementById('googleAuthConnectingState');
+    const accountList = document.getElementById('googleAuthAccountList');
+    const connectingMsg = document.getElementById('googleConnectingMsg');
+
+    if (accountList) accountList.style.display = 'none';
+    if (connectingState) {
+      connectingState.style.display = 'block';
+      if (connectingMsg) {
+        connectingMsg.textContent = `Authenticating ${name} with Google...`;
+      }
+    }
+
+    if (typeof playCivicAudio === 'function') {
+      playCivicAudio('chime');
+    }
+
     setTimeout(() => {
       const users = getUsers();
-      const citizen = users.find(u => u.email === 'citizen@ecoclear.org') || users[0];
-      if (btn) btn.innerHTML = `✓ Google Verified`;
-      setTimeout(() => {
-        setCurrentUser(citizen);
-      }, 250);
-    }, 450);
+      let targetUser = users.find(u => u.email.toLowerCase() === email.toLowerCase());
+
+      if (!targetUser) {
+        const selectedSignupRole = (document.getElementById('signupRole')?.value) || role || 'citizen';
+        targetUser = {
+          id: 'usr-g-' + Date.now(),
+          email: email,
+          pass: 'google-oauth-token',
+          name: name,
+          role: selectedSignupRole,
+          authProvider: 'google',
+          googleVerified: true,
+          credits: 50,
+          transactions: [
+            { date: new Date().toISOString().replace('T', ' ').substring(0, 16), reason: 'Google Account Connection Bonus', amount: 50 }
+          ]
+        };
+        users.push(targetUser);
+        localStorage.setItem('swm_users', JSON.stringify(users));
+
+        // Sync with backend if online
+        fetch('/api/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(targetUser)
+        }).catch(() => {});
+      } else {
+        targetUser.authProvider = 'google';
+        targetUser.googleVerified = true;
+        localStorage.setItem('swm_users', JSON.stringify(users));
+      }
+
+      closeModal('googleAuthModal');
+
+      // Update button state on screen
+      document.querySelectorAll('.btn-google').forEach(btn => {
+        const svg = btn.querySelector('svg');
+        btn.innerHTML = '';
+        if (svg) btn.appendChild(svg);
+        btn.appendChild(document.createTextNode(' ✓ Google Verified'));
+      });
+
+      setCurrentUser(targetUser);
+
+      if (typeof showCivicToast === 'function') {
+        showCivicToast(`Signed in with Google as ${targetUser.name}`, 'success');
+      }
+    }, 550);
+  };
+
+  window.toggleGoogleCustomInput = function() {
+    const form = document.getElementById('googleCustomAccountForm');
+    if (!form) return;
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  };
+
+  window.submitGoogleCustomAccount = function() {
+    const nameInput = document.getElementById('googleCustomName');
+    const emailInput = document.getElementById('googleCustomEmail');
+    const roleInput = document.getElementById('googleCustomRole');
+
+    const name = nameInput ? nameInput.value.trim() : '';
+    const email = emailInput ? emailInput.value.trim() : '';
+    const role = roleInput ? roleInput.value : 'citizen';
+
+    if (!name) {
+      alert('Please enter your Google account name');
+      nameInput?.focus();
+      return;
+    }
+    if (!email || !email.includes('@')) {
+      alert('Please enter a valid Google email address');
+      emailInput?.focus();
+      return;
+    }
+
+    const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'G';
+    selectGoogleAccount(email, name, role, '#4285F4', initials);
+  };
+
+  window.handleGoogleCredentialResponse = function(response) {
+    if (!response || !response.credential) return;
+    try {
+      const base64Url = response.credential.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+
+      const payload = JSON.parse(jsonPayload);
+      const email = payload.email;
+      const name = payload.name || payload.given_name || 'Google User';
+      const initials = (name.split(' ').map(n => n[0]).join('') || 'G').substring(0, 2).toUpperCase();
+
+      selectGoogleAccount(email, name, 'citizen', '#4285F4', initials);
+    } catch (err) {
+      console.error('Error decoding Google JWT credential:', err);
+      selectGoogleAccount('citizen@ecoclear.org', 'Ananya Sharma', 'citizen', '#16a34a', 'AS');
+    }
   };
 
   function triggerFieldValidationError(element) {
@@ -1136,32 +2446,6 @@ window.quickLogin = function(email) {
   if (found) setCurrentUser(found);
 };
 
-function demoSwitchRole(role) {
-  const roleEmailMap = {
-    citizen: 'citizen@ecoclear.org',
-    institution: 'school@cityedu.org',
-    school: 'school@cityedu.org',
-    company: 'infosys@campus.org',
-    hospital: 'citycare@hospital.org',
-    worker: 'crew101@cleanward.org',
-    worker101: 'crew101@cleanward.org',
-    worker102: 'crew102@cleanward.org',
-    worker103: 'crew103@cleanward.org',
-    worker104: 'crew104@cleanward.org',
-    worker105: 'crew105@cleanward.org',
-    admin: 'admin@citygov.org'
-  };
-  const targetEmail = roleEmailMap[role] || (role && role.includes('@') ? role : 'citizen@ecoclear.org');
-  const users = getUsers();
-  const found = users.find(u => u.email.toLowerCase() === targetEmail.toLowerCase() || u.role === role);
-  if (found) {
-    if (typeof playCivicAudio === 'function') playCivicAudio('click');
-    setCurrentUser(found);
-  }
-}
-window.demoSwitchRole = demoSwitchRole;
-window.quickSwitchDemoRole = demoSwitchRole;
-
 function setCurrentUser(user) {
   currentUser = user;
   localStorage.setItem('swm_current_user', JSON.stringify(user));
@@ -1228,6 +2512,13 @@ function checkSession() {
     navUserBar.style.display = 'flex';
 
     document.getElementById('navUserName').textContent = currentUser.name;
+    if (currentUser.authProvider === 'google') {
+      const gBadge = document.createElement('span');
+      gBadge.className = 'google-verified-badge';
+      gBadge.title = 'Authenticated via Google OAuth 2.0';
+      gBadge.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg> Google`;
+      document.getElementById('navUserName').appendChild(gBadge);
+    }
     const pill = document.getElementById('navUserRolePill');
     pill.textContent = currentUser.role.toUpperCase();
     pill.className = `role-pill role-${currentUser.role}`;
@@ -1260,7 +2551,12 @@ const KNOWN_MUNICIPAL_WARDS = [
   { name: 'Ward G/South - Dadar & Elphinstone', lat: 19.0178, lng: 72.8302, keywords: ['dadar', 'elphinstone', 'lower parel', 'prabhadevi', 'g/south', 'g-south', 'worli', 'currey road', 'commercial'] },
   { name: 'Ward H/West - Bandra Residential', lat: 19.0596, lng: 72.8295, keywords: ['bandra', 'khar', 'h/west', 'h-west', 'residential', 'pali hill', 'carter road', 'linking road', 'turner road'] },
   { name: 'Ward S - Powai Lake & Tech Enclave', lat: 19.1250, lng: 72.9150, keywords: ['powai', 'hiranandani', 'iit', 's ward', 'vikhroli', 'chandivali', 'kanjurmarg', 'tech enclave'] },
-  { name: 'Ward A - Colaba & Fort Commercial', lat: 18.9220, lng: 72.8347, keywords: ['colaba', 'fort', 'cst', 'cstm', 'railway', 'nariman point', 'marine drive', 'ward a', 'churchgate'] }
+  { name: 'Ward A - Colaba & Fort Commercial', lat: 18.9220, lng: 72.8347, keywords: ['colaba', 'fort', 'cst', 'cstm', 'railway', 'nariman point', 'marine drive', 'ward a', 'churchgate'] },
+  { name: 'Ward D - Malabar Hill & Breach Candy', lat: 18.9667, lng: 72.8055, keywords: ['malabar', 'breach candy', 'walkeshwar', 'ward d', 'd ward', 'nepean sea', 'tardeo'] },
+  { name: 'Ward K/West - Andheri West & Juhu Coastal', lat: 19.1200, lng: 72.8250, keywords: ['andheri west', 'juhu', 'versova', 'k/west', 'k-west', 'lokhandwala', 'dn nagar'] },
+  { name: 'Ward F/North - Matunga & Sion Central', lat: 19.0350, lng: 72.8550, keywords: ['matunga', 'sion', 'wadala', 'f/north', 'f-north', 'gtb nagar', 'antop hill'] },
+  { name: 'Ward M/East - Chembur & Govandi Eco-Hub', lat: 19.0550, lng: 72.9050, keywords: ['chembur', 'govandi', 'deonar', 'm/east', 'm-east', 'mankhurd', 'trombay'] },
+  { name: 'Ward T - Mulund Green Corridor', lat: 19.1750, lng: 72.9550, keywords: ['mulund', 'check naka', 't ward', 'nahur', 'eastern express', 'green corridor'] }
 ];
 
 function deriveWardFromCoordinates(lat, lng, addressData) {
@@ -1551,6 +2847,7 @@ function renderCitizenDashboard() {
   }
 
   setTimeout(() => initLeafletLocationPicker('citizen'), 150);
+  setTimeout(() => { if (window.EcoClear3D && typeof window.EcoClear3D.initSegregationStudio === 'function') { window.EcoClear3D.initSegregationStudio(); } }, 200);
 
   const segForm = document.getElementById('segregationCheckForm');
   if (segForm) {
@@ -2775,6 +4072,34 @@ function runSoftwareRouteOptimizer() {
   if (typeElem) typeElem.textContent = myVehicle ? myVehicle.type : 'Heavy Hydraulic Compactor (10T)';
   if (regElem) regElem.textContent = myVehicle ? myVehicle.regNo : 'MH-01-GA-4401';
   if (wardElem) wardElem.textContent = currentUser?.assignedWard || (myVehicle ? myVehicle.ward : 'Ward G/South - Dadar & Elphinstone');
+
+  // 1B. Update Worker Personnel Dossier Card
+  const pName = document.getElementById('workerPersonnelName');
+  const pBadge = document.getElementById('workerMcgmBadgePill');
+  const pBlood = document.getElementById('workerBloodGroupBadge');
+  const pYears = document.getElementById('workerYearsServiceDisplay');
+  const pPhone = document.getElementById('workerPhoneDisplay');
+  const pEmergency = document.getElementById('workerEmergencyDisplay');
+  const pDepot = document.getElementById('workerDepotDisplay');
+  const pTiming = document.getElementById('workerShiftTimingDisplay');
+  const pMedical = document.getElementById('workerMedicalDisplay');
+  const pLicense = document.getElementById('workerLicenseDisplay');
+
+  if (pName) pName.textContent = currentUser?.name || 'Rajesh Singh';
+  if (pBadge) pBadge.textContent = currentUser?.mcgmBadgeId || 'MCGM-SWM-4019';
+  if (pBlood) pBlood.textContent = `🩸 Blood Group: ${currentUser?.bloodGroup || 'O+'}`;
+  if (pYears) pYears.textContent = `${currentUser?.yearsOfService || 8} Years in Service`;
+  if (pPhone) {
+    const rawPhone = currentUser?.phone || '+91 98112-40192';
+    pPhone.textContent = `📞 ${rawPhone}`;
+    pPhone.setAttribute('href', `tel:${rawPhone.replace(/[s-]/g, '')}`);
+  }
+  if (pEmergency) pEmergency.textContent = `🚨 ${currentUser?.emergencyContact || '+91 98200-11223 (Kavita Singh - Spouse)'}`;
+  if (pDepot) pDepot.textContent = currentUser?.assignedDepot || 'Prabhadevi Municipal Motor Garage';
+  if (pTiming) pTiming.textContent = currentUser?.shiftTiming || '06:00 AM - 02:00 PM (Morning General)';
+  if (pMedical) pMedical.textContent = currentUser?.medicalClearance || '✓ Fit (Tetanus & Hep-B Booster Verified)';
+  if (pLicense) pLicense.textContent = currentUser?.licenseNumber || 'MH-01-2018-0044192';
+
 
   // 2. Handle Shift Status (Active vs Off-Shift)
   const shiftStatus = currentUser?.shiftStatus || 'active';
@@ -4251,11 +5576,6 @@ function displayActiveBroadcasts() {
   }
 }
 
-window.switchDemoRole = function(email) {
-  if (!email) return;
-  quickLogin(email);
-};
-
 window.openAboutProjectModal = function() {
   const modal = document.getElementById('aboutProjectModal');
   if (modal) modal.classList.add('active');
@@ -5334,7 +6654,9 @@ function initAdminWorkerLocationsMap(forceRefresh) {
             ${isIdle ? '⏸️ Idle / Off-Shift' : '🟢 Active Shift'}
           </span>
         </div>
-        <div style="font-size: 0.78rem; color: #64748b;">Crew ID: <code>${w.id}</code> (Crew #${w.crewNumber || '101'})</div>
+        <div style="font-size: 0.78rem; color: #64748b;">Crew ID: <code>${w.id}</code> (Crew #${w.crewNumber || '101'}) &bull; Badge: <code>${w.mcgmBadgeId || 'MCGM-SWM-4019'}</code></div>
+        <div style="font-size: 0.8rem; margin: 0.2rem 0;">📞 Phone: <a href="tel:${(w.phone || '+91 98112-40192').replace(/[\s-]/g, '')}" style="color: #0284c7; font-weight: 700; text-decoration: none;">${w.phone || '+91 98112-40192'}</a> &bull; 🩸 ${w.bloodGroup || 'O+'}</div>
+        <div style="font-size: 0.74rem; color: #dc2626; margin-bottom: 0.2rem;">🚨 Emergency: ${w.emergencyContact || '+91 98200-11223'}</div>
         <div style="font-size: 0.82rem; margin: 0.35rem 0;">🚛 Vehicle: <strong>${vehicle ? vehicle.type : 'Compactor'}</strong> (<code style="background: rgba(0,0,0,0.06); padding: 1px 4px; border-radius: 3px;">${vehicle ? vehicle.regNo : 'MH-01'}</code>)</div>
         <div style="font-size: 0.82rem; margin-bottom: 0.35rem;">📋 Stops Remaining: <strong>${assignedStops.length}</strong> ${assignedStops.some(s => s.isEmergency) ? '<span style="color: #dc2626; font-weight: 800;">🚨 (Includes Emergency)</span>' : ''}</div>
         <div style="font-size: 0.75rem; color: #64748b; margin-bottom: 0.6rem;">🕒 Last Updated: ${updatedStr} &bull; Ward: ${w.assignedWard || 'Mumbai'}</div>
@@ -6940,7 +8262,7 @@ function initSegregationGuide() {
         <div class="guide-item-card">
           <div>
             <strong>${displayName}</strong>
-            <div><span class="bin-tag ${i.tag}">${getCategorySvgIcon(i.bin)}${displayBin}</span></div>
+            <div><span class="bin-tag ${i.tag}" onclick="openSegregationTagDetail('${i.tag || i.bin}')" style="cursor: pointer;" title="Click for Statutory Rules & Treatment Details">${getCategorySvgIcon(i.bin)}${displayBin} 🔍</span></div>
           </div>
           <div style="font-size: 0.78rem; color: #64748b; margin-top: 0.4rem;">${displayTip}</div>
         </div>
@@ -7677,11 +8999,11 @@ const I18N = {
     tabLogin: 'Sign In',
     tabSignup: 'Register Account',
     googleSignIn: 'Sign in with Google',
+    googleSignUp: 'Sign up with Google',
     labelEmail: 'Email Address',
     labelPassword: 'Password',
     placeholderEmail: 'e.g. citizen@ecoclear.org',
     btnSignIn: 'Sign In',
-    demoRoleHeading: '⚡ Quick Demo: Switch Role',
     roleCitizen: 'Citizen',
     roleCitizenDesc: 'Resident',
     roleInstitution: 'Institution',
@@ -7759,11 +9081,11 @@ const I18N = {
     tabLogin: 'लॉग इन',
     tabSignup: 'नया खाता बनाएं',
     googleSignIn: 'Google से साइन इन करें',
+    googleSignUp: 'Google से साइन अप करें',
     labelEmail: 'ईमेल पता',
     labelPassword: 'पासवर्ड',
     placeholderEmail: 'उदा. citizen@ecoclear.org',
     btnSignIn: 'साइन इन करें',
-    demoRoleHeading: '⚡ तुरंत डेमो भूमिका बदलें',
     roleCitizen: 'नागरिक',
     roleCitizenDesc: 'स्थानीय निवासी',
     roleInstitution: 'संस्थान',
@@ -7882,12 +9204,15 @@ function applyAppLanguage(lang) {
   if (tabLogin) tabLogin.textContent = dict.tabLogin;
   const tabSignup = document.getElementById('tabSignup');
   if (tabSignup) tabSignup.textContent = dict.tabSignup;
-  const googleBtn = document.querySelector('#loginForm .btn-google');
-  if (googleBtn) {
-    const svg = googleBtn.querySelector('svg');
-    googleBtn.innerHTML = '';
-    if (svg) googleBtn.appendChild(svg);
-    googleBtn.appendChild(document.createTextNode(' ' + dict.googleSignIn));
+  const loginGoogleBtn = document.querySelector('#loginForm .btn-google');
+  if (loginGoogleBtn) {
+    const span = loginGoogleBtn.querySelector('span');
+    if (span) span.textContent = dict.googleSignIn;
+  }
+  const signupGoogleBtn = document.querySelector('#signupForm .btn-google');
+  if (signupGoogleBtn) {
+    const span = signupGoogleBtn.querySelector('span');
+    if (span) span.textContent = dict.googleSignUp;
   }
   const emailLabel = document.querySelector('label[for="loginEmail"]');
   if (emailLabel) emailLabel.textContent = dict.labelEmail;
@@ -7925,12 +9250,6 @@ function applyAppLanguage(lang) {
       if (d) d.textContent = roleCards[r].desc;
     }
   });
-
-  // Demo Role Heading
-  const demoHeading = document.querySelector('#quickDemoSwitchRole div');
-  if (demoHeading) {
-    demoHeading.innerHTML = `<span>⚡</span> <span>${dict.demoRoleHeading}</span>`;
-  }
 
   // 4. Citizen Dashboard
   const citizenH2 = document.querySelector('#citizenDashboard .dashboard-title');
@@ -8180,16 +9499,6 @@ function initKeyboardShortcuts() {
     } else if (e.key === 'Escape') {
       closeAllModals();
       document.getElementById('notificationDropdown')?.classList.remove('active');
-    } else if (e.key === '1') {
-      demoSwitchRole('citizen');
-    } else if (e.key === '2') {
-      demoSwitchRole('institution');
-    } else if (e.key === '3') {
-      demoSwitchRole('hospital');
-    } else if (e.key === '4') {
-      demoSwitchRole('worker');
-    } else if (e.key === '5') {
-      demoSwitchRole('admin');
     } else if (e.key.toLowerCase() === 't') {
       window.location.href = 'transparency.html';
     } else if (e.key.toLowerCase() === 'n') {
@@ -8460,4 +9769,562 @@ window.openAdminShiftHandoverModal = function() {
 
   modal.classList.add('active');
   playCivicAudio('beep');
+};
+
+/* ==========================================================================
+   Section 25: AI Waste Vision Scanner & Nearest Smart Bin Finder System
+   Real-Time Visual Classification, Auto Segregation & Proximity Drop-off Radar
+   ========================================================================== */
+
+const MUMBAI_SMART_BINS = [
+  {
+    id: 'BIN-DR-01',
+    name: 'Dadar Shivaji Park Eco-Depot',
+    location: 'Shivaji Park Seaface, Dadar West',
+    lat: 19.0280,
+    lng: 72.8380,
+    accepts: ['dry', 'plastic', 'paper', 'metal'],
+    capacityPercent: 42,
+    status: 'Available',
+    sensorType: 'Ultrasonic IoT + Optical Fill',
+    hours: '24/7 Access'
+  },
+  {
+    id: 'BIN-BD-02',
+    name: 'Bandra Hill Road Smart Recycling Hub',
+    location: 'Hill Road Junction, Bandra West',
+    lat: 19.0558,
+    lng: 72.8335,
+    accepts: ['plastic', 'ewaste', 'dry', 'glass'],
+    capacityPercent: 68,
+    status: 'Optimal',
+    sensorType: 'Optical AI Sorter + Compactor',
+    hours: '24/7 Access'
+  },
+  {
+    id: 'BIN-AD-03',
+    name: 'Andheri MIDC Industrial Drop-off Station',
+    location: 'Central Road, MIDC Industrial Area, Andheri East',
+    lat: 19.1180,
+    lng: 72.8685,
+    accepts: ['ewaste', 'dry', 'hazardous', 'metal'],
+    capacityPercent: 81,
+    status: 'Filling Fast',
+    sensorType: 'Laser Weight & Volume Telemetry',
+    hours: '06:00 - 22:00'
+  },
+  {
+    id: 'BIN-PW-04',
+    name: 'Powai Hiranandani Bio-Compost & Segregation Pod',
+    location: 'Central Ave, Hiranandani Gardens, Powai',
+    lat: 19.1235,
+    lng: 72.9090,
+    accepts: ['wet', 'organic', 'compost'],
+    capacityPercent: 35,
+    status: 'Available',
+    sensorType: 'Bio-Gas Sensor + Smart Aeration',
+    hours: '24/7 Access'
+  },
+  {
+    id: 'BIN-CB-05',
+    name: 'Colaba Causeway Civic Recovery Point',
+    location: 'Shahid Bhagat Singh Rd, Colaba, South Mumbai',
+    lat: 18.9180,
+    lng: 72.8285,
+    accepts: ['dry', 'plastic', 'metal', 'hazardous'],
+    capacityPercent: 55,
+    status: 'Available',
+    sensorType: 'IoT Ultrasonic Telemetry',
+    hours: '24/7 Access'
+  }
+];
+
+const AI_SAMPLE_WASTE_ITEMS = {
+  pet_bottle: {
+    id: 'pet_bottle',
+    name: 'PET Beverage Bottle',
+    badge: 'DRY RECYCLABLE',
+    badgeClass: 'badge-dry',
+    badgeBg: 'rgba(37, 99, 235, 0.15)',
+    badgeColor: '#1d4ed8',
+    categoryKey: 'dry',
+    formCategory: 'dry',
+    confidence: '98.7%',
+    material: 'Polyethylene Terephthalate (#1 PET)',
+    binColor: '🔵 Blue Dry Bin',
+    binTextColor: '#2563eb',
+    reward: '+15 EcoCredits',
+    co2: '0.35 kg CO₂e',
+    disposalTip: '1. Empty remaining liquids.\n2. Rinse lightly to prevent foul odors.\n3. Crush bottle flat to save 75% municipal truck volumetric space.\n4. Replace cap and drop into the Blue Dry Recyclables bin.',
+    boxCoords: { top: '24%', left: '30%', width: '40%', height: '52%' },
+    tag: 'PET BOTTLE [98.7%]',
+    svg: `<svg viewBox="0 0 160 200" width="130" height="170" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="petGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#60a5fa" stop-opacity="0.8"/>
+          <stop offset="50%" stop-color="#38bdf8" stop-opacity="0.4"/>
+          <stop offset="100%" stop-color="#1d4ed8" stop-opacity="0.9"/>
+        </linearGradient>
+        <linearGradient id="capGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#2563eb"/>
+          <stop offset="100%" stop-color="#1e40af"/>
+        </linearGradient>
+      </defs>
+      <rect x="68" y="15" width="24" height="14" rx="2" fill="url(#capGrad)"/>
+      <rect x="71" y="29" width="18" height="10" fill="#93c5fd" opacity="0.6"/>
+      <path d="M71 39 L52 70 C48 76 46 84 46 92 L46 165 C46 174 53 181 62 181 L98 181 C107 181 114 174 114 165 L114 92 C114 84 112 76 108 70 L89 39 Z" fill="url(#petGrad)" stroke="#38bdf8" stroke-width="2"/>
+      <path d="M54 110 L106 110" stroke="#ffffff" stroke-width="2" stroke-dasharray="4 2" opacity="0.6"/>
+      <path d="M54 135 L106 135" stroke="#ffffff" stroke-width="2" stroke-dasharray="4 2" opacity="0.6"/>
+      <text x="80" y="125" text-anchor="middle" fill="#ffffff" font-size="9" font-weight="bold" font-family="sans-serif">PET ♳ 100%</text>
+    </svg>`
+  },
+  organic_peels: {
+    id: 'organic_peels',
+    name: 'Kitchen Fruit & Vegetable Peels',
+    badge: 'WET COMPOSTABLE',
+    badgeClass: 'badge-wet',
+    badgeBg: 'rgba(16, 185, 129, 0.15)',
+    badgeColor: '#047857',
+    categoryKey: 'wet',
+    formCategory: 'wet',
+    confidence: '96.4%',
+    material: 'High-Nitrogen Organic Biomass',
+    binColor: '🟢 Green Wet Bin',
+    binTextColor: '#059669',
+    reward: '+20 EcoCredits',
+    co2: '0.48 kg CO₂e',
+    disposalTip: '1. Do not enclose in single-use plastic carry bags.\n2. Discard directly into the Green Organic Bin or community aerobic composter.\n3. Converts within 21 days into rich organic manure for Mumbai municipal parks.',
+    boxCoords: { top: '26%', left: '22%', width: '56%', height: '48%' },
+    tag: 'ORGANIC BIO-MASS [96.4%]',
+    svg: `<svg viewBox="0 0 180 180" width="140" height="140" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="peelGrad" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#facc15"/>
+          <stop offset="60%" stop-color="#eab308"/>
+          <stop offset="100%" stop-color="#ca8a04"/>
+        </linearGradient>
+      </defs>
+      <path d="M40 50 C60 20 120 20 140 50 C120 70 80 80 50 110 C35 125 25 145 20 160 C25 130 30 90 40 50 Z" fill="url(#peelGrad)" stroke="#a16207" stroke-width="2"/>
+      <path d="M140 50 C150 90 150 130 135 155 C125 140 120 110 115 80 Z" fill="#fde047" stroke="#ca8a04" stroke-width="2"/>
+      <circle cx="100" cy="110" r="22" fill="#10b981" opacity="0.25" stroke="#059669" stroke-width="2"/>
+      <path d="M92 110 L98 116 L108 104" stroke="#047857" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="100" y="145" text-anchor="middle" fill="#047857" font-size="10" font-weight="bold">COMPOSTABLE</text>
+    </svg>`
+  },
+  cardboard_box: {
+    id: 'cardboard_box',
+    name: 'Corrugated Shipping Box',
+    badge: 'PAPER & CARDBOARD',
+    badgeClass: 'badge-paper',
+    badgeBg: 'rgba(217, 119, 6, 0.15)',
+    badgeColor: '#b45309',
+    categoryKey: 'paper',
+    formCategory: 'dry',
+    confidence: '99.1%',
+    material: 'Multi-ply Kraft Cellulose Fibre',
+    binColor: '🔵 Blue Dry Bin',
+    binTextColor: '#2563eb',
+    reward: '+12 EcoCredits',
+    co2: '0.28 kg CO₂e',
+    disposalTip: '1. Remove plastic adhesive tape and parcel shipping labels.\n2. Flatten the box completely to maximize storage volume.\n3. Keep dry: wet or food-soiled cardboard cannot be mechanically repulped.',
+    boxCoords: { top: '20%', left: '20%', width: '60%', height: '60%' },
+    tag: 'CORRUGATED KRAFT [99.1%]',
+    svg: `<svg viewBox="0 0 180 180" width="140" height="140" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="boxTopGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#d97706"/>
+          <stop offset="100%" stop-color="#b45309"/>
+        </linearGradient>
+        <linearGradient id="boxSideGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#92400e"/>
+          <stop offset="100%" stop-color="#78350f"/>
+        </linearGradient>
+      </defs>
+      <polygon points="90,20 155,52 90,85 25,52" fill="#f59e0b" stroke="#78350f" stroke-width="2"/>
+      <polygon points="25,52 90,85 90,155 25,120" fill="url(#boxTopGrad)" stroke="#78350f" stroke-width="2"/>
+      <polygon points="90,85 155,52 155,120 90,155" fill="url(#boxSideGrad)" stroke="#78350f" stroke-width="2"/>
+      <line x1="90" y1="85" x2="90" y2="155" stroke="#78350f" stroke-width="2"/>
+      <text x="120" y="105" text-anchor="middle" fill="#fde68a" font-size="10" font-weight="bold" transform="rotate(15 120 105)">♻️ RECYCLE</text>
+    </svg>`
+  },
+  ewaste_circuit: {
+    id: 'ewaste_circuit',
+    name: 'High-Density Printed Circuit Board (PCB)',
+    badge: 'ELECTRONIC E-WASTE',
+    badgeClass: 'badge-ewaste',
+    badgeBg: 'rgba(147, 51, 234, 0.15)',
+    badgeColor: '#7e22ce',
+    categoryKey: 'ewaste',
+    formCategory: 'ewaste',
+    confidence: '95.9%',
+    material: 'FR4 Multi-Layer Epoxy Resin with Solder & Copper Traces',
+    binColor: '🟣 Purple E-Waste Depot',
+    binTextColor: '#9333ea',
+    reward: '+50 EcoCredits',
+    co2: '1.20 kg CO₂e',
+    disposalTip: '1. CRITICAL: Never dump with regular household waste or incinerate.\n2. Contains precious recoverable metals (Gold, Silver, Palladium) alongside heavy metals.\n3. Drop off at an authorized municipal e-waste collection depot or schedule special doorstep pickup.',
+    boxCoords: { top: '22%', left: '22%', width: '56%', height: '56%' },
+    tag: 'PCB / E-WASTE [95.9%]',
+    svg: `<svg viewBox="0 0 180 180" width="140" height="140" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="25" y="25" width="130" height="130" rx="8" fill="#064e3b" stroke="#34d399" stroke-width="3"/>
+      <rect x="45" y="45" width="35" height="35" rx="3" fill="#1e293b" stroke="#94a3b8" stroke-width="2"/>
+      <text x="62" y="66" text-anchor="middle" fill="#38bdf8" font-size="8" font-family="monospace">CPU</text>
+      <rect x="100" y="45" width="40" height="20" rx="2" fill="#0f172a" stroke="#cbd5e1"/>
+      <rect x="45" y="100" width="95" height="15" rx="2" fill="#047857" stroke="#6ee7b7"/>
+      <path d="M80 62 L100 62 M62 80 L62 100 M110 65 L110 100" stroke="#fbbf24" stroke-width="2"/>
+      <circle cx="80" cy="62" r="3" fill="#fbbf24"/>
+      <circle cx="62" cy="100" r="3" fill="#fbbf24"/>
+      <circle cx="110" cy="100" r="3" fill="#fbbf24"/>
+    </svg>`
+  },
+  medicine_blister: {
+    id: 'medicine_blister',
+    name: 'Pharmaceutical Foil Blister Pack',
+    badge: 'HAZARDOUS / BIOMEDICAL',
+    badgeClass: 'badge-hazardous',
+    badgeBg: 'rgba(239, 68, 68, 0.15)',
+    badgeColor: '#b91c1c',
+    categoryKey: 'hazardous',
+    formCategory: 'hazardous',
+    confidence: '94.2%',
+    material: 'Laminated Aluminium Foil & Thermoformed PVC',
+    binColor: '🟡 Yellow / Red Medical Hazard',
+    binTextColor: '#dc2626',
+    reward: '+30 EcoCredits',
+    co2: '0.62 kg CO₂e',
+    disposalTip: '1. Safely pop out any unused or expired capsules — take pills to a pharmacy take-back scheme.\n2. Do NOT flush medications into municipal water sewers.\n3. Deposit empty metallic blister packaging in biomedical/hazard sorting bins.',
+    boxCoords: { top: '24%', left: '26%', width: '48%', height: '52%' },
+    tag: 'PHARMA BLISTER [94.2%]',
+    svg: `<svg viewBox="0 0 180 180" width="140" height="140" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="35" y="25" width="110" height="130" rx="6" fill="#cbd5e1" stroke="#64748b" stroke-width="2"/>
+      <rect x="45" y="38" width="40" height="24" rx="12" fill="#ef4444" stroke="#b91c1c"/>
+      <rect x="95" y="38" width="40" height="24" rx="12" fill="#3b82f6" stroke="#1d4ed8"/>
+      <rect x="45" y="76" width="40" height="24" rx="12" fill="#ef4444" stroke="#b91c1c"/>
+      <rect x="95" y="76" width="40" height="24" rx="12" fill="#3b82f6" stroke="#1d4ed8"/>
+      <rect x="45" y="114" width="40" height="24" rx="12" fill="#10b981" stroke="#047857"/>
+      <rect x="95" y="114" width="40" height="24" rx="12" fill="#10b981" stroke="#047857"/>
+      <line x1="35" y1="68" x2="145" y2="68" stroke="#94a3b8" stroke-dasharray="2 2"/>
+      <line x1="35" y1="106" x2="145" y2="106" stroke="#94a3b8" stroke-dasharray="2 2"/>
+      <line x1="90" y1="25" x2="90" y2="155" stroke="#94a3b8" stroke-dasharray="2 2"/>
+    </svg>`
+  }
+};
+
+let currentAIScannedItem = AI_SAMPLE_WASTE_ITEMS.pet_bottle;
+let currentNearestSmartBin = MUMBAI_SMART_BINS[0];
+let aiScannerAnimationTimeout = null;
+let aiSmartBinMarker = null;
+
+window.MUMBAI_SMART_BINS = MUMBAI_SMART_BINS;
+window.AI_SAMPLE_WASTE_ITEMS = AI_SAMPLE_WASTE_ITEMS;
+
+window.openAIVisionScanner = function(source = 'hub') {
+  const modal = document.getElementById('aiVisionScannerModal');
+  if (!modal) return;
+  modal.classList.add('active');
+  playCivicAudio('click');
+
+  selectAISampleItem(currentAIScannedItem ? currentAIScannedItem.id : 'pet_bottle');
+};
+
+window.closeAIVisionScanner = function() {
+  const modal = document.getElementById('aiVisionScannerModal');
+  if (modal) modal.classList.remove('active');
+  if (aiScannerAnimationTimeout) {
+    clearTimeout(aiScannerAnimationTimeout);
+    aiScannerAnimationTimeout = null;
+  }
+};
+
+window.selectAISampleItem = function(itemKey) {
+  const item = AI_SAMPLE_WASTE_ITEMS[itemKey] || AI_SAMPLE_WASTE_ITEMS.pet_bottle;
+  currentAIScannedItem = item;
+
+  document.querySelectorAll('.ai-item-tab').forEach(tab => {
+    if (tab.getAttribute('data-item') === itemKey) {
+      tab.classList.add('active');
+    } else {
+      tab.classList.remove('active');
+    }
+  });
+
+  const stage = document.getElementById('aiItemGraphicStage');
+  if (stage) {
+    stage.innerHTML = item.svg;
+  }
+
+  const bBox = document.getElementById('aiBoundingBox');
+  if (bBox && item.boxCoords) {
+    bBox.style.top = item.boxCoords.top;
+    bBox.style.left = item.boxCoords.left;
+    bBox.style.width = item.boxCoords.width;
+    bBox.style.height = item.boxCoords.height;
+  }
+
+  const targetTag = document.getElementById('aiTargetTag');
+  if (targetTag) {
+    targetTag.textContent = 'SCANNING...';
+    targetTag.style.background = '#38bdf8';
+  }
+
+  runAIScanningAnimation(() => {
+    renderAIDetectionResults(item);
+  });
+};
+
+window.runAIScanningAnimation = function(onComplete) {
+  const beam = document.getElementById('aiScanBeam');
+  const statusEl = document.getElementById('aiScanStatus');
+  const targetTag = document.getElementById('aiTargetTag');
+
+  if (beam) {
+    beam.style.animation = 'none';
+    void beam.offsetWidth;
+    beam.style.animation = 'aiLaserSweep 1.1s ease-in-out 2 alternate';
+  }
+
+  if (statusEl) {
+    statusEl.textContent = 'NEURAL SEGMENTATION IN PROGRESS...';
+    statusEl.style.color = '#38bdf8';
+  }
+
+  playCivicAudio('beep');
+
+  if (aiScannerAnimationTimeout) clearTimeout(aiScannerAnimationTimeout);
+  aiScannerAnimationTimeout = setTimeout(() => {
+    if (statusEl) {
+      statusEl.textContent = 'ANALYSIS COMPLETE • 98.4% CONFIDENCE';
+      statusEl.style.color = '#86efac';
+    }
+    if (targetTag && currentAIScannedItem) {
+      targetTag.textContent = currentAIScannedItem.tag;
+      targetTag.style.background = '#22c55e';
+    }
+    playCivicAudio('chime');
+    if (typeof onComplete === 'function') {
+      onComplete();
+    } else {
+      renderAIDetectionResults(currentAIScannedItem);
+    }
+  }, 1150);
+};
+
+window.renderAIDetectionResults = function(item) {
+  if (!item) return;
+
+  const catBadge = document.getElementById('aiDetectedCategoryBadge');
+  if (catBadge) {
+    catBadge.textContent = item.badge;
+    catBadge.style.background = item.badgeBg;
+    catBadge.style.color = item.badgeColor;
+  }
+
+  const titleEl = document.getElementById('aiDetectedTitle');
+  if (titleEl) titleEl.textContent = item.name;
+
+  const confEl = document.getElementById('aiConfidenceScore');
+  if (confEl) confEl.textContent = item.confidence;
+
+  const matEl = document.getElementById('aiDetectedMaterial');
+  if (matEl) matEl.textContent = item.material;
+
+  const binColorEl = document.getElementById('aiDetectedBinColor');
+  if (binColorEl) {
+    binColorEl.textContent = item.binColor;
+    binColorEl.style.color = item.binTextColor;
+  }
+
+  const rewEl = document.getElementById('aiDetectedReward');
+  if (rewEl) rewEl.textContent = item.reward;
+
+  const co2El = document.getElementById('aiDetectedCo2');
+  if (co2El) co2El.textContent = item.co2;
+
+  const tipEl = document.getElementById('aiDisposalInstructions');
+  if (tipEl) tipEl.textContent = item.disposalTip;
+
+  updateNearestSmartBin(item.categoryKey);
+};
+
+window.updateNearestSmartBin = function(categoryKey) {
+  const latInput = document.getElementById('citizenLat');
+  const lngInput = document.getElementById('citizenLng');
+  const userLat = latInput && !isNaN(parseFloat(latInput.value)) ? parseFloat(latInput.value) : 19.0280;
+  const userLng = lngInput && !isNaN(parseFloat(lngInput.value)) ? parseFloat(lngInput.value) : 72.8380;
+
+  let candidateBins = MUMBAI_SMART_BINS.filter(b => b.accepts.includes(categoryKey));
+  if (candidateBins.length === 0) candidateBins = MUMBAI_SMART_BINS;
+
+  let nearest = candidateBins[0];
+  let minDistance = Infinity;
+
+  candidateBins.forEach(b => {
+    const d = calcDistance(userLat, userLng, b.lat, b.lng);
+    if (d < minDistance) {
+      minDistance = d;
+      nearest = b;
+    }
+  });
+
+  currentNearestSmartBin = nearest;
+
+  const bearing = calculateBearing(userLat, userLng, nearest.lat, nearest.lng);
+  const needle = document.getElementById('binCompassNeedle');
+  if (needle) {
+    needle.style.transform = `rotate(${Math.round(bearing)}deg)`;
+  }
+
+  const distBadge = document.getElementById('nearestBinDistanceBadge');
+  const meters = Math.round(minDistance * 1000);
+  const walkMins = Math.max(1, Math.round(meters / 80));
+  if (distBadge) {
+    distBadge.textContent = meters < 1000 ? `~${meters}m (${walkMins} min walk)` : `~${minDistance.toFixed(1)} km (${walkMins} min)`;
+  }
+
+  const nameEl = document.getElementById('nearestBinName');
+  if (nameEl) nameEl.textContent = nearest.name;
+
+  const addrEl = document.getElementById('nearestBinAddress');
+  if (addrEl) addrEl.textContent = nearest.location;
+
+  const fillBar = document.getElementById('nearestBinFillBar');
+  const fillText = document.getElementById('nearestBinFillText');
+  const freePercent = 100 - nearest.capacityPercent;
+
+  if (fillBar) {
+    fillBar.style.width = `${nearest.capacityPercent}%`;
+    fillBar.style.background = nearest.capacityPercent > 80 ? '#ef4444' : (nearest.capacityPercent > 50 ? '#f59e0b' : '#10b981');
+  }
+
+  if (fillText) {
+    fillText.textContent = `${freePercent}% Free Capacity`;
+    fillText.style.color = freePercent < 20 ? '#ef4444' : '#10b981';
+  }
+};
+
+window.handleCustomImageUpload = function(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const stage = document.getElementById('aiItemGraphicStage');
+    if (stage) {
+      stage.innerHTML = `<img src="${e.target.result}" style="max-width: 150px; max-height: 150px; object-fit: contain; border-radius: 8px; filter: drop-shadow(0 0 10px rgba(56,189,248,0.5));" alt="Uploaded Waste Item">`;
+    }
+
+    const fileName = (file.name || '').toLowerCase();
+    let detectedKey = 'pet_bottle';
+    if (fileName.includes('peel') || fileName.includes('food') || fileName.includes('wet') || fileName.includes('organic')) {
+      detectedKey = 'organic_peels';
+    } else if (fileName.includes('box') || fileName.includes('card') || fileName.includes('paper')) {
+      detectedKey = 'cardboard_box';
+    } else if (fileName.includes('chip') || fileName.includes('pcb') || fileName.includes('tech') || fileName.includes('circuit')) {
+      detectedKey = 'ewaste_circuit';
+    } else if (fileName.includes('pill') || fileName.includes('med') || fileName.includes('blister')) {
+      detectedKey = 'medicine_blister';
+    }
+
+    const item = AI_SAMPLE_WASTE_ITEMS[detectedKey];
+    currentAIScannedItem = item;
+
+    document.querySelectorAll('.ai-item-tab').forEach(tab => {
+      if (tab.getAttribute('data-item') === detectedKey) {
+        tab.classList.add('active');
+      } else {
+        tab.classList.remove('active');
+      }
+    });
+
+    runAIScanningAnimation(() => {
+      renderAIDetectionResults(item);
+      if (typeof showToast === 'function') {
+        showToast(`AI Recognition: Identified ${item.name} (${item.confidence} confidence)`, 'success');
+      }
+    });
+  };
+  reader.readAsDataURL(file);
+};
+
+window.applyAIDetectionToReport = function() {
+  if (!currentAIScannedItem) return;
+
+  closeAIVisionScanner();
+
+  const formCard = document.getElementById('citizenReportForm');
+  if (formCard) {
+    formCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  const notesEl = document.getElementById('citizenNotes');
+  if (notesEl) {
+    const summary = `[AI Vision Identified: ${currentAIScannedItem.name} (${currentAIScannedItem.badge}, ${currentAIScannedItem.confidence} Confidence)]\nMaterial: ${currentAIScannedItem.material}\nDisposal Protocol: ${currentAIScannedItem.disposalTip.replace(/\n/g, ' ')}`;
+    notesEl.value = summary;
+    notesEl.focus();
+  }
+
+  if (currentAIScannedItem.categoryKey === 'hazardous' || currentAIScannedItem.categoryKey === 'ewaste') {
+    if (typeof selectSeverity === 'function') {
+      selectSeverity('overflowing');
+    }
+  }
+
+  playCivicAudio('success');
+  if (typeof showToast === 'function') {
+    showToast(`📋 Auto-filled report with AI classification: ${currentAIScannedItem.badge}`, 'success');
+  }
+};
+
+window.showNearestBinOnMap = function() {
+  const bin = currentNearestSmartBin || MUMBAI_SMART_BINS[0];
+  closeAIVisionScanner();
+
+  const mapContainer = document.getElementById('citizenNearbyReportsCard');
+  if (mapContainer) {
+    mapContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  setTimeout(() => {
+    if (!citizenNearbyMap) {
+      if (typeof initCitizenNearbyReportsMap === 'function') {
+        initCitizenNearbyReportsMap();
+      }
+    }
+
+    if (citizenNearbyMap) {
+      citizenNearbyMap.invalidateSize();
+      citizenNearbyMap.setView([bin.lat, bin.lng], 16, { animate: true });
+
+      if (aiSmartBinMarker) {
+        aiSmartBinMarker.remove();
+        aiSmartBinMarker = null;
+      }
+
+      const binIcon = L.divIcon({
+        className: 'custom-bin-radar-icon',
+        html: `<div class="smart-bin-pin-pulse" style="background: #0284c7; color: white;">📍</div>`,
+        iconSize: [36, 36],
+        iconAnchor: [18, 18]
+      });
+
+      aiSmartBinMarker = L.marker([bin.lat, bin.lng], { icon: binIcon }).addTo(citizenNearbyMap);
+
+      const popupContent = `
+        <div style="min-width: 220px; font-family: var(--font-body);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <strong style="color: #0284c7; font-size: 0.95rem;">${bin.name}</strong>
+            <span class="badge" style="background: rgba(14, 165, 233, 0.15); color: #0284c7; font-size: 0.65rem; font-weight: 800;">SMART DEPOT</span>
+          </div>
+          <div style="font-size: 0.78rem; color: #64748b; margin-bottom: 6px;">${bin.location}</div>
+          <div style="font-size: 0.8rem; margin-bottom: 4px;"><strong>Accepts:</strong> ${bin.accepts.map(a => a.toUpperCase()).join(' • ')}</div>
+          <div style="font-size: 0.8rem; margin-bottom: 4px;"><strong>Sensor:</strong> ${bin.sensorType}</div>
+          <div style="font-size: 0.8rem; margin-bottom: 4px;"><strong>Fill Level:</strong> ${bin.capacityPercent}% (${100 - bin.capacityPercent}% free)</div>
+          <div style="font-size: 0.75rem; color: #059669; font-weight: 700; margin-top: 6px;">✓ 24/7 Drop-Off Ready • Verified by Municipal IoT Hub</div>
+        </div>
+      `;
+
+      aiSmartBinMarker.bindPopup(popupContent).openPopup();
+      playCivicAudio('chime');
+    }
+  }, 250);
 };

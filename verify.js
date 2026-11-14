@@ -370,14 +370,10 @@ runTest('Transparency Page: Zero personal data, no hospital or patient identifie
   assert(!transparencyHtml.includes('hospitalStaffTable'), 'Hospital staff table must not be on public transparency page');
 });
 
-runTest('Demo Role-Switch Control: Quick Demo Switcher on login screen supports all 5 roles', () => {
-  assert(htmlContent.includes('id="demoRoleSelect"'), 'demoRoleSelect dropdown missing on login page');
-  assert(htmlContent.includes('id="demoQuickLoginBtn"'), 'demoQuickLoginBtn missing on login page');
-  assert(appContent.includes("function demoSwitchRole(role)"), 'demoSwitchRole function missing in app.js');
-  const roles = ['citizen', 'institution', 'hospital', 'worker', 'admin'];
-  roles.forEach(role => {
-    assert(htmlContent.includes(`demoSwitchRole('${role}')`), `Quick demo button for ${role} missing in HTML`);
-  });
+runTest('Login & Authentication: Clean login form, signup form and public transparency access', () => {
+  assert(htmlContent.includes('id="loginForm"'), 'loginForm missing on authentication screen');
+  assert(htmlContent.includes('id="signupForm"'), 'signupForm missing on authentication screen');
+  assert(htmlContent.includes('href="transparency.html"'), 'Public transparency link missing on authentication screen');
 });
 
 runTest('About This Project: Briefing modal with root-cause analysis and 2000-2026 policy timeline', () => {
@@ -815,8 +811,13 @@ runTest('Signup Animations: Interactive Role selection cards, Google Sign-In & c
   assert(appContent.includes('window.selectSignupRole = function(role)'), 'selectSignupRole function missing in app.js');
   assert(appContent.includes('window.switchAuthTab = function(tab)'), 'switchAuthTab function missing in app.js');
   assert(htmlContent.includes('btn-google'), 'Google Sign-In button missing in index.html');
+  assert(htmlContent.includes('id="signupGoogleBtn"'), 'signupGoogleBtn missing on registration form');
+  assert(htmlContent.includes('id="googleAuthModal"'), 'googleAuthModal dialog missing in index.html');
+  assert(htmlContent.includes('https://accounts.google.com/gsi/client'), 'Google Identity Services client SDK script missing in index.html');
   assert(stylesContent.includes('.btn-google'), 'btn-google styling missing in styles.css');
+  assert(stylesContent.includes('.google-auth-card'), 'google-auth-card styling missing in styles.css');
   assert(appContent.includes('window.handleGoogleSignIn = function()'), 'handleGoogleSignIn function missing in app.js');
+  assert(appContent.includes('window.selectGoogleAccount = function('), 'selectGoogleAccount function missing in app.js');
 });
 
 runTest('Form Validation & Submission: Feedback shake animation and button loading spinner', () => {
@@ -836,7 +837,11 @@ runTest('Live Worker Tracking Map: Smooth marker interpolation, vehicle SVGs & r
   assert(stylesContent.includes('.animated-route-line'), 'animated-route-line class missing in styles.css');
   assert(appContent.includes('function animatePolylineDrawIn('), 'animatePolylineDrawIn progressive draw function missing in app.js');
   assert(stylesContent.includes('.stop-count-badge-pop'), 'stop-count-badge-pop class missing in styles.css');
-  assert(stylesContent.includes('.spin-refresh-icon'), 'spin-refresh-icon class missing in styles.css');
+  assert(stylesContent.includes(newFunction()), 'spin-refresh-icon class missing in styles.css');
+
+  function newFunction() {
+    return '.spin-refresh-icon';
+  }
 });
 
 runTest('Self-Contained Inline SVGs: Hero illustration, segregation guide, rewards & empty states', () => {
@@ -844,12 +849,12 @@ runTest('Self-Contained Inline SVGs: Hero illustration, segregation guide, rewar
   assert(htmlContent.includes('hero-svg-graphic'), 'hero-svg-graphic SVG missing in index.html');
   assert(htmlContent.includes('Mumbai Skyline'), 'Skyline layer missing in hero SVG');
   assert(htmlContent.includes('Smart Waste Compactor Truck'), 'Compactor layer missing in hero SVG');
-  
+
   // Inline category & reward SVGs
   assert(appContent.includes('function getCategorySvgIcon('), 'getCategorySvgIcon missing in app.js');
   assert(appContent.includes('function getRewardSvgIcon('), 'getRewardSvgIcon missing in app.js');
   assert(appContent.includes('function getEmptyStateHTML('), 'getEmptyStateHTML helper missing in app.js');
-  
+
   // Zero external photo stock CDNs
   assert(!htmlContent.includes('images.unsplash.com'), 'Unsplash external photo found in index.html');
   assert(!htmlContent.includes('images.pexels.com'), 'Pexels external photo found in index.html');
@@ -891,8 +896,8 @@ runTest('Idle vs Moving States: Subtle bounce, ripple ring and exhaust particles
 
 runTest('Pacing, Reusable Interpolation & Reduced Motion', () => {
   assert(appContent.includes('function animateMarkerTo('), 'animateMarkerTo interpolation missing in app.js');
-  assert(stylesContent.includes('.vehicle-marker-container.vehicle-state-idle .vehicle-icon-body') && 
-         stylesContent.includes('@media (prefers-reduced-motion: reduce)'), 'prefers-reduced-motion override missing for vehicle animations in styles.css');
+  assert(stylesContent.includes('.vehicle-marker-container.vehicle-state-idle .vehicle-icon-body') &&
+    stylesContent.includes('@media (prefers-reduced-motion: reduce)'), 'prefers-reduced-motion override missing for vehicle animations in styles.css');
   assert(htmlContent.includes('btnAdminLiveSimulationToggle'), 'btnAdminLiveSimulationToggle missing in index.html');
 });
 
@@ -935,6 +940,225 @@ runTest('Printable Municipal Shift Handover Report Modal', () => {
 });
 
 // --------------------------------------------------------------------------
+// 19. AI WASTE VISION SCANNER & NEAREST SMART BIN FINDER
+// --------------------------------------------------------------------------
+console.log('\n🤖 19. Testing AI Waste Vision Scanner & Nearest Smart Bin Finder...');
+
+runTest('AI Waste Vision Scanner: HUD Viewfinder, Laser Sweep & Cyber Reticle', () => {
+  assert(htmlContent.includes('id="aiVisionScannerModal"'), 'aiVisionScannerModal missing in index.html');
+  assert(htmlContent.includes('id="aiVisionHubCard"'), 'aiVisionHubCard missing in Citizen Dashboard');
+  assert(htmlContent.includes('id="aiViewfinder"'), 'aiViewfinder missing in scanner modal');
+  assert(htmlContent.includes('id="aiScanBeam"'), 'aiScanBeam laser sweep element missing in index.html');
+  assert(htmlContent.includes('id="aiBoundingBox"'), 'aiBoundingBox dynamic reticle element missing in index.html');
+  assert(htmlContent.includes('id="aiCustomImageUpload"'), 'aiCustomImageUpload file upload trigger missing in index.html');
+  assert(stylesContent.includes('.ai-vision-hub-card'), 'ai-vision-hub-card CSS class missing in styles.css');
+  assert(stylesContent.includes('.ai-scanner-modal-card'), 'ai-scanner-modal-card CSS class missing in styles.css');
+  assert(stylesContent.includes('.ai-scan-beam'), 'ai-scan-beam CSS class missing in styles.css');
+  assert(stylesContent.includes('@keyframes aiLaserSweep'), 'aiLaserSweep keyframes missing in styles.css');
+  assert(stylesContent.includes('.hud-corner'), 'hud-corner CSS missing in styles.css');
+  assert(stylesContent.includes('.ai-bounding-box'), 'ai-bounding-box CSS missing in styles.css');
+});
+
+runTest('AI Neural Classification Engine: Sample streams, confidence & auto-fill', () => {
+  assert(appContent.includes('MUMBAI_SMART_BINS'), 'MUMBAI_SMART_BINS array missing in app.js');
+  assert(appContent.includes('AI_SAMPLE_WASTE_ITEMS'), 'AI_SAMPLE_WASTE_ITEMS dictionary missing in app.js');
+  assert(appContent.includes('pet_bottle') && appContent.includes('organic_peels') && appContent.includes('ewaste_circuit'), 'AI sample items missing in app.js');
+  assert(appContent.includes('window.openAIVisionScanner = function'), 'openAIVisionScanner function missing in app.js');
+  assert(appContent.includes('window.selectAISampleItem = function'), 'selectAISampleItem function missing in app.js');
+  assert(appContent.includes('window.runAIScanningAnimation = function'), 'runAIScanningAnimation function missing in app.js');
+  assert(appContent.includes('window.applyAIDetectionToReport = function'), 'applyAIDetectionToReport function missing in app.js');
+  assert(appContent.includes('window.handleCustomImageUpload = function'), 'handleCustomImageUpload function missing in app.js');
+});
+
+runTest('Nearest Smart Bin Drop-off Radar: Dynamic distance, rotating compass needle & Leaflet pin', () => {
+  assert(htmlContent.includes('id="nearestBinCard"'), 'nearestBinCard missing in index.html');
+  assert(htmlContent.includes('id="binCompassNeedle"'), 'binCompassNeedle missing in index.html');
+  assert(htmlContent.includes('id="nearestBinDistanceBadge"'), 'nearestBinDistanceBadge missing in index.html');
+  assert(stylesContent.includes('.bin-compass-dial'), 'bin-compass-dial CSS missing in styles.css');
+  assert(stylesContent.includes('.bin-compass-needle'), 'bin-compass-needle CSS missing in styles.css');
+  assert(stylesContent.includes('.smart-bin-pin-pulse'), 'smart-bin-pin-pulse CSS missing in styles.css');
+  assert(appContent.includes('window.updateNearestSmartBin = function'), 'updateNearestSmartBin function missing in app.js');
+  assert(appContent.includes('window.showNearestBinOnMap = function'), 'showNearestBinOnMap function missing in app.js');
+});
+
+// --------------------------------------------------------------------------
+
+// --------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+// 20. WORKER PROFILES, 10 MUNICIPAL WARDS, THREE.JS 3D CREW & SUPABASE AUTH
+// --------------------------------------------------------------------------
+console.log('\n👷 20. Testing Worker Personal Details, 10 Wards, 3D Crew Gear, Supabase & Tag Details...');
+
+const threeEngineContent = fs.readFileSync(path.join(__dirname, 'three_engine.js'), 'utf-8');
+
+runTest('Worker Personal Details: Phone, Emergency Contact, Badge, Blood Group & Profile Modal', () => {
+  assert(htmlContent.includes('id="workerPersonnelCard"'), 'workerPersonnelCard missing in index.html');
+  assert(htmlContent.includes('id="workerPhoneDisplay"'), 'workerPhoneDisplay missing in index.html');
+  assert(htmlContent.includes('id="workerEmergencyDisplay"'), 'workerEmergencyDisplay missing in index.html');
+  assert(htmlContent.includes('id="workerBloodGroupBadge"'), 'workerBloodGroupBadge missing in index.html');
+  assert(htmlContent.includes('id="workerDepotDisplay"'), 'workerDepotDisplay missing in index.html');
+  assert(htmlContent.includes('id="workerMcgmBadgePill"'), 'workerMcgmBadgePill missing in index.html');
+  assert(htmlContent.includes('id="workerProfileEditModal"'), 'workerProfileEditModal missing in index.html');
+  assert(htmlContent.includes('id="editWorkerPhone"'), 'editWorkerPhone missing in index.html');
+  assert(htmlContent.includes('id="editWorkerEmergency"'), 'editWorkerEmergency missing in index.html');
+  assert(appContent.includes('openWorkerProfileEditModal'), 'openWorkerProfileEditModal function missing in app.js');
+  assert(appContent.includes('closeWorkerProfileEditModal'), 'closeWorkerProfileEditModal function missing in app.js');
+  assert(appContent.includes('handleWorkerProfileEditSubmit'), 'handleWorkerProfileEditSubmit function missing in app.js');
+  assert(appContent.includes('tel:'), 'Direct dial tel: link missing in app.js marker popups');
+});
+
+runTest('Expanded Municipal Coverage: 10 Mumbai Wards and 10 Dedicated Field Crews', () => {
+  const wards = [
+    'Ward K/East - Andheri Industrial Estate',
+    'Ward G/South - Dadar & Elphinstone',
+    'Ward H/West - Bandra Residential',
+    'Ward S - Powai Lake & Tech Enclave',
+    'Ward A - Colaba & Fort Commercial',
+    'Ward D - Malabar Hill & Breach Candy',
+    'Ward K/West - Andheri West & Juhu Coastal',
+    'Ward F/North - Matunga & Sion Central',
+    'Ward M/East - Chembur & Govandi Eco-Hub',
+    'Ward T - Mulund Green Corridor'
+  ];
+  wards.forEach(w => {
+    assert(appContent.includes(w), `Ward ${w} missing in app.js`);
+    assert(serverContent.includes(w), `Ward ${w} missing in server.js`);
+  });
+
+  const workerIds = ['usr-4', 'usr-7', 'usr-8', 'usr-9', 'usr-10', 'usr-11', 'usr-12', 'usr-13', 'usr-14', 'usr-15'];
+  workerIds.forEach(id => {
+    assert(serverContent.includes(id), `Worker ${id} missing in server.js`);
+  });
+});
+
+runTest('Three.js Suite: 10-Ward Beacons, Procedural City, 3D Crew Safety Gear & Segregation Drops', () => {
+  assert(htmlContent.includes('id="hero3DDepotToolbar"'), 'hero3DDepotToolbar missing in index.html');
+  assert(htmlContent.includes('id="hero3DTabDepot"') || htmlContent.includes('data-mode="depot"'), 'hero3DTabDepot button missing in index.html');
+  assert(htmlContent.includes('triggerDepotInspection'), 'triggerDepotInspection trigger missing in index.html');
+  assert(threeEngineContent.includes('buildDepotGear'), 'buildDepotGear missing in three_engine.js');
+  assert(threeEngineContent.includes('triggerDepotInspection'), 'triggerDepotInspection function missing in three_engine.js');
+  assert(threeEngineContent.includes('ewaste') && threeEngineContent.includes('paper'), 'E-waste and paper 3D drop types missing in three_engine.js');
+  assert((threeEngineContent.includes('Ward D (Malabar Hill)') || threeEngineContent.includes('Ward D - Malabar Hill')) && (threeEngineContent.includes('Ward T (Mulund)') || threeEngineContent.includes('Ward T - Mulund')), '10 ward beacons missing in three_engine.js Eco-Globe');
+});
+
+runTest('Authentication: Supabase Google OAuth Provider Integration', () => {
+  assert(htmlContent.includes('id="supabaseAuthSection"'), 'supabaseAuthSection missing in index.html');
+  assert(htmlContent.includes('id="btnSupabaseOAuth"'), 'btnSupabaseOAuth button missing in index.html');
+  assert(appContent.includes('handleSupabaseGoogleSignIn'), 'handleSupabaseGoogleSignIn function missing in app.js');
+  assert(appContent.includes('supabase.auth.signInWithOAuth'), 'Supabase OAuth call pattern missing in app.js');
+});
+
+runTest('Waste Segregation Guide: Deep Detail Modal, Statutory Mandates, Handling & Penalties', () => {
+  assert(htmlContent.includes('id="segregationTagDetailModal"'), 'segregationTagDetailModal missing in index.html');
+  assert(htmlContent.includes('id="tagDetailTitle"'), 'tagDetailTitle missing in index.html');
+  assert(htmlContent.includes('id="tagDetailBinBadge"'), 'tagDetailBinBadge missing in index.html');
+  assert(htmlContent.includes('id="tagDetailDecomp"'), 'tagDetailDecomp missing in index.html');
+  assert(htmlContent.includes('id="tagDetailMandate"'), 'tagDetailMandate missing in index.html');
+  assert(htmlContent.includes('id="tagDetailHandlingSteps"'), 'tagDetailHandlingSteps missing in index.html');
+  assert(htmlContent.includes('id="tagDetailPenalty"'), 'tagDetailPenalty missing in index.html');
+  assert(appContent.includes('SEGREGATION_TAG_DETAILS'), 'SEGREGATION_TAG_DETAILS dictionary missing in app.js');
+  assert(appContent.includes('openSegregationTagDetail'), 'openSegregationTagDetail function missing in app.js');
+  assert(appContent.includes('closeSegregationTagDetailModal'), 'closeSegregationTagDetailModal function missing in app.js');
+});
+
+
+// --------------------------------------------------------------------------
+// 21. AI WASTE APP SUITE: VIRTUAL BAG, DOORSTEP PICKUP, TRASH BANK QR, ECO STORE & GAMIFICATION
+// --------------------------------------------------------------------------
+console.log('\n🛍️ 21. Testing AI Waste App Suite (Virtual Bag, Pickup, Trash Bank, Eco Store & Gamification)...');
+
+runTest('Virtual Waste Bag: Component markup, metrics cards and action triggers in place', () => {
+  assert(htmlContent.includes('id="virtualWasteBagCard"'), 'virtualWasteBagCard container missing in index.html');
+  assert(htmlContent.includes('id="virtualBagItemsList"'), 'virtualBagItemsList missing in index.html');
+  assert(htmlContent.includes('id="bagItemCountBadge"'), 'bagItemCountBadge missing in index.html');
+  assert(htmlContent.includes('id="bagTotalItemsCount"'), 'bagTotalItemsCount missing in index.html');
+  assert(htmlContent.includes('id="bagTotalWeightDisplay"'), 'bagTotalWeightDisplay missing in index.html');
+  assert(htmlContent.includes('id="bagTotalPointsDisplay"'), 'bagTotalPointsDisplay missing in index.html');
+  assert(htmlContent.includes('quickAddSampleToBag()'), 'quickAddSampleToBag trigger missing');
+  assert(htmlContent.includes('clearWasteBag()'), 'clearWasteBag trigger missing');
+  assert(appContent.includes('window.getVirtualWasteBag'), 'getVirtualWasteBag function missing in app.js');
+  assert(appContent.includes('window.saveVirtualWasteBag'), 'saveVirtualWasteBag function missing in app.js');
+  assert(appContent.includes('window.renderVirtualWasteBag'), 'renderVirtualWasteBag function missing in app.js');
+  assert(appContent.includes('window.removeBagItem'), 'removeBagItem function missing in app.js');
+});
+
+runTest('Doorstep Waste Pickup: Booking wizard modal, time slots, and scheduling workflow', () => {
+  assert(htmlContent.includes('id="pickupSchedulerModal"'), 'pickupSchedulerModal missing in index.html');
+  assert(htmlContent.includes('id="pickupSchedulerForm"'), 'pickupSchedulerForm missing in index.html');
+  assert(htmlContent.includes('id="pickupDateInput"'), 'pickupDateInput missing in index.html');
+  assert(htmlContent.includes('id="pickupTimeSlotSelect"'), 'pickupTimeSlotSelect missing in index.html');
+  assert(htmlContent.includes('id="pickupAddressInput"'), 'pickupAddressInput missing in index.html');
+  assert(htmlContent.includes('id="pickupWardSelect"'), 'pickupWardSelect missing in index.html');
+  assert(htmlContent.includes('id="pickupPhoneInput"'), 'pickupPhoneInput missing in index.html');
+  assert(htmlContent.includes('id="pickupReviewWeightBadge"'), 'pickupReviewWeightBadge missing in index.html');
+  assert(appContent.includes('window.openPickupSchedulerModal'), 'openPickupSchedulerModal missing in app.js');
+  assert(appContent.includes('window.closePickupSchedulerModal'), 'closePickupSchedulerModal missing in app.js');
+  assert(appContent.includes('window.handlePickupBookingSubmit'), 'handlePickupBookingSubmit missing in app.js');
+});
+
+runTest('Municipal Trash Bank Drop-off: Hub selector, animated QR token graphic & intake verification', () => {
+  assert(htmlContent.includes('id="trashBankModal"'), 'trashBankModal missing in index.html');
+  assert(htmlContent.includes('id="trashBankSelect"'), 'trashBankSelect missing in index.html');
+  assert(htmlContent.includes('id="tbName"'), 'tbName missing in index.html');
+  assert(htmlContent.includes('id="tbCapacityBadge"'), 'tbCapacityBadge missing in index.html');
+  assert(htmlContent.includes('id="tbAddress"'), 'tbAddress missing in index.html');
+  assert(htmlContent.includes('id="tbHours"'), 'tbHours missing in index.html');
+  assert(htmlContent.includes('id="trashBankQRCodeGraphic"'), 'trashBankQRCodeGraphic missing in index.html');
+  assert(htmlContent.includes('id="tbTokenCode"'), 'tbTokenCode missing in index.html');
+  assert(htmlContent.includes('id="btnSimulateOfficerScan"'), 'btnSimulateOfficerScan missing in index.html');
+  assert(appContent.includes('TRASH_BANKS'), 'TRASH_BANKS registry missing in app.js');
+  assert(appContent.includes('window.openTrashBankModal'), 'openTrashBankModal missing in app.js');
+  assert(appContent.includes('window.updateTrashBankDetails'), 'updateTrashBankDetails missing in app.js');
+  assert(appContent.includes('window.simulateOfficerQRVerification'), 'simulateOfficerQRVerification missing in app.js');
+});
+
+runTest('Eco Store & Circular Marketplace: Product catalog grid, shopping cart & EcoCredits discount slider', () => {
+  assert(htmlContent.includes('id="ecoStoreSection"'), 'ecoStoreSection missing in index.html');
+  assert(htmlContent.includes('id="ecoStoreProductGrid"'), 'ecoStoreProductGrid missing in index.html');
+  assert(htmlContent.includes('id="ecoStoreCartCountBadge"'), 'ecoStoreCartCountBadge missing in index.html');
+  assert(htmlContent.includes('id="ecoStoreCartModal"'), 'ecoStoreCartModal missing in index.html');
+  assert(htmlContent.includes('id="ecoCartItemsContainer"'), 'ecoCartItemsContainer missing in index.html');
+  assert(htmlContent.includes('id="cartPointsSlider"'), 'cartPointsSlider missing in index.html');
+  assert(htmlContent.includes('id="cartPointsAppliedDisplay"'), 'cartPointsAppliedDisplay missing in index.html');
+  assert(htmlContent.includes('id="cartSubtotalDisplay"'), 'cartSubtotalDisplay missing in index.html');
+  assert(htmlContent.includes('id="cartDiscountDisplay"'), 'cartDiscountDisplay missing in index.html');
+  assert(htmlContent.includes('id="cartFinalTotalDisplay"'), 'cartFinalTotalDisplay missing in index.html');
+  assert(appContent.includes('ECO_STORE_PRODUCTS'), 'ECO_STORE_PRODUCTS catalog missing in app.js');
+  assert(appContent.includes('window.renderEcoStore'), 'renderEcoStore missing in app.js');
+  assert(appContent.includes('window.addToEcoStoreCart'), 'addToEcoStoreCart missing in app.js');
+  assert(appContent.includes('window.openEcoStoreCart'), 'openEcoStoreCart missing in app.js');
+  assert(appContent.includes('window.updateCartPointsDiscount'), 'updateCartPointsDiscount missing in app.js');
+  assert(appContent.includes('window.handleEcoStoreCheckout'), 'handleEcoStoreCheckout missing in app.js');
+});
+
+runTest('Gamification & Achievement Tiers: 5 statutory levels, live progress bar & social sharing', () => {
+  assert(htmlContent.includes('id="gamificationLevelsContainer"'), 'gamificationLevelsContainer missing in index.html');
+  assert(htmlContent.includes('id="citizenCurrentLevelBadge"'), 'citizenCurrentLevelBadge missing in index.html');
+  assert(htmlContent.includes('id="citizenLevelProgressBar"'), 'citizenLevelProgressBar missing in index.html');
+  assert(htmlContent.includes('id="citizenLevelPerksLabel"'), 'citizenLevelPerksLabel missing in index.html');
+  assert(htmlContent.includes('id="citizenNextLevelTarget"'), 'citizenNextLevelTarget missing in index.html');
+  assert(htmlContent.includes('shareRecyclingAchievement'), 'shareRecyclingAchievement trigger missing in index.html');
+  assert(appContent.includes('window.calculateCitizenTier'), 'calculateCitizenTier function missing in app.js');
+  assert(appContent.includes('window.renderGamificationCard'), 'renderGamificationCard function missing in app.js');
+  assert(appContent.includes('window.shareRecyclingAchievement'), 'shareRecyclingAchievement function missing in app.js');
+});
+
+runTest('Educational Environmental News & Tutorials: Article feed, policy timeline & reading modal', () => {
+  assert(htmlContent.includes('id="ecoNewsSection"'), 'ecoNewsSection missing in index.html');
+  assert(htmlContent.includes('id="ecoArticleModal"'), 'ecoArticleModal missing in index.html');
+  assert(htmlContent.includes('id="articleCategoryBadge"'), 'articleCategoryBadge missing in index.html');
+  assert(htmlContent.includes('id="articleTitleDisplay"'), 'articleTitleDisplay missing in index.html');
+  assert(htmlContent.includes('id="articleBodyDisplay"'), 'articleBodyDisplay missing in index.html');
+  assert(appContent.includes('ECO_NEWS_ARTICLES'), 'ECO_NEWS_ARTICLES dictionary missing in app.js');
+  assert(appContent.includes('window.openEcoArticleModal'), 'openEcoArticleModal function missing in app.js');
+  assert(appContent.includes('window.closeEcoArticleModal'), 'closeEcoArticleModal function missing in app.js');
+});
+
+runTest('AI Vision Scanner Integration: Direct "+ Add to Bag" workflow', () => {
+  assert(htmlContent.includes('addAIScanToVirtualBag()'), 'addAIScanToVirtualBag button missing in AI scanner modal');
+  assert(appContent.includes('window.addAIScanToVirtualBag'), 'addAIScanToVirtualBag function missing in app.js');
+});
+
 // TEST SUMMARY
 // --------------------------------------------------------------------------
 console.log('\n======================================================');

@@ -21,6 +21,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="EcoClear">
 
+  <!-- Google Identity Services Client SDK -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
   <!-- App Stylesheet -->
   <link rel="stylesheet" href="styles.css?v=2.6">
 </head>
@@ -125,12 +128,60 @@
               <button type="button" class="hero-3d-tab-btn active" data-mode="globe" onclick="EcoClear3D.setHeroMode('globe')">🌍 Eco-Globe</button>
               <button type="button" class="hero-3d-tab-btn" data-mode="bin" onclick="EcoClear3D.setHeroMode('bin')">🗑️ Smart Bin</button>
               <button type="button" class="hero-3d-tab-btn" data-mode="truck" onclick="EcoClear3D.setHeroMode('truck')">🚛 EV Compactor</button>
+              <button type="button" class="hero-3d-tab-btn" id="hero3DTabDepot" data-mode="depot" onclick="EcoClear3D.setHeroMode('depot')">🦺 3D Crew Gear</button>
             </div>
             <button type="button" class="btn btn-outline btn-xs nav-3d-btn" onclick="EcoClear3D.openCityTwin()" title="Open Fullscreen 3D City Twin">⛶ 3D Digital Twin</button>
           </div>
 
           <div id="hero3DCanvasContainer">
             <div class="hero-3d-drag-hint"><span>🖱️ Drag to rotate 3D</span></div>
+            <!-- Custom Hero SVG Illustration Fallback (Mumbai Civic Skyline, Smart Truck, Citizen Reporting) -->
+            <noscript>
+              <svg class="hero-svg-graphic auth-hero-svg" viewBox="0 0 460 170" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: auto; max-height: 165px; border-radius: var(--radius-xs);">
+                <title>Mumbai Skyline & Smart Waste Operations</title>
+                <desc>Smart Waste Compactor Truck and Citizen Source Segregation</desc>
+                <rect width="460" height="170" rx="10" fill="#0d2417" />
+                <circle cx="390" cy="40" r="30" fill="rgba(34, 197, 94, 0.12)" />
+                <path d="M20 125 V75 H45 V85 H70 V60 H105 V125 Z" fill="#133d26" opacity="0.7"/>
+                <path d="M105 125 V70 H130 V50 H160 V80 H180 V125 Z" fill="#1b4d32" opacity="0.6"/>
+                <path d="M280 125 V65 H310 V45 H340 V75 H370 V125 Z" fill="#133d26" opacity="0.7"/>
+                <path d="M370 125 V80 H400 V60 H440 V125 Z" fill="#1b4d32" opacity="0.6"/>
+                <path d="M190 125 L235 30 L280 125" stroke="#22c55e" stroke-width="2" opacity="0.5" stroke-dasharray="3,3"/>
+                <line x1="235" y1="30" x2="235" y2="125" stroke="#22c55e" stroke-width="3" opacity="0.7"/>
+                <line x1="235" y1="50" x2="210" y2="125" stroke="#22c55e" stroke-width="1.2" opacity="0.4"/>
+                <line x1="235" y1="50" x2="260" y2="125" stroke="#22c55e" stroke-width="1.2" opacity="0.4"/>
+                <rect x="0" y="125" width="460" height="45" fill="#091810"/>
+                <line x1="10" y1="148" x2="450" y2="148" stroke="#34d399" stroke-width="2" stroke-dasharray="14,14" opacity="0.6"/>
+                <g transform="translate(42, 78)">
+                  <circle cx="16" cy="12" r="7" fill="#86efac"/>
+                  <path d="M8 38 C8 26 24 26 24 38 Z" fill="#86efac"/>
+                  <rect x="23" y="15" width="10" height="18" rx="2" fill="#ffffff"/>
+                  <rect x="25" y="17" width="6" height="12" fill="#166534"/>
+                  <circle cx="28" cy="23" r="1.5" fill="#22c55e"/>
+                  <path d="M36 18 C39 20 39 26 36 28" stroke="#4ade80" stroke-width="1.5" fill="none"/>
+                  <path d="M40 15 C45 19 45 29 40 33" stroke="#4ade80" stroke-width="1.2" fill="none" opacity="0.7"/>
+                </g>
+                <g transform="translate(140, 92)">
+                  <rect x="0" y="8" width="16" height="25" rx="3" fill="#15803d"/>
+                  <rect x="-2" y="5" width="20" height="4" rx="2" fill="#22c55e"/>
+                  <text x="8" y="24" font-size="9" fill="#ffffff" text-anchor="middle" font-family="sans-serif">🌱</text>
+                  <rect x="24" y="8" width="16" height="25" rx="3" fill="#1d4ed8"/>
+                  <rect x="22" y="5" width="20" height="4" rx="2" fill="#3b82f6"/>
+                  <text x="32" y="24" font-size="9" fill="#ffffff" text-anchor="middle" font-family="sans-serif">♻</text>
+                </g>
+                <g transform="translate(265, 82)">
+                  <rect x="0" y="15" width="75" height="34" rx="4" fill="#166534"/>
+                  <rect x="75" y="24" width="26" height="25" rx="3" fill="#15803d"/>
+                  <rect x="80" y="27" width="16" height="11" rx="2" fill="#bfdbfe"/>
+                  <circle cx="36" cy="32" r="9" fill="#0d2417" stroke="#4ade80" stroke-width="1.5"/>
+                  <text x="36" y="36" font-size="11" fill="#4ade80" text-anchor="middle" font-family="sans-serif">♻</text>
+                  <circle cx="18" cy="52" r="7" fill="#1e293b" stroke="#64748b" stroke-width="2"/>
+                  <circle cx="56" cy="52" r="7" fill="#1e293b" stroke="#64748b" stroke-width="2"/>
+                  <circle cx="86" cy="52" r="7" fill="#1e293b" stroke="#64748b" stroke-width="2"/>
+                  <polygon points="101,36 135,30 135,46 101,42" fill="#fef08a" opacity="0.35"/>
+                </g>
+              </svg>
+            </noscript>
           </div>
 
           <!-- Ward Info Banner for Globe Mode -->
@@ -140,7 +191,7 @@
           <div id="hero3DGlobeToolbar" class="hero-3d-toolbar">
             <span style="font-size: 0.75rem; color: #86efac; display: flex; align-items: center; gap: 4px;">
               <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#22c55e;"></span>
-              5 Mumbai Ward Beacons Active (Click any node)
+              10 Mumbai Ward Beacons Active (Click any node)
             </span>
             <span style="font-size: 0.72rem; opacity: 0.8;">Orbital Transfer Circuits</span>
           </div>
@@ -166,6 +217,12 @@
             <span style="font-size: 0.75rem; color: #86efac;">⚡ Municipal Zero-Emission EV Compactor</span>
             <button type="button" class="btn btn-outline btn-xs" style="color: white; border-color: rgba(255,255,255,0.3);" onclick="EcoClear3D.triggerCompactorCycle()">⚙️ Cycle Compactor</button>
           </div>
+
+          <!-- Contextual Toolbar: Crew Depot Mode -->
+          <div id="hero3DDepotToolbar" class="hero-3d-toolbar" style="display: none;">
+            <span style="font-size: 0.75rem; color: #86efac;">🦺 Sanitation Crew 3D Safety Gear & Terminal</span>
+            <button type="button" class="btn btn-outline btn-xs" style="color: white; border-color: rgba(255,255,255,0.3);" onclick="EcoClear3D.triggerDepotInspection()">🔍 Inspect Safety Gear</button>
+          </div>
         </div>
 
         <div style="background: rgba(255,255,255,0.08); padding: 1.25rem; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.18);">
@@ -183,14 +240,14 @@
         <!-- Login Form -->
         <form id="loginForm">
           <!-- Sign In with Google Button -->
-          <button type="button" class="btn-google" onclick="handleGoogleSignIn()" title="Quick 1-Click Sign In">
+          <button type="button" class="btn-google" id="loginGoogleBtn" onclick="handleGoogleSignIn('login')" title="Quick 1-Click Sign In with Google">
             <svg width="18" height="18" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
               <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
             </svg>
-            Sign in with Google
+            <span>Sign in with Google</span>
           </button>
           
           <div style="display: flex; align-items: center; text-align: center; margin: 0.75rem 0 1rem 0; color: #94a3b8; font-size: 0.75rem;">
@@ -210,41 +267,25 @@
           <button type="submit" id="loginSubmitBtn" class="btn btn-primary" style="width: 100%;">Sign In</button>
         </form>
 
-        <!-- Quick Demo Role Switcher Control -->
-        <div class="card" style="margin-top: 1.25rem; background: var(--civic-surface-muted); border: 1px dashed var(--civic-cobalt-accent); padding: 1rem;">
-          <div style="font-weight: 800; font-size: 0.85rem; color: var(--civic-forest-ink); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.4rem;">
-            <span>⚡</span> <span>Quick Demo: Switch Role</span>
-          </div>
-          <div style="display: flex; gap: 0.5rem; margin-bottom: 0.65rem;">
-            <select id="demoRoleSelect" class="form-control" style="font-size: 0.82rem; padding: 0.35rem 0.5rem;">
-              <option value="citizen">👤 Citizen (Ananya Sharma)</option>
-              <option value="institution">🏫 Institution (Bombay Scottish School, Powai)</option>
-              <option value="hospital">🏥 Hospital (CityCare Super Specialty)</option>
-              <option value="crew101@cleanward.org">👷 Worker #101: Rajesh Singh (Dadar)</option>
-              <option value="crew102@cleanward.org">👷 Worker #102: Sunita Devi (Bandra)</option>
-              <option value="crew103@cleanward.org">👷 Worker #103: Amit Verma (Andheri)</option>
-              <option value="crew104@cleanward.org">👷 Worker #104: Harish Kumar (Powai)</option>
-              <option value="crew105@cleanward.org">👷 Worker #105: Sachin Kamble (Borivali - Off-Shift)</option>
-              <option value="admin">🏛️ Admin (Municipal Commissioner)</option>
-            </select>
-            <button id="demoQuickLoginBtn" type="button" class="btn btn-outline btn-xs" onclick="demoSwitchRole(document.getElementById('demoRoleSelect').value)">Switch</button>
-          </div>
-          <div style="display: flex; flex-wrap: wrap; gap: 0.35rem;">
-            <button type="button" class="btn btn-outline btn-xs" onclick="demoSwitchRole('citizen')">Citizen</button>
-            <button type="button" class="btn btn-outline btn-xs" onclick="demoSwitchRole('institution')">Institution</button>
-            <button type="button" class="btn btn-outline btn-xs" onclick="demoSwitchRole('hospital')">Hospital</button>
-            <button type="button" class="btn btn-outline btn-xs" onclick="demoSwitchRole('worker')">Worker</button>
-            <button type="button" class="btn btn-outline btn-xs" onclick="demoSwitchRole('crew101@cleanward.org')">Crew #101</button>
-            <button type="button" class="btn btn-outline btn-xs" onclick="demoSwitchRole('crew102@cleanward.org')">Crew #102</button>
-            <button type="button" class="btn btn-outline btn-xs" onclick="demoSwitchRole('crew103@cleanward.org')">Crew #103</button>
-            <button type="button" class="btn btn-outline btn-xs" onclick="demoSwitchRole('crew104@cleanward.org')">Crew #104</button>
-            <button type="button" class="btn btn-outline btn-xs" onclick="demoSwitchRole('crew105@cleanward.org')">Crew #105</button>
-            <button type="button" class="btn btn-outline btn-xs" onclick="demoSwitchRole('admin')">Admin</button>
-          </div>
-        </div>
-
         <!-- Signup Form with Dynamic School & Company Fields -->
         <form id="signupForm" style="display: none;">
+          <!-- Sign Up with Google Button -->
+          <button type="button" class="btn-google" id="signupGoogleBtn" onclick="handleGoogleSignIn('signup')" title="Quick 1-Click Registration with Google">
+            <svg width="18" height="18" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+            </svg>
+            <span>Sign up with Google</span>
+          </button>
+
+          <div style="display: flex; align-items: center; text-align: center; margin: 0.75rem 0 1rem 0; color: #94a3b8; font-size: 0.75rem;">
+            <span style="flex: 1; border-bottom: 1px solid var(--civic-border);"></span>
+            <span style="padding: 0 0.5rem; text-transform: uppercase; letter-spacing: 0.05em;">or register with email</span>
+            <span style="flex: 1; border-bottom: 1px solid var(--civic-border);"></span>
+          </div>
+
           <div class="form-group">
             <label for="signupName" class="form-label">Contact Person Name</label>
             <input type="text" id="signupName" class="form-control" placeholder="e.g. Ananya Sharma or Facility Officer" required>
@@ -366,39 +407,9 @@
           <button type="submit" class="btn btn-primary" style="width: 100%;">Create Account</button>
         </form>
 
-        <!-- Quick Demo: Switch Role -->
-        <div id="quickDemoSwitchRole" style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px dashed var(--civic-border);">
-          <div style="font-size: 0.82rem; font-weight: 800; color: var(--civic-forest-ink); margin-bottom: 0.6rem; text-align: center; display: flex; align-items: center; justify-content: center; gap: 0.35rem;">
-            <span>⚡ Quick Demo: Switch Role</span>
-          </div>
-          <div style="margin-bottom: 0.75rem;">
-            <select id="demoRoleSelectDropdown" class="form-control" onchange="switchDemoRole(this.value)">
-              <option value="">Switch Role (Select Demo Account)...</option>
-              <option value="citizen@ecoclear.org">Citizen: Ananya Sharma (Resident)</option>
-              <option value="school@cityedu.org">Institution: Bombay Scottish School, Powai</option>
-              <option value="citycare@hospital.org">Hospital: CityCare Super Specialty</option>
-              <option value="crew101@cleanward.org">Worker #101: Rajesh Singh (Dadar)</option>
-              <option value="crew102@cleanward.org">Worker #102: Sunita Devi (Bandra)</option>
-              <option value="crew103@cleanward.org">Worker #103: Amit Verma (Andheri)</option>
-              <option value="crew104@cleanward.org">Worker #104: Harish Kumar (Powai)</option>
-              <option value="crew105@cleanward.org">Worker #105: Sachin Kamble (Borivali - Off-Shift)</option>
-              <option value="admin@citygov.org">Admin: Municipal Sanitation Officer</option>
-            </select>
-          </div>
-          <div class="demo-account-grid">
-            <button type="button" class="demo-btn" onclick="switchDemoRole('citizen@ecoclear.org')">Citizen</button>
-            <button type="button" class="demo-btn" onclick="switchDemoRole('school@cityedu.org')">Institution</button>
-            <button type="button" class="demo-btn" onclick="switchDemoRole('citycare@hospital.org')">Hospital</button>
-            <button type="button" class="demo-btn" onclick="switchDemoRole('crew101@cleanward.org')">Crew #101</button>
-            <button type="button" class="demo-btn" onclick="switchDemoRole('crew102@cleanward.org')">Crew #102</button>
-            <button type="button" class="demo-btn" onclick="switchDemoRole('crew103@cleanward.org')">Crew #103</button>
-            <button type="button" class="demo-btn" onclick="switchDemoRole('crew104@cleanward.org')">Crew #104</button>
-            <button type="button" class="demo-btn" onclick="switchDemoRole('crew105@cleanward.org')">Crew #105</button>
-            <button type="button" class="demo-btn" onclick="switchDemoRole('admin@citygov.org')">Admin</button>
-          </div>
-          <div style="text-align: center; margin-top: 1rem;">
-            <a href="transparency.html" style="font-size: 0.82rem; color: var(--civic-cobalt-accent); text-decoration: underline; font-weight: 600;">🌐 View Public City-Wide Transparency Page (No Login Required) →</a>
-          </div>
+        <!-- Public Transparency Page Link -->
+        <div style="text-align: center; margin-top: 1.25rem;">
+          <a href="transparency.html" style="font-size: 0.82rem; color: var(--civic-cobalt-accent); text-decoration: underline; font-weight: 600;">🌐 View Public City-Wide Transparency Page (No Login Required) →</a>
         </div>
       </div>
     </section>
@@ -428,6 +439,26 @@
             <button class="btn btn-outline btn-xs" onclick="openCreditLedgerModal()">📜 History</button>
             <a href="#redemptionStoreSection" class="btn btn-primary btn-xs">🎁 Redeem Rewards</a>
           </div>
+
+          <!-- 5 Statutory Gamification Achievement Levels -->
+          <div id="gamificationLevelsContainer" style="width: 100%; margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px dashed var(--civic-border);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+              <span style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; font-weight: 700;">Current Rank & Tier:</span>
+              <span id="citizenCurrentLevelBadge" class="badge" style="font-weight: 800; font-size: 0.8rem; background: rgba(16, 185, 129, 0.2); color: #047857;">🌿 Green Heroes</span>
+            </div>
+            <div style="background: rgba(16, 185, 129, 0.15); height: 8px; border-radius: 999px; overflow: hidden; margin-bottom: 0.4rem;">
+              <div id="citizenLevelProgressBar" style="width: 42%; height: 100%; background: linear-gradient(90deg, #10b981, #047857); border-radius: 999px; transition: width 0.4s ease;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #64748b;">
+              <span id="citizenLevelPerksLabel" style="color: #047857; font-weight: 600;">Perk: +20% Plastic Hunter Bonus Active</span>
+              <span id="citizenNextLevelTarget" style="font-weight: 600;">Next Tier: Eco Master (200 pts)</span>
+            </div>
+            <div style="display: flex; gap: 0.5rem; margin-top: 0.6rem; justify-content: flex-end;">
+              <button type="button" class="btn btn-outline btn-xs" style="font-size: 0.7rem; padding: 2px 8px; border-color: #25d366; color: #128c7e;" onclick="shareRecyclingAchievement('whatsapp')">📲 WhatsApp Share</button>
+              <button type="button" class="btn btn-outline btn-xs" style="font-size: 0.7rem; padding: 2px 8px; border-color: #1da1f2; color: #1da1f2;" onclick="shareRecyclingAchievement('twitter')">🐦 Tweet Badge</button>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -505,6 +536,91 @@
             </div>
           </div>
         </div>
+
+      <!-- AI Waste Vision Scanner & Smart Bin Radar Hub Card -->
+      <div class="card ai-vision-hub-card" id="aiVisionHubCard">
+        <div class="ai-vision-hub-header">
+          <div style="display: flex; align-items: center; gap: 0.85rem;">
+            <div class="ai-vision-icon-pulse">📷</div>
+            <div>
+              <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                <h3 style="margin: 0; font-size: 1.18rem; color: var(--civic-forest-ink);">AI Waste Vision Scanner & Smart Bin Finder</h3>
+                <span class="badge" style="background: linear-gradient(135deg, #10b981, #0284c7); color: white; font-weight: 800; font-size: 0.68rem; letter-spacing: 0.05em; padding: 0.2rem 0.5rem;">NEURAL VISION 2.0</span>
+              </div>
+              <p style="color: #64748b; font-size: 0.82rem; margin: 0.25rem 0 0 0;">Point your camera at discarded items: Edge AI classifies material stream, displays statutory disposal advice, and navigates you to the closest municipal smart bin.</p>
+            </div>
+          </div>
+          <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+            <button type="button" class="btn btn-primary btn-sm ai-scan-btn-glow" onclick="openAIVisionScanner()">📷 Launch AI Scanner</button>
+            <button type="button" class="btn btn-outline btn-sm" onclick="openAIVisionScanner('radar')">🧭 Nearest Smart Bins</button>
+          </div>
+        </div>
+      </div>
+
+      
+      <!-- AI Virtual Waste Bag & Drop-Off / Pickup Launchpad -->
+      <div class="card virtual-waste-bag-card" id="virtualWasteBagCard" style="margin-bottom: 1.5rem; background: linear-gradient(135deg, #ffffff, #f0fdf4); border: 2px solid #86efac; box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.12);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+          <div style="display: flex; align-items: center; gap: 0.85rem;">
+            <div style="width: 52px; height: 52px; border-radius: 14px; background: linear-gradient(135deg, #10b981, #047857); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);">
+              🛍️
+            </div>
+            <div>
+              <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                <h3 style="margin: 0; font-size: 1.22rem; color: var(--civic-forest-ink);">My Virtual Waste Bag</h3>
+                <span id="bagItemCountBadge" class="badge" style="background: rgba(16, 185, 129, 0.2); color: #047857; font-weight: 800; font-size: 0.74rem;">3 Items Loaded</span>
+                <span class="badge" style="background: #e0f2fe; color: #0284c7; font-weight: 800; font-size: 0.72rem;">AI Scanned & Classified</span>
+              </div>
+              <p style="color: #64748b; font-size: 0.82rem; margin: 0.2rem 0 0 0;">Accumulate scanned recyclable items. Schedule a free home doorstep collection or drop off at a nearby municipal Trash Bank with verifiable QR code.</p>
+            </div>
+          </div>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button type="button" class="btn btn-outline btn-xs" onclick="quickAddSampleToBag()" title="Quick add sample scanned recyclables">+ Quick Add Item</button>
+            <button type="button" class="btn btn-outline btn-xs" style="color: #dc2626; border-color: #fca5a5;" onclick="clearWasteBag()">Clear Bag</button>
+          </div>
+        </div>
+
+        <!-- Waste Bag Metrics Bar -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.75rem; margin-bottom: 1rem; padding: 0.85rem 1rem; background: rgba(255, 255, 255, 0.85); border-radius: var(--radius-xs); border: 1px solid #bbf7d0;">
+          <div>
+            <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #64748b;">Total Items</div>
+            <div id="bagTotalItemsCount" style="font-size: 1.35rem; font-weight: 800; color: var(--civic-forest-ink); margin-top: 0.1rem;">3</div>
+          </div>
+          <div>
+            <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #64748b;">Est. Total Weight</div>
+            <div id="bagTotalWeightDisplay" style="font-size: 1.35rem; font-weight: 800; color: #047857; margin-top: 0.1rem;">1.75 kg</div>
+          </div>
+          <div>
+            <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #64748b;">Estimated EcoCredits</div>
+            <div id="bagTotalPointsDisplay" style="font-size: 1.35rem; font-weight: 800; color: var(--civic-cobalt-accent); margin-top: 0.1rem;">+45 pts</div>
+          </div>
+          <div>
+            <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #64748b;">Collection Fee</div>
+            <div style="font-size: 1.15rem; font-weight: 800; color: #16a34a; margin-top: 0.2rem;">FREE (100% Segregated)</div>
+          </div>
+        </div>
+
+        <!-- Bag Item Cards Container -->
+        <div id="virtualBagItemsList" style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.25rem;">
+          <!-- Rendered dynamically via JS -->
+        </div>
+
+        <!-- Dispatch / Drop-off Action Strip -->
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; padding-top: 0.75rem; border-top: 1px dashed #bbf7d0;">
+          <div style="font-size: 0.78rem; color: #64748b;">
+            🌿 Ready for collection? Choose your preferred municipal disposal route:
+          </div>
+          <div style="display: flex; gap: 0.65rem; flex-wrap: wrap;">
+            <button type="button" class="btn btn-outline btn-sm" id="btnOpenTrashBankModal" onclick="openTrashBankModal()" style="border-color: #3b82f6; color: #1d4ed8; font-weight: 700;">
+              🏦 Drop-off at Trash Bank (QR Code)
+            </button>
+            <button type="button" class="btn btn-primary btn-sm" id="btnOpenPickupScheduler" onclick="openPickupSchedulerModal()" style="font-weight: 700; background: linear-gradient(135deg, #10b981, #047857); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+              🚛 Schedule Doorstep Pickup
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- 3D Interactive Virtual Waste Segregation Studio -->
       <div class="citizen-3d-studio-card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
@@ -527,6 +643,8 @@
             <button type="button" class="btn btn-outline btn-xs" onclick="EcoClear3D.dropSegregationItem('organic')" title="Drop into Green Wet Waste Bin">🍎 Organic Food Peels (+10 pts)</button>
             <button type="button" class="btn btn-outline btn-xs" onclick="EcoClear3D.dropSegregationItem('plastic')" title="Drop into Blue Dry Recyclable Bin">🥤 Clean Plastic Bottle (+10 pts)</button>
             <button type="button" class="btn btn-outline btn-xs" onclick="EcoClear3D.dropSegregationItem('battery')" title="Drop into Amber Hazardous Bin">🔋 Lithium Battery (+10 pts)</button>
+            <button type="button" class="btn btn-outline btn-xs" onclick="EcoClear3D.dropSegregationItem('ewaste')" title="Drop into Purple E-Waste Depot">🔌 E-Waste PCB (+15 pts)</button>
+            <button type="button" class="btn btn-outline btn-xs" onclick="EcoClear3D.dropSegregationItem('paper')" title="Drop into Blue Paperboard Bin">📦 Cardboard Box (+10 pts)</button>
           </div>
           <div style="font-size: 0.76rem; color: #64748b;">
             💡 Earns +10 EcoCredits directly to your Citizen EcoWallet.
@@ -584,6 +702,15 @@
               ⚡ You have <span id="priorityPassCountText">1</span> Priority Pickup Pass active! Next report will jump to the top of the collection queue.
             </div>
             <form id="citizenReportForm">
+
+              <!-- AI Vision Scan Trigger Banner -->
+              <div class="ai-report-scan-shortcut">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <span style="font-size: 1.1rem;">✨</span>
+                  <span style="font-size: 0.8rem; font-weight: 600; color: #1e40af;">Unsure of waste category or nearest drop-off?</span>
+                </div>
+                <button type="button" class="btn btn-outline btn-xs" style="color: #1d4ed8; border-color: #93c5fd; background: white; font-weight: 700;" onclick="openAIVisionScanner('report')">📷 Scan with AI Vision</button>
+              </div>
 
               <!-- REAL LOCATION PICKER WITH LEAFLET -->
               <div class="form-group">
@@ -734,7 +861,81 @@
 
         </div>
       </div>
-    </section>
+    
+
+      <!-- ==========================================
+           ECO STORE: SUSTAINABLE PRODUCTS ONLINE MARKETPLACE
+           ========================================== -->
+      <div id="ecoStoreSection" class="card" style="margin-top: 2rem; border-top: 4px solid #10b981; padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #047857; font-weight: 800; font-size: 0.72rem;">CIRCULAR ECONOMY STORE</span>
+              <h3 style="margin: 0; font-size: 1.35rem; color: var(--civic-forest-ink);">🛒 Eco Store & Sustainable Lifestyle</h3>
+            </div>
+            <p style="color: #64748b; font-size: 0.84rem; margin: 0.25rem 0 0 0;">Purchase verified zero-waste products and upcycled goods. Apply your recycling EcoPoints for full or partial discount at checkout!</p>
+          </div>
+          <button type="button" class="btn btn-primary btn-sm" id="btnOpenEcoStoreCart" onclick="openEcoStoreCart()" style="display: flex; align-items: center; gap: 0.5rem; font-weight: 700; background: linear-gradient(135deg, #10b981, #0284c7);">
+            <span>🛍️ View Cart</span>
+            <span id="ecoStoreCartCountBadge" class="badge" style="background: white; color: #047857; font-weight: 800; font-size: 0.75rem; padding: 2px 7px;">0</span>
+          </button>
+        </div>
+
+        <!-- Product Catalog Grid -->
+        <div class="eco-store-grid" id="ecoStoreProductGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem;">
+          <!-- Dynamically populated via renderEcoStore() -->
+        </div>
+      </div>
+
+
+      <!-- ==========================================
+           ENVIRONMENTAL NEWS, ARTICLES & RECYCLING TUTORIALS
+           ========================================== -->
+      <div id="ecoNewsSection" class="card" style="margin-top: 2rem; border-left: 4px solid var(--civic-cobalt-accent); padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span class="badge" style="background: #e0f2fe; color: #0284c7; font-weight: 800; font-size: 0.72rem;">ENVIRONMENTAL EDUCATION</span>
+              <h3 style="margin: 0; font-size: 1.25rem; color: var(--civic-forest-ink);">📰 Environmental News & Recycling Tutorials</h3>
+            </div>
+            <p style="color: #64748b; font-size: 0.82rem; margin: 0.25rem 0 0 0;">Stay informed on municipal policies, modern recycling breakthroughs, and zero-waste community initiatives.</p>
+          </div>
+        </div>
+
+        <div class="eco-news-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+          <!-- Card 1 -->
+          <div class="news-article-card" style="background: var(--civic-surface-muted, #f8fafc); border: 1px solid var(--civic-border); border-radius: 8px; padding: 1rem; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #047857; font-size: 0.68rem; font-weight: 800; margin-bottom: 0.5rem; display: inline-block;">AI RECYCLING INNOVATION</span>
+              <h4 style="margin: 0 0 0.35rem 0; font-size: 0.98rem; color: var(--civic-forest-ink);">How AI Optical Sorters Detect Plastics in 15 Milliseconds</h4>
+              <p style="font-size: 0.8rem; color: #64748b; margin: 0 0 0.75rem 0; line-height: 1.4;">Near-infrared spectrometry combined with convolutional neural networks allows municipal MRFs to separate PET from HDPE at 12 tons per hour.</p>
+            </div>
+            <button type="button" class="btn btn-outline btn-xs" onclick="openEcoArticleModal('optical_ai')">Read Full Article &bull; 3 min read</button>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="news-article-card" style="background: var(--civic-surface-muted, #f8fafc); border: 1px solid var(--civic-border); border-radius: 8px; padding: 1rem; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <span class="badge" style="background: rgba(59, 130, 246, 0.15); color: #1d4ed8; font-size: 0.68rem; font-weight: 800; margin-bottom: 0.5rem; display: inline-block;">STATUTORY ROADMAP</span>
+              <h4 style="margin: 0 0 0.35rem 0; font-size: 0.98rem; color: var(--civic-forest-ink);">Mumbai Circular Economy Roadmap: 2026 Directives</h4>
+              <p style="font-size: 0.8rem; color: #64748b; margin: 0 0 0.75rem 0; line-height: 1.4;">MCGM mandates strict 3-way segregation for all residential societies exceeding 5,000 sq. meters, with on-site composting requirements.</p>
+            </div>
+            <button type="button" class="btn btn-outline btn-xs" onclick="openEcoArticleModal('mumbai_2026')">Read Full Article &bull; 4 min read</button>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="news-article-card" style="background: var(--civic-surface-muted, #f8fafc); border: 1px solid var(--civic-border); border-radius: 8px; padding: 1rem; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #b91c1c; font-size: 0.68rem; font-weight: 800; margin-bottom: 0.5rem; display: inline-block;">HAZARD ADVISORY</span>
+              <h4 style="margin: 0 0 0.35rem 0; font-size: 0.98rem; color: var(--civic-forest-ink);">Why Lithium Batteries Cannot Enter Landfills</h4>
+              <p style="font-size: 0.8rem; color: #64748b; margin: 0 0 0.75rem 0; line-height: 1.4;">Compaction pressure in ordinary garbage trucks can crush lithium cells, igniting toxic thermal runaways and methane dump fires.</p>
+            </div>
+            <button type="button" class="btn btn-outline btn-xs" onclick="openEcoArticleModal('battery_hazard')">Read Full Article &bull; 2 min read</button>
+          </div>
+        </div>
+      </div>
+
+</section>
 
     <!-- ==========================================
          VIEW 3: INSTITUTION DASHBOARD
@@ -1170,6 +1371,70 @@
           </span>
         </div>
       </div>
+
+      <!-- Worker Personnel Dossier & Identification Card -->
+      <div id="workerPersonnelCard" class="card" style="margin-bottom: 1.25rem; border-left: 4px solid var(--civic-cobalt-accent); padding: 1rem 1.25rem;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 0.75rem;">
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <div class="worker-avatar-badge" style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #059669, #0284c7); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; box-shadow: 0 4px 12px rgba(2,132,199,0.25);">
+              👷
+            </div>
+            <div>
+              <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                <h3 id="workerPersonnelName" style="margin: 0; font-size: 1.1rem; color: var(--civic-forest-ink);">Rajesh Singh</h3>
+                <span id="workerMcgmBadgePill" class="badge" style="background: rgba(2, 132, 199, 0.15); color: #0284c7; font-weight: 800; font-size: 0.72rem;">MCGM-SWM-4019</span>
+                <span id="workerBloodGroupBadge" class="badge" style="background: rgba(239, 68, 68, 0.15); color: #dc2626; font-weight: 800; font-size: 0.72rem;">🩸 Blood Group: O+</span>
+              </div>
+              <div style="font-size: 0.78rem; color: #64748b; margin-top: 0.15rem;">
+                Municipal Sanitation Cadre &bull; Heavy Motor Vehicle Operator &bull; <span id="workerYearsServiceDisplay">8 Years in Service</span>
+              </div>
+            </div>
+          </div>
+          <button type="button" class="btn btn-outline btn-xs" onclick="openWorkerProfileEditModal()" title="Update Emergency Contacts & Phone">
+            ✏️ Update Personal & Emergency Contacts
+          </button>
+        </div>
+
+        <div class="worker-details-grid">
+          <div>
+            <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: #64748b;">Direct Mobile Contact</div>
+            <div style="font-size: 0.88rem; font-weight: 700; margin-top: 0.15rem;">
+              📞 <a id="workerPhoneDisplay" href="tel:+919811240192" style="color: var(--civic-cobalt-accent); text-decoration: none;">+91 98112 40192</a>
+            </div>
+          </div>
+          <div>
+            <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: #64748b;">Emergency Contact Person</div>
+            <div id="workerEmergencyDisplay" style="font-size: 0.84rem; font-weight: 700; margin-top: 0.15rem; color: #b91c1c;">
+              🚨 +91 98200 11223 (Kavita Singh - Spouse)
+            </div>
+          </div>
+          <div>
+            <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: #64748b;">Assigned Depot & Garage</div>
+            <div id="workerDepotDisplay" style="font-size: 0.82rem; font-weight: 600; margin-top: 0.15rem; color: var(--civic-forest-ink);">
+              Prabhadevi Municipal Motor Garage
+            </div>
+          </div>
+          <div>
+            <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: #64748b;">Shift Roster & Timings</div>
+            <div id="workerShiftTimingDisplay" style="font-size: 0.82rem; font-weight: 600; margin-top: 0.15rem; color: var(--civic-forest-ink);">
+              06:00 AM - 02:00 PM (Morning General)
+            </div>
+          </div>
+          <div>
+            <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: #64748b;">Occupational Health & Vaccines</div>
+            <div id="workerMedicalDisplay" style="font-size: 0.82rem; font-weight: 600; margin-top: 0.15rem; color: #047857;">
+              ✓ Fit (Tetanus & Hep-B Booster Verified)
+            </div>
+          </div>
+          <div>
+            <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: #64748b;">Driving License (HCV)</div>
+            <div id="workerLicenseDisplay" style="font-size: 0.82rem; font-weight: 600; margin-top: 0.15rem; font-family: monospace;">
+              MH-01-2018-0044192
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Worker Daily Pre-Shift Safety Checklist Log -->
       <div id="workerSafetyChecklistCard" class="card" style="margin-bottom: 1.25rem;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; flex-wrap: wrap; gap: 0.5rem;">
@@ -2318,26 +2583,6 @@
       
       <div style="display: flex; flex-direction: column; gap: 0.35rem;">
         <div class="shortcut-row">
-          <span>Switch to Citizen Portal</span>
-          <span class="shortcut-key">1</span>
-        </div>
-        <div class="shortcut-row">
-          <span>Switch to Institution Portal</span>
-          <span class="shortcut-key">2</span>
-        </div>
-        <div class="shortcut-row">
-          <span>Switch to Hospital Portal</span>
-          <span class="shortcut-key">3</span>
-        </div>
-        <div class="shortcut-row">
-          <span>Switch to Worker Field View</span>
-          <span class="shortcut-key">4</span>
-        </div>
-        <div class="shortcut-row">
-          <span>Switch to Admin Command Center</span>
-          <span class="shortcut-key">5</span>
-        </div>
-        <div class="shortcut-row">
           <span>Open Public Transparency</span>
           <span class="shortcut-key">T</span>
         </div>
@@ -2536,6 +2781,237 @@
   </div>
 
   <!-- ==========================================
+       GOOGLE AUTHENTICATION & ACCOUNT CHOOSER MODAL
+       ========================================== -->
+  <div id="googleAuthModal" class="modal-overlay">
+    <div class="modal-card google-auth-card">
+      <button class="modal-close" onclick="closeModal('googleAuthModal')">×</button>
+      
+      <!-- Google Top Branding -->
+      <div class="google-auth-header">
+        <svg width="32" height="32" viewBox="0 0 24 24" style="margin-bottom: 0.5rem;">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+        </svg>
+        <h3 id="googleAuthTitle" style="font-size: 1.25rem; font-weight: 700; margin: 0; color: var(--civic-forest-ink, #0f172a);">Sign in with Google</h3>
+        <p id="googleAuthSubtitle" style="color: #64748b; font-size: 0.82rem; margin: 0.25rem 0 0 0;">Choose an account to continue to <strong>EcoClear Municipal Waste Portal</strong></p>
+      </div>
+
+      <!-- Google Status / Connecting Banner -->
+      <div id="googleAuthConnectingState" style="display: none; padding: 1.5rem; text-align: center;">
+        <div class="google-auth-spinner"></div>
+        <div style="font-size: 0.92rem; font-weight: 600; color: var(--civic-forest-ink, #0f172a); margin-top: 0.75rem;" id="googleConnectingMsg">Connecting with Google ID...</div>
+        <div style="font-size: 0.78rem; color: #64748b; margin-top: 0.25rem;">Verifying OAuth 2.0 token & credentials</div>
+      </div>
+
+      <!-- Account List -->
+      <div id="googleAuthAccountList" class="google-account-list">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Custom Google Account Row -->
+      <div id="googleCustomAccountSection" style="margin-top: 0.75rem; border-top: 1px solid var(--civic-border, #e2e8f0); padding-top: 0.75rem;">
+        <button type="button" class="btn btn-outline btn-xs" style="width: 100%; justify-content: flex-start; gap: 0.5rem; border-style: dashed;" onclick="toggleGoogleCustomInput()">
+          <span>➕</span> <span>Use another Google account</span>
+        </button>
+        <div id="googleCustomAccountForm" style="display: none; margin-top: 0.75rem; background: var(--civic-surface-alt, #f8fafc); padding: 0.85rem; border-radius: 8px; border: 1px solid var(--civic-border, #e2e8f0);">
+          <div class="form-group" style="margin-bottom: 0.5rem;">
+            <label class="form-label" style="font-size: 0.75rem;">Google Account Name</label>
+            <input type="text" id="googleCustomName" class="form-control" placeholder="e.g. Vikram Malhotra" style="font-size: 0.82rem;">
+          </div>
+          <div class="form-group" style="margin-bottom: 0.5rem;">
+            <label class="form-label" style="font-size: 0.75rem;">Gmail or Workspace Email</label>
+            <input type="email" id="googleCustomEmail" class="form-control" placeholder="e.g. vikram.malhotra@gmail.com" style="font-size: 0.82rem;">
+          </div>
+          <div class="form-group" style="margin-bottom: 0.65rem;">
+            <label class="form-label" style="font-size: 0.75rem;">Account Role</label>
+            <select id="googleCustomRole" class="form-control" style="font-size: 0.82rem;">
+              <option value="citizen">Citizen (Resident)</option>
+              <option value="worker">Worker (Field Crew)</option>
+              <option value="institution">Institution (School / Corporate)</option>
+              <option value="hospital">Hospital (Biomedical)</option>
+              <option value="admin">Admin (Municipal Directorate)</option>
+            </select>
+          </div>
+          <button type="button" class="btn btn-primary btn-xs" style="width: 100%;" onclick="submitGoogleCustomAccount()">Authenticate Google Account →</button>
+        </div>
+      </div>
+
+      
+      <!-- Supabase OAuth Provider Integration -->
+      <div id="supabaseAuthSection" style="margin-top: 0.75rem; border-top: 1px solid var(--civic-border, #e2e8f0); padding-top: 0.75rem;">
+        <button type="button" class="btn btn-outline btn-xs" id="btnSupabaseOAuth" style="width: 100%; justify-content: center; gap: 0.5rem; background: rgba(16, 185, 129, 0.08); border-color: #10b981; color: #047857; font-weight: 700;" onclick="handleSupabaseGoogleSignIn()">
+          <span>⚡</span> <span>Sign In via Supabase Auth (Google Provider)</span>
+        </button>
+        <div id="supabaseStatusNotice" style="display: none; font-size: 0.72rem; color: #059669; text-align: center; margin-top: 0.35rem;">
+          Connecting with Supabase Auth (Google Provider)...
+        </div>
+      </div>
+      <!-- Google Privacy Terms Footer -->
+      <div class="google-auth-footer">
+        <p style="margin: 0; font-size: 0.72rem; color: #94a3b8; line-height: 1.4;">
+          To continue, Google will share your name, email address, language preference, and profile picture with EcoClear. Review EcoClear's <a href="transparency.html" target="_blank" style="color: #4285F4; text-decoration: underline;">Privacy Policy</a> and <a href="transparency.html" target="_blank" style="color: #4285F4; text-decoration: underline;">Terms of Service</a>.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       AI WASTE VISION SCANNER & NEAREST SMART BIN FINDER MODAL
+       ========================================== -->
+  <div id="aiVisionScannerModal" class="modal-overlay">
+    <div class="modal-card ai-scanner-modal-card">
+      <button class="modal-close" onclick="closeAIVisionScanner()">×</button>
+      
+      <!-- Scanner Top Bar -->
+      <div class="ai-scanner-topbar">
+        <div style="display: flex; align-items: center; gap: 0.65rem;">
+          <div class="ai-lens-badge">📷</div>
+          <div>
+            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+              <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800; color: var(--civic-forest-ink);">AI Waste Vision Scanner</h3>
+              <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #047857; font-weight: 800; font-size: 0.7rem;">EDGE AI 98.4%</span>
+            </div>
+            <p style="margin: 0.15rem 0 0 0; font-size: 0.78rem; color: #64748b;">Autonomous computer vision classifier for source segregation and real-time smart drop-off navigation.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Item Selector Bar -->
+      <div style="margin-bottom: 0.75rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+          <span style="font-size: 0.74rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: #64748b;">Sample Waste Streams to Scan:</span>
+          <label for="aiCustomImageUpload" class="btn btn-outline btn-xs" style="cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem;">
+            <span>📁 Upload Custom Photo</span>
+            <input type="file" id="aiCustomImageUpload" accept="image/*" style="display: none;" onchange="handleCustomImageUpload(event)">
+          </label>
+        </div>
+        <div class="ai-item-tabs">
+          <button type="button" class="ai-item-tab active" data-item="pet_bottle" onclick="selectAISampleItem('pet_bottle')">🥤 Plastic Bottle</button>
+          <button type="button" class="ai-item-tab" data-item="organic_peels" onclick="selectAISampleItem('organic_peels')">🍎 Kitchen Peels</button>
+          <button type="button" class="ai-item-tab" data-item="cardboard_box" onclick="selectAISampleItem('cardboard_box')">📦 Cardboard Box</button>
+          <button type="button" class="ai-item-tab" data-item="ewaste_circuit" onclick="selectAISampleItem('ewaste_circuit')">💻 E-Waste PCB</button>
+          <button type="button" class="ai-item-tab" data-item="medicine_blister" onclick="selectAISampleItem('medicine_blister')">💊 Pharma Blister</button>
+        </div>
+      </div>
+
+      <!-- Dual Column Layout: Cyber Viewfinder (Left) & Telemetry Results (Right) -->
+      <div class="ai-scanner-grid">
+        
+        <!-- Interactive Viewfinder -->
+        <div class="ai-viewfinder-container">
+          <div class="ai-viewfinder" id="aiViewfinder">
+            <!-- Reticle HUD corners -->
+            <div class="hud-corner hud-top-left"></div>
+            <div class="hud-corner hud-top-right"></div>
+            <div class="hud-corner hud-bottom-left"></div>
+            <div class="hud-corner hud-bottom-right"></div>
+            
+            <!-- Laser Scan Beam -->
+            <div class="ai-scan-beam" id="aiScanBeam"></div>
+
+            <!-- SVG Item Stage / Image Canvas -->
+            <div id="aiItemGraphicStage" class="ai-item-stage">
+              <!-- Rendered via JS -->
+            </div>
+
+            <!-- Dynamic Bounding Box -->
+            <div class="ai-bounding-box" id="aiBoundingBox">
+              <div class="ai-target-tag" id="aiTargetTag">ANALYZING...</div>
+            </div>
+
+            <!-- Live HUD Status Strip -->
+            <div class="ai-hud-status-strip">
+              <span id="aiScanFps">60 FPS • RESNET-50</span>
+              <span id="aiScanStatus">ANALYSIS COMPLETE</span>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+            <button type="button" class="btn btn-outline btn-xs" style="flex: 1;" onclick="runAIScanningAnimation()">🔄 Re-Scan Frame</button>
+          </div>
+        </div>
+
+        <!-- Telemetry & Segregation Results -->
+        <div class="ai-results-container">
+          <!-- Classification Card -->
+          <div class="ai-card" id="aiClassificationCard">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+              <div>
+                <span id="aiDetectedCategoryBadge" class="badge" style="background: rgba(37, 99, 235, 0.15); color: #1d4ed8; font-weight: 800; font-size: 0.72rem;">DRY RECYCLABLE</span>
+                <h4 id="aiDetectedTitle" style="margin: 0.25rem 0 0 0; font-size: 1.05rem; line-height: 1.2;">PET Beverage Bottle</h4>
+              </div>
+              <div style="text-align: right;">
+                <div id="aiConfidenceScore" style="font-size: 1.2rem; font-weight: 900; color: #10b981;">98.7%</div>
+                <div style="font-size: 0.68rem; color: #64748b; text-transform: uppercase;">Confidence</div>
+              </div>
+            </div>
+
+            <div class="ai-chip-grid">
+              <div class="ai-chip">
+                <span class="ai-chip-label">Material</span>
+                <span class="ai-chip-val" id="aiDetectedMaterial">Polyethylene Terephthalate</span>
+              </div>
+              <div class="ai-chip">
+                <span class="ai-chip-label">Target Bin</span>
+                <span class="ai-chip-val" id="aiDetectedBinColor" style="color: #2563eb; font-weight: 800;">🔵 Blue Dry Bin</span>
+              </div>
+              <div class="ai-chip">
+                <span class="ai-chip-label">Statutory Reward</span>
+                <span class="ai-chip-val" id="aiDetectedReward" style="color: #047857; font-weight: 800;">+15 EcoCredits</span>
+              </div>
+              <div class="ai-chip">
+                <span class="ai-chip-label">CO₂ Offset</span>
+                <span class="ai-chip-val" id="aiDetectedCo2">0.35 kg CO₂e</span>
+              </div>
+            </div>
+
+            <div style="margin-top: 0.65rem; background: var(--civic-surface-muted, #f8fafc); padding: 0.65rem; border-radius: 6px; border-left: 3px solid var(--civic-spruce-green);">
+              <div style="font-size: 0.72rem; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 0.2rem;">Municipal Disposal Protocol</div>
+              <p id="aiDisposalInstructions" style="margin: 0; font-size: 0.78rem; color: var(--civic-forest-ink); line-height: 1.4; white-space: pre-line;">Empty liquids, rinse and crush bottle to save space.</p>
+            </div>
+          </div>
+
+          <!-- Nearest Smart Bin Drop-off Radar Card -->
+          <div class="ai-card nearest-bin-card" id="nearestBinCard">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+              <span class="badge" style="background: rgba(14, 165, 233, 0.15); color: #0284c7; font-weight: 800; font-size: 0.7rem;">📍 PROXIMITY RADAR</span>
+              <span id="nearestBinDistanceBadge" style="font-size: 0.82rem; font-weight: 800; color: #0284c7;">~210m (3 min walk)</span>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <div class="bin-compass-dial">
+                <div class="bin-compass-needle" id="binCompassNeedle">▲</div>
+              </div>
+              <div style="flex: 1; min-width: 0;">
+                <div id="nearestBinName" style="font-size: 0.88rem; font-weight: 700; color: var(--civic-forest-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Dadar Shivaji Park Eco-Depot</div>
+                <div id="nearestBinAddress" style="font-size: 0.75rem; color: #64748b; margin-top: 0.1rem;">Near Shivaji Park Gate 3, Dadar West</div>
+                <div style="display: flex; align-items: center; gap: 0.4rem; margin-top: 0.35rem;">
+                  <div class="bin-capacity-bar-track">
+                    <div class="bin-capacity-bar-fill" id="nearestBinFillBar" style="width: 38%; background: #10b981;"></div>
+                  </div>
+                  <span id="nearestBinFillText" style="font-size: 0.7rem; color: #10b981; font-weight: 700;">62% Free</span>
+                </div>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 0.4rem; margin-top: 0.75rem;">
+              <button type="button" class="btn btn-outline btn-xs" style="flex: 1;" onclick="showNearestBinOnMap()">🗺️ Highlight on Map</button>
+              <button type="button" class="btn btn-outline btn-xs" style="flex: 1; border-color: #10b981; color: #047857; font-weight: 700;" onclick="addAIScanToVirtualBag()">🛍️ Add to Bag</button>
+              <button type="button" class="btn btn-primary btn-xs" style="flex: 1.2;" onclick="applyAIDetectionToReport()">📋 Auto-Fill Report</button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==========================================
        FULLSCREEN 3D MUNICIPAL DIGITAL TWIN EXPLORER MODAL
        ========================================== -->
   <div id="threeCityModal">
@@ -2569,6 +3045,364 @@
         <div class="hero-3d-drag-hint" style="top: 16px; left: 16px; right: auto;">
           <span>🖱️ Left-Click + Drag: Orbit | Right-Click: Pan | Scroll: Zoom | Click any Ward or Truck for telemetry</span>
         </div>
+      </div>
+    </div>
+  <!-- Modal: Worker Profile & Emergency Contact Edit -->
+  <div id="workerProfileEditModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 480px;">
+      <button class="modal-close" onclick="closeWorkerProfileEditModal()">×</button>
+      <h3 style="margin-top: 0; font-size: 1.15rem; color: var(--civic-forest-ink);">👷 Update Worker Personal & Emergency Details</h3>
+      <p style="font-size: 0.82rem; color: #64748b; margin-bottom: 1rem;">Keep your municipal dispatch contact and family emergency details up-to-date for field safety.</p>
+      <form id="workerProfileEditForm" onsubmit="handleWorkerProfileEditSubmit(event)">
+        <div class="form-group">
+          <label class="form-label">Primary Mobile Phone <span style="color: var(--civic-signal-crimson);">*</span></label>
+          <input type="tel" id="editWorkerPhone" class="form-control" required placeholder="e.g. +91 98112-40192">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Emergency Contact (Name, Relation & Phone) <span style="color: var(--civic-signal-crimson);">*</span></label>
+          <input type="text" id="editWorkerEmergency" class="form-control" required placeholder="e.g. +91 98200-11223 (Kavita Singh - Spouse)">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Blood Group</label>
+          <select id="editWorkerBloodGroup" class="form-control">
+            <option value="O+">O+ (Positive)</option>
+            <option value="O-">O- (Negative)</option>
+            <option value="A+">A+ (Positive)</option>
+            <option value="A-">A- (Negative)</option>
+            <option value="B+">B+ (Positive)</option>
+            <option value="B-">B- (Negative)</option>
+            <option value="AB+">AB+ (Positive)</option>
+            <option value="AB-">AB- (Negative)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Assigned Municipal Garage / Depot</label>
+          <input type="text" id="editWorkerDepot" class="form-control" placeholder="e.g. Prabhadevi Municipal Motor Garage">
+        </div>
+        <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1.25rem;">
+          <button type="button" class="btn btn-outline btn-sm" onclick="closeWorkerProfileEditModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm">💾 Save Profile Details</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  
+  <!-- Modal: Waste Segregation Tag Deep Details & Statutory Disposal Protocol -->
+  <div id="segregationTagDetailModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 580px;">
+      <button class="modal-close" onclick="closeSegregationTagDetailModal()">×</button>
+      <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+        <span id="tagDetailEmoji" style="font-size: 2rem;">🌱</span>
+        <div>
+          <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+            <h3 id="tagDetailTitle" style="margin: 0; font-size: 1.25rem; color: var(--civic-forest-ink);">WET ORGANIC WASTE</h3>
+            <span id="tagDetailBinBadge" class="badge" style="background: rgba(16, 185, 129, 0.15); color: #047857; font-weight: 800; font-size: 0.75rem;">🟢 Green Municipal Bin</span>
+          </div>
+          <div id="tagDetailMandate" style="font-size: 0.78rem; color: #64748b; margin-top: 0.15rem;">Statutory Mandate: SWM Rules 2016 / 2026 (Rule 4 Clause 1)</div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.75rem; margin-bottom: 1rem;">
+        <div style="background: var(--civic-surface-muted, #f8fafc); padding: 0.75rem; border-radius: 6px; border-left: 3px solid #10b981;">
+          <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #64748b;">Decomposition Horizon</div>
+          <div id="tagDetailDecomp" style="font-size: 0.88rem; font-weight: 700; color: var(--civic-forest-ink); margin-top: 0.15rem;">2 to 6 Weeks (Aerobic Composting)</div>
+        </div>
+        <div style="background: var(--civic-surface-muted, #f8fafc); padding: 0.75rem; border-radius: 6px; border-left: 3px solid #3b82f6;">
+          <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #64748b;">Treatment & Recovery Pathway</div>
+          <div id="tagDetailTreatment" style="font-size: 0.88rem; font-weight: 700; color: var(--civic-forest-ink); margin-top: 0.15rem;">Biomethanation & Anaerobic Digestion (CNG / Compost)</div>
+        </div>
+        <div style="background: var(--civic-surface-muted, #f8fafc); padding: 0.75rem; border-radius: 6px; border-left: 3px solid #f59e0b;">
+          <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #64748b;">Environmental / Chemical Hazard</div>
+          <div id="tagDetailHazard" style="font-size: 0.88rem; font-weight: 700; color: #b45309; margin-top: 0.15rem;">Generates potent methane (CH₄) & toxic leachate in landfills</div>
+        </div>
+        <div style="background: var(--civic-surface-muted, #f8fafc); padding: 0.75rem; border-radius: 6px; border-left: 3px solid #ef4444;">
+          <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #64748b;">Statutory Non-Compliance Penalty</div>
+          <div id="tagDetailPenalty" style="font-size: 0.88rem; font-weight: 700; color: #dc2626; margin-top: 0.15rem;">₹500 / incident (Residential) &bull; ₹5,000 (Bulk Generator)</div>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 1rem; background: var(--civic-surface-muted, #f8fafc); padding: 0.85rem; border-radius: 8px; border: 1px solid var(--civic-border, #e2e8f0);">
+        <div style="font-size: 0.74rem; font-weight: 800; text-transform: uppercase; color: #64748b; margin-bottom: 0.4rem;">Citizen Handling Protocol (Step-by-Step)</div>
+        <ul id="tagDetailHandlingSteps" style="margin: 0; padding-left: 1.25rem; font-size: 0.82rem; line-height: 1.5; color: var(--civic-forest-ink);">
+          <li>Drain excess liquids and gravies before placing into green bin.</li>
+          <li>Keep bin covered with a breathable lid to prevent fruit flies.</li>
+          <li>Never use non-biodegradable plastic liner bags; use compostable liners or newspaper wraps.</li>
+        </ul>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+        <span style="font-size: 0.75rem; color: #64748b;">MCGM Statutory Waste Framework &bull; SBM 2.0 Compliant</span>
+        <button type="button" class="btn btn-primary btn-sm" onclick="closeSegregationTagDetailModal()">Understood & Close</button>
+      </div>
+    </div>
+  </div>
+
+  
+  <!-- Modal: Doorstep Waste Pickup Booking Wizard -->
+  <div id="pickupSchedulerModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 620px;">
+      <button class="modal-close" onclick="closePickupSchedulerModal()">×</button>
+      <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+        <div style="font-size: 2rem;">🚛</div>
+        <div>
+          <h3 style="margin: 0; font-size: 1.25rem; color: var(--civic-forest-ink);">Schedule Doorstep Waste Collection</h3>
+          <p style="margin: 0.15rem 0 0 0; font-size: 0.8rem; color: #64748b;">Municipal smart collection vehicle visits your address for verified doorstep intake.</p>
+        </div>
+      </div>
+
+      <form id="pickupSchedulerForm" onsubmit="handlePickupBookingSubmit(event)">
+        <!-- Step 1 & 2: Date and Time Slot -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" for="pickupDateInput">Select Pickup Date <span style="color: var(--civic-signal-crimson);">*</span></label>
+            <input type="date" id="pickupDateInput" class="form-control" required>
+            <div style="font-size: 0.72rem; color: #64748b; margin-top: 0.2rem;">Same-day or next-day booking</div>
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" for="pickupTimeSlotSelect">Select Time Slot <span style="color: var(--civic-signal-crimson);">*</span></label>
+            <select id="pickupTimeSlotSelect" class="form-control" required>
+              <option value="08:00 AM - 10:00 AM">Morning: 08:00 AM - 10:00 AM</option>
+              <option value="10:00 AM - 12:00 PM">Late Morning: 10:00 AM - 12:00 PM</option>
+              <option value="02:00 PM - 04:00 PM" selected>Afternoon: 02:00 PM - 04:00 PM</option>
+              <option value="04:00 PM - 06:00 PM">Evening: 04:00 PM - 06:00 PM</option>
+            </select>
+            <div style="font-size: 0.72rem; color: #64748b; margin-top: 0.2rem;">2-hour arrival window</div>
+          </div>
+        </div>
+
+        <!-- Step 3: Address & Phone -->
+        <div class="form-group">
+          <label class="form-label" for="pickupAddressInput">Pickup Street Address & Landmark <span style="color: var(--civic-signal-crimson);">*</span></label>
+          <input type="text" id="pickupAddressInput" class="form-control" required placeholder="Apartment / Flat, Building Name, Street, Landmark...">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" for="pickupWardSelect">Municipal Ward</label>
+            <select id="pickupWardSelect" class="form-control">
+              <option value="Ward G/South - Dadar & Elphinstone">Ward G/South - Dadar</option>
+              <option value="Ward H/West - Bandra Residential">Ward H/West - Bandra</option>
+              <option value="Ward K/East - Andheri Industrial Estate">Ward K/East - Andheri</option>
+              <option value="Ward S - Powai Lake & Tech Enclave">Ward S - Powai</option>
+              <option value="Ward A - Colaba & Fort Commercial">Ward A - Colaba</option>
+              <option value="Ward D - Malabar Hill & Breach Candy">Ward D - Malabar Hill</option>
+              <option value="Ward K/West - Andheri West & Juhu Coastal">Ward K/West - Andheri West</option>
+              <option value="Ward F/North - Matunga & Sion Central">Ward F/North - Matunga</option>
+              <option value="Ward M/East - Chembur & Govandi Eco-Hub">Ward M/East - Chembur</option>
+              <option value="Ward T - Mulund Green Corridor">Ward T - Mulund</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" for="pickupPhoneInput">Contact Mobile Phone <span style="color: var(--civic-signal-crimson);">*</span></label>
+            <input type="tel" id="pickupPhoneInput" class="form-control" required value="+91 98200 44101">
+          </div>
+        </div>
+
+        <!-- Step 4: Review Items & Weight -->
+        <div style="background: var(--civic-surface-muted, #f8fafc); padding: 0.85rem 1rem; border-radius: var(--radius-xs); border: 1px solid var(--civic-border); margin-bottom: 1rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+            <span style="font-size: 0.78rem; font-weight: 800; text-transform: uppercase; color: #64748b;">Booking Summary</span>
+            <span id="pickupReviewWeightBadge" class="badge" style="background: rgba(16, 185, 129, 0.15); color: #047857; font-weight: 800;">1.75 kg Segregated Waste</span>
+          </div>
+          <div style="font-size: 0.82rem; color: var(--civic-forest-ink); line-height: 1.4;">
+            <div>Items in Bag: <strong id="pickupReviewItemsText">PET Bottles, Clean Cardboard, Organic Peels</strong></div>
+            <div style="display: flex; justify-content: space-between; margin-top: 0.4rem; font-size: 0.82rem;">
+              <span>Doorstep Pickup Fee:</span>
+              <strong style="color: #10b981;">₹0.00 (Free Municipal Service)</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 0.2rem; font-size: 0.82rem;">
+              <span>Expected Reward Credit:</span>
+              <strong style="color: var(--civic-cobalt-accent);">+45 EcoCredits upon verification</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 5: Submit -->
+        <div style="display: flex; justify-content: flex-end; gap: 0.75rem; align-items: center;">
+          <button type="button" class="btn btn-outline btn-sm" onclick="closePickupSchedulerModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm" id="btnConfirmPickupBooking" style="background: linear-gradient(135deg, #10b981, #047857); font-weight: 800;">
+            ✓ Confirm Pickup Booking
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- Modal: Trash Bank Nearby Drop-off Centre & QR Verification -->
+  <div id="trashBankModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 660px;">
+      <button class="modal-close" onclick="closeTrashBankModal()">×</button>
+      <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+        <div style="font-size: 2rem;">🏦</div>
+        <div>
+          <h3 style="margin: 0; font-size: 1.25rem; color: var(--civic-forest-ink);">Municipal Trash Bank Drop-Off</h3>
+          <p style="margin: 0.15rem 0 0 0; font-size: 0.8rem; color: #64748b;">Deliver segregated waste directly to an authorized recycling bank. Present your digital QR token to the officer for instant credit.</p>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 220px; gap: 1rem; margin-bottom: 1rem;">
+        <!-- Left: Collection Center Selector & Details -->
+        <div>
+          <label class="form-label">Select Nearest Trash Bank:</label>
+          <select id="trashBankSelect" class="form-control" onchange="updateTrashBankDetails(this.value)" style="margin-bottom: 0.75rem;">
+            <option value="dadar">Dadar MRF Recovery Bank (Ward G/South) - 1.2 km</option>
+            <option value="andheri">Andheri MIDC Tech Waste Hub (Ward K/East) - 3.8 km</option>
+            <option value="bandra">Bandra West Eco-Bank (Ward H/West) - 2.1 km</option>
+            <option value="powai">Powai Clean Energy Depot (Ward S) - 5.4 km</option>
+            <option value="colaba">Colaba Portside Recovery Bank (Ward A) - 4.0 km</option>
+          </select>
+
+          <div id="trashBankInfoCard" style="background: var(--civic-surface-muted, #f8fafc); padding: 0.85rem; border-radius: var(--radius-xs); border: 1px solid var(--civic-border); font-size: 0.82rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+              <strong id="tbName" style="color: var(--civic-forest-ink);">Dadar MRF Recovery Bank</strong>
+              <span id="tbCapacityBadge" class="badge" style="background: rgba(16, 185, 129, 0.15); color: #047857; font-weight: 800;">78% Capacity Available</span>
+            </div>
+            <div id="tbAddress" style="color: #64748b; margin-bottom: 0.25rem;">📍 Senapati Bapat Marg, Dadar West, Mumbai</div>
+            <div id="tbHours" style="color: #0284c7; font-weight: 600;">⏰ Open Today: 07:00 AM - 07:00 PM &bull; Accepts: Plastics, Paper, Metals, E-Waste</div>
+          </div>
+
+          <div style="margin-top: 0.75rem; padding: 0.75rem; border-radius: var(--radius-xs); background: #eff6ff; border: 1px solid #bfdbfe; font-size: 0.78rem; color: #1e40af;">
+            💡 <strong>Officer Intake Process:</strong> Present the QR code on the right to the weighing kiosk officer. The intake scale verifies the net weight and authorizes an instant EcoWallet credit.
+          </div>
+        </div>
+
+        <!-- Right: Animated Verifiable QR Code Token -->
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #ffffff; border: 2px solid #3b82f6; border-radius: 12px; padding: 0.85rem; text-align: center; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);">
+          <div style="font-size: 0.68rem; font-weight: 800; text-transform: uppercase; color: #3b82f6; letter-spacing: 0.05em; margin-bottom: 0.4rem;">Municipal Drop Token</div>
+          
+          <!-- Verifiable SVG QR Code Graphic -->
+          <div id="trashBankQRCodeGraphic" style="width: 140px; height: 140px; background: #ffffff; padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; position: relative;">
+            <svg viewBox="0 0 100 100" width="124" height="124" fill="#1e293b">
+              <!-- Corner Finder Patterns -->
+              <rect x="5" y="5" width="28" height="28" fill="#1e293b" rx="2"/>
+              <rect x="9" y="9" width="20" height="20" fill="#ffffff" rx="1"/>
+              <rect x="13" y="13" width="12" height="12" fill="#2563eb" rx="1"/>
+
+              <rect x="67" y="5" width="28" height="28" fill="#1e293b" rx="2"/>
+              <rect x="71" y="9" width="20" height="20" fill="#ffffff" rx="1"/>
+              <rect x="75" y="13" width="12" height="12" fill="#2563eb" rx="1"/>
+
+              <rect x="5" y="67" width="28" height="28" fill="#1e293b" rx="2"/>
+              <rect x="9" y="71" width="20" height="20" fill="#ffffff" rx="1"/>
+              <rect x="13" y="75" width="12" height="12" fill="#2563eb" rx="1"/>
+
+              <!-- Simulated Data Pattern Matrix -->
+              <rect x="38" y="8" width="6" height="6" fill="#1e293b"/>
+              <rect x="48" y="14" width="6" height="6" fill="#1e293b"/>
+              <rect x="58" y="8" width="6" height="6" fill="#1e293b"/>
+              <rect x="8" y="38" width="6" height="6" fill="#1e293b"/>
+              <rect x="18" y="48" width="6" height="6" fill="#1e293b"/>
+              <rect x="38" y="38" width="10" height="10" fill="#10b981" rx="2"/>
+              <rect x="52" y="38" width="8" height="8" fill="#1e293b"/>
+              <rect x="68" y="42" width="6" height="6" fill="#1e293b"/>
+              <rect x="82" y="38" width="6" height="6" fill="#1e293b"/>
+              <rect x="38" y="52" width="6" height="6" fill="#1e293b"/>
+              <rect x="48" y="58" width="12" height="12" fill="#3b82f6" rx="2"/>
+              <rect x="68" y="58" width="6" height="6" fill="#1e293b"/>
+              <rect x="84" y="54" width="6" height="6" fill="#1e293b"/>
+              <rect x="38" y="74" width="6" height="6" fill="#1e293b"/>
+              <rect x="48" y="78" width="8" height="8" fill="#1e293b"/>
+              <rect x="62" y="74" width="6" height="6" fill="#1e293b"/>
+              <rect x="74" y="78" width="14" height="6" fill="#1e293b"/>
+            </svg>
+          </div>
+
+          <div id="tbTokenCode" style="font-family: monospace; font-size: 0.72rem; font-weight: 800; color: #1e40af; margin-top: 0.35rem;">
+            QR-MUM-8842-TB
+          </div>
+          <div style="font-size: 0.68rem; color: #64748b; margin-top: 0.15rem;">
+            Valid for today &bull; 1.75 kg
+          </div>
+        </div>
+      </div>
+
+      <!-- Simulation Action: Verify Drop-off with Center Officer -->
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; padding-top: 0.75rem; border-top: 1px solid var(--civic-border);">
+        <button type="button" class="btn btn-outline btn-sm" id="btnSimulateOfficerScan" onclick="simulateOfficerQRVerification()" style="border-color: #10b981; color: #047857; font-weight: 700;">
+          ⚡ Simulate Officer Scanning My QR Code (+45 Credits)
+        </button>
+        <button type="button" class="btn btn-outline btn-sm" onclick="closeTrashBankModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Modal: Eco Store Shopping Cart & Checkout with Points Discount -->
+  <div id="ecoStoreCartModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 620px;">
+      <button class="modal-close" onclick="closeEcoStoreCart()">×</button>
+      <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+        <div style="font-size: 1.8rem;">🛍️</div>
+        <div>
+          <h3 style="margin: 0; font-size: 1.2rem; color: var(--civic-forest-ink);">Eco Store Cart & Checkout</h3>
+          <p style="margin: 0.15rem 0 0 0; font-size: 0.78rem; color: #64748b;">Pay via Connected Wallet, UPI, or redeem your EcoPoints for up to 100% discount.</p>
+        </div>
+      </div>
+
+      <div id="ecoCartItemsContainer" style="display: flex; flex-direction: column; gap: 0.65rem; max-height: 240px; overflow-y: auto; margin-bottom: 1rem;">
+        <!-- Dynamic Cart Items -->
+      </div>
+
+      <!-- EcoPoints Redemption Discount Slider -->
+      <div style="background: #f0fdf4; border: 1px solid #86efac; border-radius: var(--radius-xs); padding: 0.85rem 1rem; margin-bottom: 1rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+          <span style="font-size: 0.78rem; font-weight: 800; text-transform: uppercase; color: #047857;">Apply EcoCredits Discount</span>
+          <span id="cartPointsBalanceNotice" style="font-size: 0.75rem; color: #065f46;">Wallet Balance: <strong id="cartWalletBalanceVal">85</strong> pts</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <input type="range" id="cartPointsSlider" min="0" max="85" value="0" style="flex: 1;" oninput="updateCartPointsDiscount(this.value)">
+          <span id="cartPointsAppliedDisplay" style="font-size: 0.84rem; font-weight: 800; color: #047857; min-width: 75px; text-align: right;">0 pts (₹0)</span>
+        </div>
+        <div style="font-size: 0.72rem; color: #059669; margin-top: 0.25rem;">Rate: 10 EcoCredits = ₹100 direct cash discount.</div>
+      </div>
+
+      <!-- Order Totals Breakdown -->
+      <div style="background: var(--civic-surface-muted, #f8fafc); border: 1px solid var(--civic-border); border-radius: var(--radius-xs); padding: 0.85rem 1rem; margin-bottom: 1rem; font-size: 0.82rem;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+          <span>Subtotal:</span>
+          <strong id="cartSubtotalDisplay">₹0</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem; color: #047857;">
+          <span>EcoCredits Discount:</span>
+          <strong id="cartDiscountDisplay">-₹0</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem;">
+          <span>Carbon-Neutral Delivery:</span>
+          <span style="color: #10b981; font-weight: 700;">FREE</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; padding-top: 0.4rem; border-top: 1px solid var(--civic-border); font-size: 1rem;">
+          <strong style="color: var(--civic-forest-ink);">Total Payable:</strong>
+          <strong id="cartFinalTotalDisplay" style="color: #047857;">₹0</strong>
+        </div>
+      </div>
+
+      <!-- Checkout Action -->
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+        <button type="button" class="btn btn-outline btn-sm" onclick="closeEcoStoreCart()">Continue Shopping</button>
+        <button type="button" class="btn btn-primary btn-sm" id="btnCompleteEcoOrder" onclick="handleEcoStoreCheckout()" style="background: linear-gradient(135deg, #10b981, #0284c7); font-weight: 800;">
+          💳 Authorize Payment & Complete Order
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Modal: Environmental Article Reader -->
+  <div id="ecoArticleModal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 640px;">
+      <button class="modal-close" onclick="closeEcoArticleModal()">×</button>
+      <div style="margin-bottom: 1rem;">
+        <span id="articleCategoryBadge" class="badge" style="background: rgba(16, 185, 129, 0.15); color: #047857; font-weight: 800; font-size: 0.72rem; margin-bottom: 0.5rem; display: inline-block;">RECYCLING INNOVATION</span>
+        <h3 id="articleTitleDisplay" style="margin: 0 0 0.35rem 0; font-size: 1.3rem; color: var(--civic-forest-ink);">Article Title</h3>
+        <div style="font-size: 0.76rem; color: #64748b;">Published by Municipal Department of Urban Sustainability &bull; SBM 2.0</div>
+      </div>
+      <div id="articleBodyDisplay" style="font-size: 0.88rem; line-height: 1.6; color: var(--civic-forest-ink); max-height: 360px; overflow-y: auto; padding-right: 0.5rem; margin-bottom: 1.25rem;">
+        <!-- Dynamic Article Content -->
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--civic-border); padding-top: 0.75rem;">
+        <span style="font-size: 0.75rem; color: #64748b;">Share with community to earn +5 EcoCredits</span>
+        <button type="button" class="btn btn-primary btn-sm" onclick="closeEcoArticleModal()">Close Reader</button>
       </div>
     </div>
   </div>

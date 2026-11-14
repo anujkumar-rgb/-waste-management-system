@@ -417,29 +417,6 @@ button, input, select, textarea {
   background: var(--civic-cobalt-accent);
 }
 
-.demo-account-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-  gap: 0.4rem;
-  margin-top: 1rem;
-}
-
-.demo-btn {
-  padding: 0.5rem 0.4rem;
-  background: var(--civic-surface-muted);
-  border: 1px solid var(--civic-border);
-  border-radius: var(--radius-xs);
-  font-size: 0.78rem;
-  font-weight: 700;
-  cursor: pointer;
-  text-align: center;
-}
-
-.demo-btn:hover {
-  border-color: var(--civic-cobalt-accent);
-  color: var(--civic-cobalt-accent);
-}
-
 /* --- Dashboard Header Banners --- */
 .dashboard-header {
   display: flex;
@@ -2007,6 +1984,111 @@ button, input, select, textarea {
   border-color: #4285F4;
 }
 
+/* Google Authentication Modal & Account Chooser */
+.google-auth-card {
+  max-width: 440px !important;
+  border-radius: 16px !important;
+  padding: 1.75rem 1.5rem 1.25rem 1.5rem !important;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.2), 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+  border: 1px solid rgba(226, 232, 240, 0.8) !important;
+}
+.google-auth-header {
+  text-align: center;
+  margin-bottom: 1.25rem;
+}
+.google-account-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  max-height: 280px;
+  overflow-y: auto;
+}
+.google-account-item {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease, transform 120ms ease;
+  border: 1px solid transparent;
+  background: var(--civic-surface);
+}
+.google-account-item:hover {
+  background: rgba(66, 133, 244, 0.08);
+  border-color: rgba(66, 133, 244, 0.3);
+  transform: translateX(2px);
+}
+.google-account-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: #ffffff;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.google-account-info {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+.google-account-name {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--civic-forest-ink, #0f172a);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.google-account-email {
+  font-size: 0.76rem;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.google-account-role-pill {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+.google-auth-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(66, 133, 244, 0.18);
+  border-top-color: #4285F4;
+  border-radius: 50%;
+  animation: btnSpin 0.7s linear infinite;
+  margin: 0 auto;
+}
+.google-verified-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(66, 133, 244, 0.12);
+  color: #1d4ed8;
+  border: 1px solid rgba(66, 133, 244, 0.25);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  margin-left: 0.35rem;
+}
+.google-auth-footer {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--civic-border, #e2e8f0);
+  text-align: center;
+}
+
 /* ==========================================================================
    22. LIVE WORKER TRACKING MAP ANIMATIONS
    ========================================================================== */
@@ -3057,5 +3139,457 @@ html.theme-transitioning *::after {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* ==========================================================================
+   25. AI WASTE VISION SCANNER & NEAREST SMART BIN FINDER STYLES
+   ========================================================================== */
+.ai-vision-hub-card {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(2, 132, 199, 0.08) 100%);
+  border-left: 4px solid var(--civic-spruce-green);
+  border-radius: var(--radius-sm);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.ai-vision-hub-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.ai-vision-icon-pulse {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, #10b981, #0284c7);
+  color: #ffffff;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+  animation: pulseRing 3s infinite;
+  flex-shrink: 0;
+}
+
+.ai-scan-btn-glow {
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.45);
+  transition: all 180ms ease;
+}
+.ai-scan-btn-glow:hover {
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.65);
+  transform: translateY(-1px);
+}
+
+.ai-report-scan-shortcut {
+  background: rgba(37, 99, 235, 0.06);
+  border: 1px dashed rgba(59, 130, 246, 0.4);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-xs);
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* Modal Card */
+.ai-scanner-modal-card {
+  max-width: 820px !important;
+  border-radius: 16px !important;
+  padding: 1.5rem !important;
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25) !important;
+}
+
+.ai-scanner-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.85rem;
+}
+
+.ai-lens-badge {
+  width: 36px;
+  height: 36px;
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  flex-shrink: 0;
+}
+
+.ai-item-tabs {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+  scrollbar-width: none;
+}
+.ai-item-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.ai-item-tab {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  border: 1px solid var(--civic-border);
+  background: var(--civic-surface);
+  color: var(--civic-forest-ink);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 150ms ease;
+  white-space: nowrap;
+}
+.ai-item-tab:hover {
+  background: var(--civic-surface-muted);
+  border-color: #94a3b8;
+}
+.ai-item-tab.active {
+  background: var(--civic-forest-ink);
+  color: #ffffff;
+  border-color: var(--civic-forest-ink);
+}
+
+.ai-scanner-grid {
+  display: grid;
+  grid-template-columns: 330px 1fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+@media (max-width: 768px) {
+  .ai-scanner-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ai-viewfinder-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.ai-viewfinder {
+  position: relative;
+  height: 250px;
+  background: radial-gradient(circle at center, #0b2214 0%, #030a06 100%);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  box-shadow: inset 0 0 30px rgba(16, 185, 129, 0.2);
+}
+
+.hud-corner {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-color: #34d399;
+  border-style: solid;
+  pointer-events: none;
+}
+.hud-top-left {
+  top: 8px;
+  left: 8px;
+  border-width: 2px 0 0 2px;
+}
+.hud-top-right {
+  top: 8px;
+  right: 8px;
+  border-width: 2px 2px 0 0;
+}
+.hud-bottom-left {
+  bottom: 8px;
+  left: 8px;
+  border-width: 0 0 2px 2px;
+}
+.hud-bottom-right {
+  bottom: 8px;
+  right: 8px;
+  border-width: 0 2px 2px 0;
+}
+
+.ai-scan-beam {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #38bdf8, #22c55e, #38bdf8, transparent);
+  box-shadow: 0 0 10px #22c55e, 0 0 16px #38bdf8;
+  animation: aiLaserSweep 2.2s ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 5;
+}
+@keyframes aiLaserSweep {
+  0% { top: 6%; }
+  100% { top: 92%; }
+}
+
+.ai-item-stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  transform: scale(1.15);
+  transition: transform 200ms ease;
+}
+
+.ai-bounding-box {
+  position: absolute;
+  width: 130px;
+  height: 130px;
+  border: 2px dashed #22c55e;
+  border-radius: 8px;
+  box-shadow: 0 0 15px rgba(34, 197, 94, 0.35);
+  pointer-events: none;
+  z-index: 4;
+  animation: pulseBox 1.8s infinite;
+}
+@keyframes pulseBox {
+  0%, 100% { border-color: #22c55e; }
+  50% { border-color: #38bdf8; }
+}
+
+.ai-target-tag {
+  position: absolute;
+  top: -20px;
+  left: 0;
+  background: #22c55e;
+  color: #06120b;
+  font-size: 0.65rem;
+  font-weight: 900;
+  padding: 2px 6px;
+  border-radius: 3px;
+  letter-spacing: 0.05em;
+  font-family: monospace;
+}
+
+.ai-hud-status-strip {
+  position: absolute;
+  bottom: 8px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.65rem;
+  font-family: monospace;
+  color: #86efac;
+  opacity: 0.85;
+}
+
+.ai-results-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ai-card {
+  background: var(--civic-surface);
+  border: 1px solid var(--civic-border);
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+}
+
+.ai-chip-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.45rem;
+  margin-top: 0.5rem;
+}
+
+.ai-chip {
+  background: var(--civic-surface-muted, #f8fafc);
+  border: 1px solid var(--civic-border);
+  border-radius: 6px;
+  padding: 0.35rem 0.55rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.ai-chip-label {
+  font-size: 0.66rem;
+  color: #64748b;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.ai-chip-val {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--civic-forest-ink);
+  margin-top: 0.1rem;
+}
+
+.nearest-bin-card {
+  border-left: 4px solid #0284c7;
+}
+
+.bin-compass-dial {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 2px solid #0284c7;
+  background: rgba(2, 132, 199, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.bin-compass-needle {
+  font-size: 1.15rem;
+  color: #0284c7;
+  transition: transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  line-height: 1;
+}
+
+.bin-capacity-bar-track {
+  flex: 1;
+  height: 6px;
+  background: var(--civic-border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.bin-capacity-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 300ms ease;
+}
+
+/* Custom Map Marker for Smart Bins */
+.smart-bin-pin-pulse {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  box-shadow: 0 0 12px rgba(2, 132, 199, 0.6);
+  border: 2px solid #ffffff;
+  animation: pulseRing 2s infinite;
+}
+
+/* ==========================================================================
+   Section 26: Worker Personnel Dossier & Emergency Identification
+   ========================================================================== */
+.worker-avatar-badge {
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.worker-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+  background: var(--civic-surface-muted, #f8fafc);
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--civic-border);
+}
+
+.worker-details-grid a {
+  color: var(--civic-cobalt-accent);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.worker-details-grid a:hover {
+  text-decoration: underline !important;
+}
+
+.admin-worker-badge-pill {
+  font-family: monospace;
+  font-size: 0.72rem;
+  background: rgba(0, 0, 0, 0.06);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
 
 
+
+
+
+
+/* ==========================================================================
+   Section 27: AI Waste Management App Suite (Virtual Bag, Eco Store, Pickup, Trash Bank)
+   ========================================================================== */
+.virtual-waste-bag-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.virtual-waste-bag-card:hover {
+  box-shadow: 0 14px 30px -6px rgba(16, 185, 129, 0.18) !important;
+}
+
+.bag-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 0.85rem;
+  background: #ffffff;
+  border: 1px solid #d1fae5;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+.bag-item-row:hover {
+  border-color: #10b981;
+  transform: translateX(4px);
+  background: #f0fdf4;
+}
+
+.eco-product-card {
+  background: #ffffff;
+  border: 1px solid var(--civic-border, #e2e8f0);
+  border-radius: 12px;
+  padding: 1.15rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+.eco-product-card:hover {
+  transform: translateY(-4px);
+  border-color: #10b981;
+  box-shadow: 0 12px 24px -6px rgba(16, 185, 129, 0.15);
+}
+
+.eco-product-image-box {
+  background: linear-gradient(135deg, #f0fdf4, #e0f2fe);
+  border-radius: 8px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.85rem;
+  position: relative;
+}
+
+.news-article-card {
+  transition: all 0.25s ease;
+}
+.news-article-card:hover {
+  border-color: var(--civic-cobalt-accent) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px -4px rgba(2, 132, 199, 0.12);
+}
+
+@keyframes qrPulseGlow {
+  0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+}
+#trashBankQRCodeGraphic {
+  animation: qrPulseGlow 2.5s infinite;
+}
