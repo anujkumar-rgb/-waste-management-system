@@ -800,24 +800,33 @@ const DEFAULT_DB = {
 let db = { ...DEFAULT_DB };
 
 function initDatabase() {
-  const dataDir = path.join(__dirname, 'data');
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
-  }
+  try {
+    const dataDir = path.join(__dirname, 'data');
+    if (!fs.existsSync(dataDir)) {
+      try {
+        fs.mkdirSync(dataDir, { recursive: true });
+      } catch (e) {
+        // Read-only filesystem fallback
+      }
+    }
 
-  if (fs.existsSync(DB_PATH)) {
-    try {
-      const content = fs.readFileSync(DB_PATH, 'utf-8');
-      const parsed = JSON.parse(content);
-      db = { ...DEFAULT_DB, ...parsed };
-      console.log('📦 Database loaded successfully from data/db.json');
-    } catch (e) {
-      console.warn('⚠️ Error parsing data/db.json. Initializing with default seeds:', e.message);
+    if (fs.existsSync(DB_PATH)) {
+      try {
+        const content = fs.readFileSync(DB_PATH, 'utf-8');
+        const parsed = JSON.parse(content);
+        db = { ...DEFAULT_DB, ...parsed };
+        console.log('📦 Database loaded successfully from data/db.json');
+      } catch (e) {
+        console.warn('⚠️ Error parsing data/db.json. Initializing with default seeds:', e.message);
+        saveDatabase();
+      }
+    } else {
+      console.log('🌱 Seeding fresh database at data/db.json...');
       saveDatabase();
     }
-  } else {
-    console.log('🌱 Seeding fresh database at data/db.json...');
-    saveDatabase();
+  } catch (err) {
+    console.warn('⚠️ Fallback to in-memory database:', err.message);
+    db = { ...DEFAULT_DB };
   }
 }
 
@@ -870,13 +879,21 @@ function parseRequestBody(req) {
 function sendJson(res, statusCode, data) {
   if (res.headersSent) return;
   const payload = JSON.stringify(data);
-  res.writeHead(statusCode, {
+  const headers = {
     'Content-Type': 'application/json; charset=UTF-8',
     'Content-Length': Buffer.byteLength(payload),
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With'
-  });
+  };
+  if (typeof res.writeHead === 'function') {
+    res.writeHead(statusCode, headers);
+  } else {
+    res.statusCode = statusCode;
+    Object.entries(headers).forEach(([k, v]) => {
+      if (typeof res.setHeader === 'function') res.setHeader(k, v);
+    });
+  }
   res.end(payload);
 }
 
@@ -888,11 +905,19 @@ async function handleApiRequest(req, res, parsedUrl) {
 
   // Handle CORS Preflight
   if (method === 'OPTIONS') {
-    res.writeHead(204, {
+    const corsHeaders = {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With'
-    });
+    };
+    if (typeof res.writeHead === 'function') {
+      res.writeHead(204, corsHeaders);
+    } else {
+      res.statusCode = 204;
+      Object.entries(corsHeaders).forEach(([k, v]) => {
+        if (typeof res.setHeader === 'function') res.setHeader(k, v);
+      });
+    }
     res.end();
     return true;
   }
@@ -1451,9 +1476,10 @@ function serveStaticFile(req, res, pathname) {
   });
 }
 
-// Master HTTP Server
-const server = http.createServer(async (req, res) => {
-  const reqUrl = new URL(req.url, `http://${req.headers.host || 'localhost:8080'}`);
+// Master HTTP Request Handler (compatible with Vercel serverless & native Node.js)
+async function handleRequest(req, res) {
+  const host = req.headers ? req.headers.host : 'localhost';
+  const reqUrl = new URL(req.url, `http://${host || 'localhost:8080'}`);
   const parsedUrl = {
     pathname: reqUrl.pathname,
     query: Object.fromEntries(reqUrl.searchParams),
@@ -1476,7 +1502,10 @@ const server = http.createServer(async (req, res) => {
       sendJson(res, 500, { error: 'Internal Server Error', message: err.message });
     }
   }
-});
+}
+
+// Master HTTP Server
+const server = http.createServer(handleRequest);
 
 // Start Server
 initDatabase();
@@ -1491,4 +1520,5 @@ if (require.main === module) {
   });
 }
 
-module.exports = server;
+handleRequest.server = server;
+module.exports = handleRequest;
