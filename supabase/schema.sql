@@ -93,7 +93,7 @@ CREATE TABLE IF NOT EXISTS public.fleet (
     capacity_ton DOUBLE PRECISION DEFAULT 5.0,
     current_payload_ton DOUBLE PRECISION DEFAULT 0.0,
     fuel_percent INTEGER DEFAULT 100 CHECK (fuel_percent BETWEEN 0 AND 100),
-    status TEXT NOT NULL DEFAULT 'Standby' CHECK (status IN ('Active Collection', 'Standby', 'Maintenance', 'En Route to Depot')),
+    status TEXT NOT NULL DEFAULT 'Standby' CHECK (status IN ('Active Collection', 'Standby', 'Maintenance', 'En Route to Depot', 'Idle / Off-Shift', 'Idle')),
     icon TEXT DEFAULT '🚛',
     last_known_lat DOUBLE PRECISION NOT NULL,
     last_known_lng DOUBLE PRECISION NOT NULL,
@@ -116,7 +116,7 @@ CREATE TABLE IF NOT EXISTS public.hospital_reports (
     hospital_ward TEXT NOT NULL,
     container_code TEXT NOT NULL,
     volume_kg DOUBLE PRECISION NOT NULL CHECK (volume_kg > 0),
-    lifecycle_stage TEXT NOT NULL DEFAULT 'At Facility' CHECK (lifecycle_stage IN ('At Facility', 'In Transit', 'At CWTFE', 'Treated', 'Disposed')),
+    lifecycle_stage TEXT NOT NULL DEFAULT 'At Facility' CHECK (lifecycle_stage IN ('Registered', 'At Facility', 'In Transit', 'At CWTFE', 'Treated', 'Disposed')),
     treatment_facility TEXT NOT NULL,
     status TEXT NOT NULL DEFAULT 'assigned',
     is_high_priority BOOLEAN DEFAULT FALSE,
@@ -150,7 +150,7 @@ CREATE TABLE IF NOT EXISTS public.redemptions (
     item_id TEXT NOT NULL,
     item_name TEXT NOT NULL,
     credit_cost INTEGER NOT NULL CHECK (credit_cost >= 0),
-    status TEXT NOT NULL DEFAULT 'Pending' CHECK (status IN ('Pending', 'Fulfilled', 'Rejected')),
+    status TEXT NOT NULL DEFAULT 'Pending' CHECK (status IN ('Requested', 'Pending', 'Fulfilled', 'Rejected')),
     requested_at TIMESTAMPTZ DEFAULT TIMEZONE('utc', NOW()),
     fulfilled_at TIMESTAMPTZ
 );
@@ -166,7 +166,7 @@ CREATE TABLE IF NOT EXISTS public.compliance_metrics (
     segregation_rate INTEGER NOT NULL DEFAULT 70 CHECK (segregation_rate BETWEEN 0 AND 100),
     coverage_rate INTEGER NOT NULL DEFAULT 90 CHECK (coverage_rate BETWEEN 0 AND 100),
     processing_rate INTEGER NOT NULL DEFAULT 80 CHECK (processing_rate BETWEEN 0 AND 100),
-    status TEXT NOT NULL DEFAULT 'ontrack' CHECK (status IN ('ontrack', 'attention', 'lagging')),
+    status TEXT NOT NULL DEFAULT 'ontrack' CHECK (status IN ('ontrack', 'neartarget', 'offtarget', 'attention', 'lagging')),
     updated_at TIMESTAMPTZ DEFAULT TIMEZONE('utc', NOW())
 );
 
