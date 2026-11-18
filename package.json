@@ -3,8 +3,7 @@
   "version": "2.0.0",
   "description": "Municipal Smart Waste Management System with Full Node.js REST API Backend & Advanced Admin Operations",
   "scripts": {
-    "start": "node server.js",
-    "serve": "node serve.js",
+    "serve": "node server.js",
     "test": "node verify.js"
   },
   "keywords": [
