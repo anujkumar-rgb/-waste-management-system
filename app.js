@@ -691,6 +691,9 @@ window.closeEcoArticleModal = function() {
 /* ==========================================================================
    SUPABASE CLIENT & REAL GOOGLE OAUTH INTEGRATION
    ========================================================================== */
+window.SUPABASE_URL = 'https://cdeojeofrpqicfcbqhdp.supabase.co';
+window.SUPABASE_ANON_KEY = 'sb_publishable_LbhYDtQSmFdESU3AL6Felw_o5iFyqfm';
+
 window.initSupabaseClient = function() {
   const url = localStorage.getItem('swm_supabase_url') || window.SUPABASE_URL || '';
   const key = localStorage.getItem('swm_supabase_anon_key') || window.SUPABASE_ANON_KEY || '';
@@ -716,8 +719,8 @@ window.openSupabaseConfigModal = function() {
   if (!modal) return;
   const urlInput = document.getElementById('cfgSupabaseUrl');
   const keyInput = document.getElementById('cfgSupabaseAnonKey');
-  if (urlInput) urlInput.value = localStorage.getItem('swm_supabase_url') || '';
-  if (keyInput) keyInput.value = localStorage.getItem('swm_supabase_anon_key') || '';
+  if (urlInput) urlInput.value = localStorage.getItem('swm_supabase_url') || window.SUPABASE_URL || '';
+  if (keyInput) keyInput.value = localStorage.getItem('swm_supabase_anon_key') || window.SUPABASE_ANON_KEY || '';
   modal.classList.add('active');
   if (typeof playCivicAudio === 'function') playCivicAudio('click');
 };
@@ -748,8 +751,8 @@ window.handleSaveSupabaseConfig = function(e) {
 window.useDemoSupabaseConfig = function() {
   const urlInput = document.getElementById('cfgSupabaseUrl');
   const keyInput = document.getElementById('cfgSupabaseAnonKey');
-  if (urlInput) urlInput.value = 'https://ecoclear-mumbai-civic.supabase.co';
-  if (keyInput) keyInput.value = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.demo-anon-key-ecoclear-mumbai-waste-platform';
+  if (urlInput) urlInput.value = 'https://cdeojeofrpqicfcbqhdp.supabase.co';
+  if (keyInput) keyInput.value = 'sb_publishable_LbhYDtQSmFdESU3AL6Felw_o5iFyqfm';
 };
 
 window.handleSupabaseGoogleSignIn = async function(intendedRole = 'citizen') {
