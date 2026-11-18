@@ -147,10 +147,14 @@ window.addAIScanToVirtualBag = function() {
 window.removeBagItem = function(id) {
   const bag = getVirtualWasteBag().filter(i => i.id !== id);
   saveVirtualWasteBag(bag);
+  if (typeof playCivicAudio === 'function') playCivicAudio('click');
+  if (typeof showToast === 'function') showToast('Item removed from Virtual Waste Bag', 'info');
 };
 
 window.clearWasteBag = function() {
   saveVirtualWasteBag([]);
+  if (typeof playCivicAudio === 'function') playCivicAudio('click');
+  if (typeof showToast === 'function') showToast('Virtual Waste Bag cleared', 'info');
 };
 
 window.quickAddSampleToBag = function() {
@@ -314,12 +318,14 @@ window.simulateOfficerQRVerification = function() {
   const bag = getVirtualWasteBag();
   const pointsToCredit = (bag.length > 0 ? bag.reduce((sum, item) => sum + (item.points || 0), 0) : 45);
 
-  if (currentUser) {
+  if (typeof awardCredits === 'function') {
+    awardCredits(pointsToCredit, 'Trash Bank Verified Drop-off Bonus');
+  } else if (currentUser) {
     currentUser.credits = (currentUser.credits || 85) + pointsToCredit;
     localStorage.setItem('swm_current_user', JSON.stringify(currentUser));
   }
 
-  // Update UI headers
+  // Update UI balances
   const headerBal = document.getElementById('storeHeaderBalance');
   if (headerBal) headerBal.textContent = currentUser?.credits || 130;
   const citizenBal = document.getElementById('citizenCreditBalance') || document.getElementById('citizenBalance');
@@ -335,7 +341,7 @@ window.simulateOfficerQRVerification = function() {
   }
 
   if (typeof showToast === 'function') {
-    showToast(`🎉 Drop-Off Verified! Intake Officer scanned QR code. +${pointsToCredit} EcoCredits credited!`, 'success');
+    showToast(`🎉 Drop-Off Verified! Intake Officer scanned QR code. +${pointsToCredit} EcoCredits deposited!`, 'success');
   } else {
     alert(`Drop-off Verified! +${pointsToCredit} EcoCredits deposited.`);
   }

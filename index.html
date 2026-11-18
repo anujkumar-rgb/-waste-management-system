@@ -561,7 +561,7 @@
 
       
       <!-- AI Virtual Waste Bag & Drop-Off / Pickup Launchpad -->
-      <div class="card virtual-waste-bag-card" id="virtualWasteBagCard" style="margin-bottom: 1.5rem; background: linear-gradient(135deg, #ffffff, #f0fdf4); border: 2px solid #86efac; box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.12);">
+      <div class="card virtual-waste-bag-card" id="virtualWasteBagCard">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
           <div style="display: flex; align-items: center; gap: 0.85rem;">
             <div style="width: 52px; height: 52px; border-radius: 14px; background: linear-gradient(135deg, #10b981, #047857); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);">
@@ -569,24 +569,24 @@
             </div>
             <div>
               <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                <h3 style="margin: 0; font-size: 1.22rem; color: var(--civic-forest-ink);">My Virtual Waste Bag</h3>
+                <h3 class="bag-card-title" style="margin: 0; font-size: 1.22rem;">My Virtual Waste Bag</h3>
                 <span id="bagItemCountBadge" class="badge" style="background: rgba(16, 185, 129, 0.2); color: #047857; font-weight: 800; font-size: 0.74rem;">3 Items Loaded</span>
                 <span class="badge" style="background: #e0f2fe; color: #0284c7; font-weight: 800; font-size: 0.72rem;">AI Scanned & Classified</span>
               </div>
-              <p style="color: #64748b; font-size: 0.82rem; margin: 0.2rem 0 0 0;">Accumulate scanned recyclable items. Schedule a free home doorstep collection or drop off at a nearby municipal Trash Bank with verifiable QR code.</p>
+              <p class="bag-card-subtitle" style="margin: 0.2rem 0 0 0;">Accumulate scanned recyclable items. Schedule a free home doorstep collection or drop off at a nearby municipal Trash Bank with verifiable QR code.</p>
             </div>
           </div>
           <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-            <button type="button" class="btn btn-outline btn-xs" onclick="quickAddSampleToBag()" title="Quick add sample scanned recyclables">+ Quick Add Item</button>
-            <button type="button" class="btn btn-outline btn-xs" style="color: #dc2626; border-color: #fca5a5;" onclick="clearWasteBag()">Clear Bag</button>
+            <button type="button" class="btn btn-outline btn-xs virtual-bag-btn-quick" onclick="quickAddSampleToBag()" title="Quick add sample scanned recyclables">+ Quick Add Item</button>
+            <button type="button" class="btn btn-outline btn-xs virtual-bag-btn-clear" onclick="clearWasteBag()">Clear Bag</button>
           </div>
         </div>
 
         <!-- Waste Bag Metrics Bar -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.75rem; margin-bottom: 1rem; padding: 0.85rem 1rem; background: rgba(255, 255, 255, 0.85); border-radius: var(--radius-xs); border: 1px solid #bbf7d0;">
+        <div class="virtual-bag-metrics-bar">
           <div>
             <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #64748b;">Total Items</div>
-            <div id="bagTotalItemsCount" style="font-size: 1.35rem; font-weight: 800; color: var(--civic-forest-ink); margin-top: 0.1rem;">3</div>
+            <div id="bagTotalItemsCount" class="bag-total-items-val">3</div>
           </div>
           <div>
             <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #64748b;">Est. Total Weight</div>
@@ -613,7 +613,7 @@
             🌿 Ready for collection? Choose your preferred municipal disposal route:
           </div>
           <div style="display: flex; gap: 0.65rem; flex-wrap: wrap;">
-            <button type="button" class="btn btn-outline btn-sm" id="btnOpenTrashBankModal" onclick="openTrashBankModal()" style="border-color: #3b82f6; color: #1d4ed8; font-weight: 700;">
+            <button type="button" class="btn btn-sm virtual-bag-btn-trashbank" id="btnOpenTrashBankModal" onclick="openTrashBankModal()">
               🏦 Drop-off at Trash Bank (QR Code)
             </button>
             <button type="button" class="btn btn-primary btn-sm" id="btnOpenPickupScheduler" onclick="openPickupSchedulerModal()" style="font-weight: 700; background: linear-gradient(135deg, #10b981, #047857); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">

@@ -3523,30 +3523,134 @@ html.theme-transitioning *::after {
 
 /* ==========================================================================
    Section 27: AI Waste Management App Suite (Virtual Bag, Eco Store, Pickup, Trash Bank)
+   High-Contrast Theme-Adaptive Styling (Light & Dark Mode)
    ========================================================================== */
+
+/* Light Mode Defaults */
 .virtual-waste-bag-card {
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, #ffffff, #f0fdf4);
+  border: 2px solid #86efac;
+  border-radius: var(--radius-sm);
+  padding: 1.35rem;
+  box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.12);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 .virtual-waste-bag-card:hover {
   box-shadow: 0 14px 30px -6px rgba(16, 185, 129, 0.18) !important;
 }
 
+.virtual-waste-bag-card .bag-card-title {
+  color: #064e3b !important;
+  font-weight: 800 !important;
+  font-size: 1.25rem;
+  letter-spacing: -0.01em;
+}
+
+.virtual-waste-bag-card .bag-card-subtitle {
+  color: #334155 !important;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.virtual-bag-metrics-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding: 0.85rem 1.15rem;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: var(--radius-xs);
+  border: 1px solid #bbf7d0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+}
+
+.virtual-bag-metrics-bar .metric-label {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #475569;
+  letter-spacing: 0.04em;
+}
+
+.virtual-bag-metrics-bar .bag-total-items-val {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #064e3b !important;
+  margin-top: 0.1rem;
+}
+
 .bag-item-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.65rem 0.85rem;
+  padding: 0.75rem 0.95rem;
   background: #ffffff;
   border: 1px solid #d1fae5;
   border-radius: 8px;
   transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 .bag-item-row:hover {
   border-color: #10b981;
-  transform: translateX(4px);
+  transform: translateX(3px);
   background: #f0fdf4;
 }
 
+.bag-item-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #0f172a !important;
+}
+
+.bag-item-meta {
+  font-size: 0.74rem;
+  color: #475569;
+  margin-top: 0.15rem;
+}
+
+.bag-empty-state {
+  text-align: center;
+  padding: 1.75rem;
+  background: #ffffff;
+  border: 1px dashed #bbf7d0;
+  border-radius: 8px;
+  color: #334155;
+  font-size: 0.88rem;
+}
+
+.virtual-bag-btn-quick {
+  background: #f8fafc !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+.virtual-bag-btn-quick:hover {
+  background: #e2e8f0 !important;
+}
+
+.virtual-bag-btn-trashbank {
+  background: #eff6ff !important;
+  border: 1.5px solid #3b82f6 !important;
+  color: #1d4ed8 !important;
+  font-weight: 800 !important;
+}
+.virtual-bag-btn-trashbank:hover {
+  background: #dbeafe !important;
+  color: #1e40af !important;
+}
+
+.virtual-bag-btn-clear {
+  background: #fef2f2 !important;
+  border: 1px solid #fca5a5 !important;
+  color: #dc2626 !important;
+  font-weight: 700 !important;
+}
+.virtual-bag-btn-clear:hover {
+  background: #fee2e2 !important;
+}
+
+/* Eco Store Styling */
 .eco-product-card {
   background: #ffffff;
   border: 1px solid var(--civic-border, #e2e8f0);
@@ -3576,6 +3680,12 @@ html.theme-transitioning *::after {
   position: relative;
 }
 
+.eco-product-title {
+  color: #0f172a !important;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
 .news-article-card {
   transition: all 0.25s ease;
 }
@@ -3592,4 +3702,104 @@ html.theme-transitioning *::after {
 }
 #trashBankQRCodeGraphic {
   animation: qrPulseGlow 2.5s infinite;
+}
+
+/* ==========================================================================
+   DARK THEME OVERRIDES (data-theme="dark")
+   High Contrast & Dark Emerald Aesthetic
+   ========================================================================== */
+[data-theme="dark"] .virtual-waste-bag-card {
+  background: linear-gradient(135deg, #13271f, #0d1c15) !important;
+  border: 2px solid rgba(16, 185, 129, 0.4) !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5) !important;
+}
+
+[data-theme="dark"] .virtual-waste-bag-card .bag-card-title {
+  color: #f8fafc !important; /* Crisp 100% white */
+}
+
+[data-theme="dark"] .virtual-waste-bag-card .bag-card-subtitle {
+  color: #cbd5e1 !important; /* Clean silver slate */
+}
+
+[data-theme="dark"] .virtual-bag-metrics-bar {
+  background: rgba(18, 38, 32, 0.85) !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+}
+
+[data-theme="dark"] .virtual-bag-metrics-bar .metric-label {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .virtual-bag-metrics-bar .bag-total-items-val {
+  color: #f8fafc !important; /* Crisp white */
+}
+
+[data-theme="dark"] .bag-item-row {
+  background: #152b22 !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+[data-theme="dark"] .bag-item-row:hover {
+  background: #1b382c !important;
+  border-color: #10b981 !important;
+}
+
+[data-theme="dark"] .bag-item-name {
+  color: #f8fafc !important; /* Crisp bright white */
+}
+
+[data-theme="dark"] .bag-item-meta {
+  color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .bag-empty-state {
+  background: #152b22 !important;
+  border: 1px dashed rgba(16, 185, 129, 0.3) !important;
+  color: #cbd5e1 !important;
+}
+
+[data-theme="dark"] .virtual-bag-btn-quick {
+  background: #1c362c !important;
+  border: 1px solid rgba(16, 185, 129, 0.5) !important;
+  color: #f8fafc !important;
+}
+[data-theme="dark"] .virtual-bag-btn-quick:hover {
+  background: #25493b !important;
+}
+
+[data-theme="dark"] .virtual-bag-btn-trashbank {
+  background: rgba(37, 99, 235, 0.25) !important;
+  border: 1.5px solid #3b82f6 !important;
+  color: #93c5fd !important; /* Bright sky blue - highly visible */
+}
+[data-theme="dark"] .virtual-bag-btn-trashbank:hover {
+  background: rgba(37, 99, 235, 0.45) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .virtual-bag-btn-clear {
+  background: rgba(220, 38, 38, 0.15) !important;
+  border: 1px solid #f87171 !important;
+  color: #fca5a5 !important;
+}
+[data-theme="dark"] .virtual-bag-btn-clear:hover {
+  background: rgba(220, 38, 38, 0.28) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .eco-product-card {
+  background: #13241d !important;
+  border: 1px solid rgba(16, 185, 129, 0.25) !important;
+}
+[data-theme="dark"] .eco-product-card:hover {
+  background: #192e25 !important;
+  border-color: #10b981 !important;
+}
+[data-theme="dark"] .eco-product-title {
+  color: #f8fafc !important;
+}
+[data-theme="dark"] .eco-product-image-box {
+  background: rgba(16, 185, 129, 0.1) !important;
+  border: 1px solid rgba(16, 185, 129, 0.2) !important;
 }

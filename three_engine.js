@@ -1681,6 +1681,18 @@
       renderer.render(scene, camera);
     }
     animate();
+    // Dynamic ResizeObserver for citizen 3D segregation canvas
+    const segResizeObserver = new ResizeObserver(() => {
+      const w = container.clientWidth || 380;
+      const h = container.clientHeight || 220;
+      if (w > 0 && h > 0) {
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(w, h);
+      }
+    });
+    segResizeObserver.observe(container);
+
 
     function triggerBinWobble(bin) {
       if (!bin) return;
