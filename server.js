@@ -1480,13 +1480,15 @@ const server = http.createServer(async (req, res) => {
 
 // Start Server
 initDatabase();
-server.listen(PORT, () => {
-  console.log(`\n======================================================`);
-  console.log(`🚀 Smart Waste Management Municipal REST Server`);
-  console.log(`🌐 Live at: http://localhost:${PORT}/`);
-  console.log(`📡 REST API Base: http://localhost:${PORT}/api/`);
-  console.log(`📂 Database: ${DB_PATH}`);
-  console.log(`======================================================\n`);
-});
+if (require.main === module) {
+  server.listen(PORT, () => {
+    console.log(`\n======================================================`);
+    console.log(`🚀 Smart Waste Management Municipal REST Server`);
+    console.log(`🌐 Live at: http://localhost:${PORT}/`);
+    console.log(`📡 REST API Base: http://localhost:${PORT}/api/`);
+    console.log(`📂 Database: ${DB_PATH}`);
+    console.log(`======================================================\n`);
+  });
+}
 
 module.exports = server;
