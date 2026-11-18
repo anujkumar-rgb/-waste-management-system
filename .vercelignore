@@ -1,0 +1,12 @@
+server.js
+serve.js
+api/
+data/
+supabase/
+verify.js
+build_ai_waste_features.js
+deploy_ai_waste_features.js
+deploy_app_section27.js
+deploy_styles_section27.js
+fix_3d_tools.js
+SUPABASE_BACKEND_GUIDE.md
