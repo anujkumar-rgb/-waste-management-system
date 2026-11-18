@@ -866,6 +866,143 @@ window.checkSupabaseAuthCallback = async function() {
   }
 };
 
+
+window.testSupabaseBackendConnection = async function() {
+  if (!window.SupabaseBackend) {
+    alert('Supabase service not loaded.');
+    return;
+  }
+  const url = document.getElementById('cfgSupabaseUrl')?.value.trim();
+  const key = document.getElementById('cfgSupabaseAnonKey')?.value.trim();
+  if (url) localStorage.setItem('swm_supabase_url', url);
+  if (key) localStorage.setItem('swm_supabase_anon_key', key);
+
+  const res = await window.SupabaseBackend.testConnection();
+  const indicator = document.getElementById('supabaseRealtimeIndicator');
+  if (res.ok) {
+    if (indicator) {
+      indicator.textContent = '🟢 PostgreSQL Database Connected';
+      indicator.style.color = '#10b981';
+    }
+    if (typeof showToast === 'function') {
+      showToast('✓ Successfully connected to Supabase PostgreSQL database!', 'success');
+    } else {
+      alert('Success: ' + res.message);
+    }
+    window.initSupabaseRealtimeSync();
+  } else {
+    if (indicator) {
+      indicator.textContent = '🔴 Connection failed: ' + res.message;
+      indicator.style.color = '#ef4444';
+    }
+    alert('Connection failed: ' + res.message);
+  }
+};
+
+window.initSupabaseRealtimeSync = function() {
+  if (!window.SupabaseBackend || !window.SupabaseBackend.isConfigured()) return;
+
+  window.SupabaseBackend.initRealtime({
+    onReportChange: function(payload) {
+      const reports = getReports();
+      if (payload.eventType === 'INSERT' && payload.new) {
+        const mapped = {
+          id: payload.new.id,
+          userId: payload.new.user_id,
+          userName: payload.new.user_name,
+          userRole: payload.new.user_role,
+          area: payload.new.area,
+          coords: { lat: payload.new.latitude, lng: payload.new.longitude },
+          latitude: payload.new.latitude,
+          longitude: payload.new.longitude,
+          landmark: payload.new.landmark,
+          resolvedAddress: payload.new.resolved_address,
+          category: payload.new.category,
+          severity: payload.new.severity,
+          notes: payload.new.notes,
+          photoUrl: payload.new.photo_url,
+          voiceUrl: payload.new.voice_url,
+          isEmergency: payload.new.is_emergency,
+          isPriorityPickup: payload.new.is_priority_pickup,
+          status: payload.new.status,
+          assignedWorkerId: payload.new.assigned_worker_id,
+          assignedWorkerName: payload.new.assigned_worker_name,
+          duplicateCount: payload.new.duplicate_count || 0,
+          isEscalated: payload.new.is_escalated,
+          createdAt: payload.new.created_at ? new Date(payload.new.created_at).getTime() : Date.now()
+        };
+        if (!reports.some(r => r.id === mapped.id)) {
+          reports.unshift(mapped);
+          saveReports(reports);
+          if (typeof showToast === 'function') {
+            showToast(`⚡ Realtime: New report ${mapped.id} logged (${mapped.category})`, mapped.isEmergency ? 'warning' : 'info');
+          }
+          if (mapped.isEmergency && typeof playCivicAudio === 'function') {
+            playCivicAudio('alert');
+          }
+          refreshActiveCivicViews();
+        }
+      } else if (payload.eventType === 'UPDATE' && payload.new) {
+        const idx = reports.findIndex(r => r.id === payload.new.id);
+        if (idx !== -1) {
+          reports[idx].status = payload.new.status;
+          reports[idx].assignedWorkerId = payload.new.assigned_worker_id;
+          reports[idx].assignedWorkerName = payload.new.assigned_worker_name;
+          reports[idx].duplicateCount = payload.new.duplicate_count || 0;
+          reports[idx].isEscalated = payload.new.is_escalated;
+          saveReports(reports);
+          refreshActiveCivicViews();
+        }
+      }
+    },
+    onFleetChange: function(payload) {
+      if (payload.new) {
+        const fleet = getFleet();
+        const f = fleet.find(item => item.id === payload.new.id || item.driverId === payload.new.driver_id);
+        if (f) {
+          f.lastKnownLat = payload.new.last_known_lat;
+          f.lastKnownLng = payload.new.last_known_lng;
+          f.status = payload.new.status;
+          f.currentPayloadTon = payload.new.current_payload_ton;
+          saveFleet(fleet);
+          if (typeof updateWorkerMarkerPositions === 'function') updateWorkerMarkerPositions();
+        }
+      }
+    },
+    onBroadcastChange: function(payload) {
+      if (payload.new && payload.new.active) {
+        const broadcasts = getBroadcasts();
+        const b = {
+          id: payload.new.id,
+          message: payload.new.message,
+          level: payload.new.level,
+          author: payload.new.author,
+          timestamp: Date.now(),
+          active: true
+        };
+        if (!broadcasts.some(item => item.id === b.id)) {
+          broadcasts.unshift(b);
+          saveBroadcasts(broadcasts);
+          if (typeof displayActiveBroadcasts === 'function') displayActiveBroadcasts();
+          if (typeof showToast === 'function') showToast(`📢 MUNICIPAL ALERT: ${b.message}`, 'warning');
+        }
+      }
+    }
+  });
+};
+
+function refreshActiveCivicViews() {
+  if (typeof renderAdminDashboard === 'function' && document.getElementById('adminDashboard')?.classList.contains('active')) {
+    renderAdminDashboard();
+  }
+  if (typeof renderCitizenDashboard === 'function' && document.getElementById('citizenDashboard')?.classList.contains('active')) {
+    renderCitizenDashboard();
+  }
+  if (typeof renderWorkerRoute === 'function' && document.getElementById('workerDashboard')?.classList.contains('active')) {
+    renderWorkerRoute();
+  }
+}
+
 const SEGREGATION_TAG_DETAILS = {
   wet: {
     emoji: '🌱',
@@ -1089,6 +1226,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initBackendSync();
   initAuth();
   checkSupabaseAuthCallback();
+  initSupabaseRealtimeSync();
   initVoiceRecorder();
   initSegregationGuide();
   renderVirtualWasteBag();

@@ -3426,8 +3426,9 @@
           ⚡
         </div>
         <div>
-          <h3 style="margin: 0; font-size: 1.25rem; color: var(--civic-forest-ink);">Supabase & Google Auth Setup</h3>
-          <p style="margin: 0.15rem 0 0 0; font-size: 0.8rem; color: #64748b;">Connect real Google OAuth via your Supabase project.</p>
+          <h3 style="margin: 0; font-size: 1.25rem; color: var(--civic-forest-ink);">Supabase PostgreSQL & Realtime Backend Setup</h3>
+          <p style="margin: 0.15rem 0 0 0; font-size: 0.8rem; color: #64748b;">Connect real Google OAuth & PostgreSQL Realtime database via your Supabase project.</p>
+          <div id="supabaseRealtimeIndicator" style="font-size: 0.74rem; font-weight: 600; color: #64748b; margin-top: 0.25rem;">⚪ Realtime: Standby</div>
         </div>
       </div>
 
@@ -3453,12 +3454,20 @@
             <li>Copy the <strong>Callback URL</strong> shown in Supabase and paste it into Google's <em>Authorized redirect URIs</em>.</li>
             <li>Paste your Google Client ID and Secret into Supabase, and save!</li>
           </ol>
+          <div style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px dashed var(--civic-border); font-size: 0.75rem; color: #475569;">
+            🗄️ <strong>PostgreSQL Schema & Realtime:</strong> Run <code>supabase/schema.sql</code> and <code>supabase/seed.sql</code> in your Supabase SQL Editor. See <a href="SUPABASE_BACKEND_GUIDE.md" target="_blank" style="color: #0284c7; text-decoration: underline;">Backend Guide</a>.
+          </div>
         </div>
 
         <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
-          <button type="button" class="btn btn-outline btn-xs" onclick="useDemoSupabaseConfig()" style="border-color: #3b82f6; color: #1d4ed8; font-weight: 700;">
-            ⚡ Quick-Fill Demo Keys
-          </button>
+          <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+            <button type="button" class="btn btn-outline btn-xs" onclick="useDemoSupabaseConfig()" style="border-color: #3b82f6; color: #1d4ed8; font-weight: 700;">
+              ⚡ Quick-Fill Demo Keys
+            </button>
+            <button type="button" class="btn btn-outline btn-xs" onclick="testSupabaseBackendConnection()" style="border-color: #10b981; color: #047857; font-weight: 700;">
+              📡 Test Database
+            </button>
+          </div>
           <div style="display: flex; gap: 0.5rem;">
             <button type="button" class="btn btn-outline btn-sm" onclick="closeModal('supabaseConfigModal')">Cancel</button>
             <button type="submit" class="btn btn-primary btn-sm" style="background: linear-gradient(135deg, #10b981, #047857); font-weight: 700;">Save & Connect</button>
@@ -3479,6 +3488,8 @@
   <script src="OrbitControls.js"></script>
   <script src="three_engine.js?v=1.0"></script>
   <!-- App JS Engine -->
+  <!-- Supabase PostgreSQL Backend & Realtime Service -->
+  <script src="supabase_service.js?v=1.0"></script>
   <script src="app.js?v=2.6"></script>
 </body>
 </html>
