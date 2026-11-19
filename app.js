@@ -1,5 +1,5 @@
 
-window.awardCitizenEcoCredits = function(amount, reason) {
+window.awardCitizenEcoCredits = function (amount, reason) {
   const pts = parseInt(amount, 10) || 10;
   if (!currentUser) {
     currentUser = { id: 'usr-1', name: 'Resident', role: 'citizen', credits: 85, transactions: [] };
@@ -41,21 +41,21 @@ let virtualWasteBag = [
   { id: 'bag-3', name: 'Compostable Vegetable Kitchen Trimmings', category: 'organic', material: 'Wet Biomass', weightKg: 0.50, points: 15, icon: '🍎' }
 ];
 
-window.getVirtualWasteBag = function() {
+window.getVirtualWasteBag = function () {
   try {
     const saved = localStorage.getItem('swm_virtual_waste_bag');
     if (saved) return JSON.parse(saved);
-  } catch (e) {}
+  } catch (e) { }
   return virtualWasteBag;
 };
 
-window.saveVirtualWasteBag = function(bag) {
+window.saveVirtualWasteBag = function (bag) {
   virtualWasteBag = bag;
   localStorage.setItem('swm_virtual_waste_bag', JSON.stringify(bag));
   renderVirtualWasteBag();
 };
 
-window.renderVirtualWasteBag = function() {
+window.renderVirtualWasteBag = function () {
   const container = document.getElementById('virtualBagItemsList');
   const countBadge = document.getElementById('bagItemCountBadge');
   const totalCountElem = document.getElementById('bagTotalItemsCount');
@@ -109,7 +109,7 @@ window.renderVirtualWasteBag = function() {
   `).join('');
 };
 
-window.addScannedItemToBag = function(item) {
+window.addScannedItemToBag = function (item) {
   const bag = getVirtualWasteBag();
   const newItem = Object.assign({
     id: 'bag-' + Date.now(),
@@ -129,7 +129,7 @@ window.addScannedItemToBag = function(item) {
   }
 };
 
-window.addAIScanToVirtualBag = function() {
+window.addAIScanToVirtualBag = function () {
   const sampleKey = window.currentAIScannedSample || 'pet_bottle';
   const itemMap = {
     pet_bottle: { name: 'PET Plastic Beverage Bottle', category: 'dry', material: 'PET #1 Plastic', weightKg: 0.45, points: 15, icon: '🥤' },
@@ -144,20 +144,20 @@ window.addAIScanToVirtualBag = function() {
   closeModal('aiVisionScannerModal');
 };
 
-window.removeBagItem = function(id) {
+window.removeBagItem = function (id) {
   const bag = getVirtualWasteBag().filter(i => i.id !== id);
   saveVirtualWasteBag(bag);
   if (typeof playCivicAudio === 'function') playCivicAudio('click');
   if (typeof showToast === 'function') showToast('Item removed from Virtual Waste Bag', 'info');
 };
 
-window.clearWasteBag = function() {
+window.clearWasteBag = function () {
   saveVirtualWasteBag([]);
   if (typeof playCivicAudio === 'function') playCivicAudio('click');
   if (typeof showToast === 'function') showToast('Virtual Waste Bag cleared', 'info');
 };
 
-window.quickAddSampleToBag = function() {
+window.quickAddSampleToBag = function () {
   const samples = [
     { name: 'Crushed Aluminium Soda Cans (x3)', category: 'dry', material: 'Aluminium #41', weightKg: 0.30, points: 20, icon: '🥫' },
     { name: 'Clean Cardboard Shipping Box', category: 'dry', material: 'Corrugated Fiber', weightKg: 0.65, points: 15, icon: '📦' },
@@ -168,7 +168,7 @@ window.quickAddSampleToBag = function() {
 };
 
 // 2. Doorstep Pickup Scheduling Handlers
-window.openPickupSchedulerModal = function() {
+window.openPickupSchedulerModal = function () {
   const modal = document.getElementById('pickupSchedulerModal');
   if (!modal) return;
   const dateInput = document.getElementById('pickupDateInput');
@@ -186,12 +186,12 @@ window.openPickupSchedulerModal = function() {
   if (typeof playCivicAudio === 'function') playCivicAudio('click');
 };
 
-window.closePickupSchedulerModal = function() {
+window.closePickupSchedulerModal = function () {
   const modal = document.getElementById('pickupSchedulerModal');
   if (modal) modal.classList.remove('active');
 };
 
-window.handlePickupBookingSubmit = function(e) {
+window.handlePickupBookingSubmit = function (e) {
   if (e && e.preventDefault) e.preventDefault();
   const date = document.getElementById('pickupDateInput')?.value || new Date().toISOString().split('T')[0];
   const slot = document.getElementById('pickupTimeSlotSelect')?.value || '02:00 PM - 04:00 PM';
@@ -223,7 +223,7 @@ window.handlePickupBookingSubmit = function(e) {
   let pickups = [];
   try {
     pickups = JSON.parse(localStorage.getItem('swm_scheduled_pickups') || '[]');
-  } catch (err) {}
+  } catch (err) { }
   pickups.unshift(booking);
   localStorage.setItem('swm_scheduled_pickups', JSON.stringify(pickups));
 
@@ -283,7 +283,7 @@ const TRASH_BANKS = {
   }
 };
 
-window.openTrashBankModal = function() {
+window.openTrashBankModal = function () {
   const modal = document.getElementById('trashBankModal');
   if (!modal) return;
   updateTrashBankDetails('dadar');
@@ -291,12 +291,12 @@ window.openTrashBankModal = function() {
   if (typeof playCivicAudio === 'function') playCivicAudio('click');
 };
 
-window.closeTrashBankModal = function() {
+window.closeTrashBankModal = function () {
   const modal = document.getElementById('trashBankModal');
   if (modal) modal.classList.remove('active');
 };
 
-window.updateTrashBankDetails = function(key) {
+window.updateTrashBankDetails = function (key) {
   const tb = TRASH_BANKS[key] || TRASH_BANKS.dadar;
   const nameElem = document.getElementById('tbName');
   const capElem = document.getElementById('tbCapacityBadge');
@@ -314,7 +314,7 @@ window.updateTrashBankDetails = function(key) {
   }
 };
 
-window.simulateOfficerQRVerification = function() {
+window.simulateOfficerQRVerification = function () {
   const bag = getVirtualWasteBag();
   const pointsToCredit = (bag.length > 0 ? bag.reduce((sum, item) => sum + (item.points || 0), 0) : 45);
 
@@ -413,22 +413,22 @@ const ECO_STORE_PRODUCTS = [
 
 let ecoStoreCart = [];
 
-window.getEcoStoreCart = function() {
+window.getEcoStoreCart = function () {
   try {
     const saved = localStorage.getItem('swm_eco_store_cart');
     if (saved) return JSON.parse(saved);
-  } catch (e) {}
+  } catch (e) { }
   return ecoStoreCart;
 };
 
-window.saveEcoStoreCart = function(cart) {
+window.saveEcoStoreCart = function (cart) {
   ecoStoreCart = cart;
   localStorage.setItem('swm_eco_store_cart', JSON.stringify(cart));
   const badge = document.getElementById('ecoStoreCartCountBadge');
   if (badge) badge.textContent = cart.length;
 };
 
-window.renderEcoStore = function() {
+window.renderEcoStore = function () {
   const grid = document.getElementById('ecoStoreProductGrid');
   if (!grid) return;
 
@@ -467,7 +467,7 @@ window.renderEcoStore = function() {
   saveEcoStoreCart(getEcoStoreCart());
 };
 
-window.addToEcoStoreCart = function(productId) {
+window.addToEcoStoreCart = function (productId) {
   const product = ECO_STORE_PRODUCTS.find(p => p.id === productId);
   if (!product) return;
   const cart = getEcoStoreCart();
@@ -480,7 +480,7 @@ window.addToEcoStoreCart = function(productId) {
   }
 };
 
-window.openEcoStoreCart = function() {
+window.openEcoStoreCart = function () {
   const modal = document.getElementById('ecoStoreCartModal');
   if (!modal) return;
   const cart = getEcoStoreCart();
@@ -519,19 +519,19 @@ window.openEcoStoreCart = function() {
   if (typeof playCivicAudio === 'function') playCivicAudio('click');
 };
 
-window.removeCartItem = function(index) {
+window.removeCartItem = function (index) {
   const cart = getEcoStoreCart();
   cart.splice(index, 1);
   saveEcoStoreCart(cart);
   openEcoStoreCart();
 };
 
-window.closeEcoStoreCart = function() {
+window.closeEcoStoreCart = function () {
   const modal = document.getElementById('ecoStoreCartModal');
   if (modal) modal.classList.remove('active');
 };
 
-window.updateCartPointsDiscount = function(sliderVal) {
+window.updateCartPointsDiscount = function (sliderVal) {
   const cart = getEcoStoreCart();
   const subtotal = cart.reduce((sum, item) => sum + item.price, 0);
   const points = parseInt(sliderVal, 10) || 0;
@@ -552,7 +552,7 @@ window.updateCartPointsDiscount = function(sliderVal) {
   if (finalDisplay) finalDisplay.textContent = `₹${finalTotal}`;
 };
 
-window.handleEcoStoreCheckout = function() {
+window.handleEcoStoreCheckout = function () {
   const cart = getEcoStoreCart();
   if (cart.length === 0) {
     alert('Your cart is empty! Add sustainable products first.');
@@ -586,7 +586,7 @@ window.handleEcoStoreCheckout = function() {
 };
 
 // 5. Gamification - 5 Statutory Levels & Perks
-window.calculateCitizenTier = function(credits) {
+window.calculateCitizenTier = function (credits) {
   const c = credits || 0;
   if (c >= 1000) {
     return { name: '👑 Planet Guardian', progress: 100, perk: 'Perk: All-Stream 2x Multiplier + VIP Priority', next: 'Max Level' };
@@ -601,7 +601,7 @@ window.calculateCitizenTier = function(credits) {
   }
 };
 
-window.renderGamificationCard = function() {
+window.renderGamificationCard = function () {
   const tier = calculateCitizenTier(currentUser?.credits || 85);
   const badge = document.getElementById('citizenCurrentLevelBadge');
   const bar = document.getElementById('citizenLevelProgressBar');
@@ -614,7 +614,7 @@ window.renderGamificationCard = function() {
   if (target) target.textContent = tier.next;
 };
 
-window.shareRecyclingAchievement = function(platform) {
+window.shareRecyclingAchievement = function (platform) {
   const tier = calculateCitizenTier(currentUser?.credits || 85);
   const text = encodeURIComponent(`I just reached ${tier.name} rank on EcoClear AI Waste Management! I have recycled segregated waste and saved Mumbai landfills from tons of trash. Join the green revolution! 🌍♻️`);
   const url = encodeURIComponent(window.location.origin);
@@ -663,7 +663,7 @@ const ECO_NEWS_ARTICLES = {
   }
 };
 
-window.openEcoArticleModal = function(id) {
+window.openEcoArticleModal = function (id) {
   const article = ECO_NEWS_ARTICLES[id] || ECO_NEWS_ARTICLES.optical_ai;
   const modal = document.getElementById('ecoArticleModal');
   const catBadge = document.getElementById('articleCategoryBadge');
@@ -678,7 +678,7 @@ window.openEcoArticleModal = function(id) {
   if (typeof playCivicAudio === 'function') playCivicAudio('click');
 };
 
-window.closeEcoArticleModal = function() {
+window.closeEcoArticleModal = function () {
   const modal = document.getElementById('ecoArticleModal');
   if (modal) modal.classList.remove('active');
 };
@@ -694,7 +694,7 @@ window.closeEcoArticleModal = function() {
 window.SUPABASE_URL = 'https://cdeojeofrpqicfcbqhdp.supabase.co';
 window.SUPABASE_ANON_KEY = 'sb_publishable_LbhYDtQSmFdESU3AL6Felw_o5iFyqfm';
 
-window.initSupabaseClient = function() {
+window.initSupabaseClient = function () {
   const url = localStorage.getItem('swm_supabase_url') || window.SUPABASE_URL || '';
   const key = localStorage.getItem('swm_supabase_anon_key') || window.SUPABASE_ANON_KEY || '';
 
@@ -714,18 +714,20 @@ window.initSupabaseClient = function() {
   return null;
 };
 
-window.openSupabaseConfigModal = function() {
+window.openSupabaseConfigModal = function () {
   const modal = document.getElementById('supabaseConfigModal');
   if (!modal) return;
   const urlInput = document.getElementById('cfgSupabaseUrl');
   const keyInput = document.getElementById('cfgSupabaseAnonKey');
+  if (urlInput) urlInput.value = localStorage.getItem('swm_supabase_url') || '';
+  if (keyInput) keyInput.value = localStorage.getItem('swm_supabase_anon_key') || '';
   if (urlInput) urlInput.value = localStorage.getItem('swm_supabase_url') || window.SUPABASE_URL || '';
   if (keyInput) keyInput.value = localStorage.getItem('swm_supabase_anon_key') || window.SUPABASE_ANON_KEY || '';
   modal.classList.add('active');
   if (typeof playCivicAudio === 'function') playCivicAudio('click');
 };
 
-window.handleSaveSupabaseConfig = function(e) {
+window.handleSaveSupabaseConfig = function (e) {
   if (e && e.preventDefault) e.preventDefault();
   const url = document.getElementById('cfgSupabaseUrl')?.value.trim() || '';
   const key = document.getElementById('cfgSupabaseAnonKey')?.value.trim() || '';
@@ -748,14 +750,16 @@ window.handleSaveSupabaseConfig = function(e) {
   }
 };
 
-window.useDemoSupabaseConfig = function() {
+window.useDemoSupabaseConfig = function () {
   const urlInput = document.getElementById('cfgSupabaseUrl');
   const keyInput = document.getElementById('cfgSupabaseAnonKey');
+  if (urlInput) urlInput.value = 'https://ecoclear-mumbai-civic.supabase.co';
+  if (keyInput) keyInput.value = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.demo-anon-key-ecoclear-mumbai-waste-platform';
   if (urlInput) urlInput.value = 'https://cdeojeofrpqicfcbqhdp.supabase.co';
   if (keyInput) keyInput.value = 'sb_publishable_LbhYDtQSmFdESU3AL6Felw_o5iFyqfm';
 };
 
-window.handleSupabaseGoogleSignIn = async function(intendedRole = 'citizen') {
+window.handleSupabaseGoogleSignIn = async function (intendedRole = 'citizen') {
   const client = window.initSupabaseClient();
   const notice = document.getElementById('supabaseStatusNotice');
   const btn = document.getElementById('btnSupabaseOAuth');
@@ -827,7 +831,7 @@ window.handleSupabaseGoogleSignIn = async function(intendedRole = 'citizen') {
 };
 
 // Check for incoming Supabase OAuth redirect callback on page load
-window.checkSupabaseAuthCallback = async function() {
+window.checkSupabaseAuthCallback = async function () {
   const client = window.initSupabaseClient();
   if (!client || !client.auth) return;
 
@@ -876,7 +880,7 @@ window.checkSupabaseAuthCallback = async function() {
 };
 
 
-window.testSupabaseBackendConnection = async function() {
+window.testSupabaseBackendConnection = async function () {
   if (!window.SupabaseBackend) {
     alert('Supabase service not loaded.');
     return;
@@ -908,11 +912,11 @@ window.testSupabaseBackendConnection = async function() {
   }
 };
 
-window.initSupabaseRealtimeSync = function() {
+window.initSupabaseRealtimeSync = function () {
   if (!window.SupabaseBackend || !window.SupabaseBackend.isConfigured()) return;
 
   window.SupabaseBackend.initRealtime({
-    onReportChange: function(payload) {
+    onReportChange: function (payload) {
       const reports = getReports();
       if (payload.eventType === 'INSERT' && payload.new) {
         const mapped = {
@@ -964,7 +968,7 @@ window.initSupabaseRealtimeSync = function() {
         }
       }
     },
-    onFleetChange: function(payload) {
+    onFleetChange: function (payload) {
       if (payload.new) {
         const fleet = getFleet();
         const f = fleet.find(item => item.id === payload.new.id || item.driverId === payload.new.driver_id);
@@ -978,7 +982,7 @@ window.initSupabaseRealtimeSync = function() {
         }
       }
     },
-    onBroadcastChange: function(payload) {
+    onBroadcastChange: function (payload) {
       if (payload.new && payload.new.active) {
         const broadcasts = getBroadcasts();
         const b = {
@@ -1111,7 +1115,7 @@ const SEGREGATION_TAG_DETAILS = {
   }
 };
 
-window.openSegregationTagDetail = function(tagKey) {
+window.openSegregationTagDetail = function (tagKey) {
   const modal = document.getElementById('segregationTagDetailModal');
   if (!modal) return;
   const k = (tagKey || '').toLowerCase();
@@ -1154,7 +1158,7 @@ window.openSegregationTagDetail = function(tagKey) {
   if (typeof playCivicAudio === 'function') playCivicAudio('click');
 };
 
-window.closeSegregationTagDetailModal = function() {
+window.closeSegregationTagDetailModal = function () {
   const modal = document.getElementById('segregationTagDetailModal');
   if (modal) modal.classList.remove('active');
 };
@@ -1163,7 +1167,7 @@ window.closeSegregationTagDetailModal = function() {
 /* ==========================================================================
    Section 26: Worker Personnel Dossier & Profile Edit Handlers
    ========================================================================== */
-window.openWorkerProfileEditModal = function() {
+window.openWorkerProfileEditModal = function () {
   const modal = document.getElementById('workerProfileEditModal');
   if (!modal) return;
   const user = currentUser || {};
@@ -1181,12 +1185,12 @@ window.openWorkerProfileEditModal = function() {
   if (typeof playCivicAudio === 'function') playCivicAudio('click');
 };
 
-window.closeWorkerProfileEditModal = function() {
+window.closeWorkerProfileEditModal = function () {
   const modal = document.getElementById('workerProfileEditModal');
   if (modal) modal.classList.remove('active');
 };
 
-window.handleWorkerProfileEditSubmit = function(e) {
+window.handleWorkerProfileEditSubmit = function (e) {
   if (e && e.preventDefault) e.preventDefault();
   const phone = document.getElementById('editWorkerPhone')?.value.trim() || '+91 98112-40192';
   const emergency = document.getElementById('editWorkerEmergency')?.value.trim() || '+91 98200-11223';
@@ -1271,7 +1275,7 @@ function initTheme() {
         if (typeof playCivicAudio === 'function') playCivicAudio('click');
         const currentTheme = document.documentElement.getAttribute('data-theme');
         const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        
+
         // Smooth cross-fade transition
         document.documentElement.classList.add('theme-transitioning');
         document.documentElement.setAttribute('data-theme', newTheme);
@@ -1297,12 +1301,12 @@ function updateThemeIcons(theme) {
    2. DATA STORES & SEED ENTITIES
    ========================================================================== */
 const SEED_USERS = [
-  { 
-    id: 'usr-1', 
-    email: 'citizen@ecoclear.org', 
-    pass: 'demo123', 
-    name: 'Ananya Sharma', 
-    role: 'citizen', 
+  {
+    id: 'usr-1',
+    email: 'citizen@ecoclear.org',
+    pass: 'demo123',
+    name: 'Ananya Sharma',
+    role: 'citizen',
     credits: 85,
     transactions: [
       { date: '2026-09-21 10:15', reason: 'Initial Registration Bonus', amount: 30 },
@@ -1312,12 +1316,12 @@ const SEED_USERS = [
       { date: '2026-09-23 11:45', reason: 'Redeemed Digital Eco-Champion Badge', amount: 0 }
     ]
   },
-  { 
-    id: 'usr-2', 
-    email: 'school@cityedu.org', 
-    pass: 'demo123', 
-    name: 'Bombay Scottish School, Powai', 
-    role: 'institution', 
+  {
+    id: 'usr-2',
+    email: 'school@cityedu.org',
+    pass: 'demo123',
+    name: 'Bombay Scottish School, Powai',
+    role: 'institution',
     institutionType: 'school',
     schoolName: 'Bombay Scottish School, Powai',
     verificationCode: 'INST-SCH-8821',
@@ -1331,12 +1335,12 @@ const SEED_USERS = [
       { date: '2026-09-15', rate: 92, stream: 'Wet Canteen & Food Waste' }
     ]
   },
-  { 
-    id: 'usr-6', 
-    email: 'infosys@campus.org', 
-    pass: 'demo123', 
-    name: 'Tata Consultancy Services, Andheri (E)', 
-    role: 'institution', 
+  {
+    id: 'usr-6',
+    email: 'infosys@campus.org',
+    pass: 'demo123',
+    name: 'Tata Consultancy Services, Andheri (E)',
+    role: 'institution',
     institutionType: 'company',
     companyName: 'Tata Consultancy Services, Andheri (E)',
     businessType: 'IT / Tech Office',
@@ -1351,12 +1355,12 @@ const SEED_USERS = [
       { date: '2026-09-18', rate: 95, stream: 'Paper & Packaging Cardboard' }
     ]
   },
-  { 
-    id: 'usr-3', 
-    email: 'citycare@hospital.org', 
-    pass: 'demo123', 
-    name: 'CityCare Super Specialty Hospital', 
-    role: 'hospital', 
+  {
+    id: 'usr-3',
+    email: 'citycare@hospital.org',
+    pass: 'demo123',
+    name: 'CityCare Super Specialty Hospital',
+    role: 'hospital',
     verificationCode: 'HOSP-NABH-4019',
     hazardThreshold: 25,
     credits: 60,
@@ -1365,13 +1369,13 @@ const SEED_USERS = [
       { date: '2026-09-22 16:30', reason: 'Hazardous Stream Clearance Compliant', amount: 50 }
     ]
   },
-  { 
-    id: 'usr-4', 
-    email: 'crew101@cleanward.org', 
-    pass: 'demo123', 
-    name: 'Rajesh Singh (Crew #101)', 
+  {
+    id: 'usr-4',
+    email: 'crew101@cleanward.org',
+    pass: 'demo123',
+    name: 'Rajesh Singh (Crew #101)',
     crewNumber: '101',
-    role: 'worker', 
+    role: 'worker',
     verificationCode: 'WRK-101',
     assignedWard: 'Ward G/South - Dadar & Elphinstone',
     vehicleType: 'Heavy Hydraulic Compactor (10T)',
@@ -1381,13 +1385,13 @@ const SEED_USERS = [
     lastKnownLng: 72.8350,
     lastLocationUpdatedAt: Date.now() - 120000
   },
-  { 
-    id: 'usr-7', 
-    email: 'crew102@cleanward.org', 
-    pass: 'demo123', 
-    name: 'Sunita Devi (Crew #102)', 
+  {
+    id: 'usr-7',
+    email: 'crew102@cleanward.org',
+    pass: 'demo123',
+    name: 'Sunita Devi (Crew #102)',
     crewNumber: '102',
-    role: 'worker', 
+    role: 'worker',
     verificationCode: 'WRK-102',
     assignedWard: 'Ward H/West - Bandra Residential',
     vehicleType: 'Electric Multi-Bin Tipper Auto (1.5T)',
@@ -1397,13 +1401,13 @@ const SEED_USERS = [
     lastKnownLng: 72.8295,
     lastLocationUpdatedAt: Date.now() - 180000
   },
-  { 
-    id: 'usr-8', 
-    email: 'crew103@cleanward.org', 
-    pass: 'demo123', 
-    name: 'Amit Verma (Crew #103)', 
+  {
+    id: 'usr-8',
+    email: 'crew103@cleanward.org',
+    pass: 'demo123',
+    name: 'Amit Verma (Crew #103)',
     crewNumber: '103',
-    role: 'worker', 
+    role: 'worker',
     verificationCode: 'WRK-103',
     assignedWard: 'Ward K/East - Andheri Industrial Estate',
     vehicleType: 'Biomedical Closed-Chamber Van (2T)',
@@ -1413,13 +1417,13 @@ const SEED_USERS = [
     lastKnownLng: 72.8697,
     lastLocationUpdatedAt: Date.now() - 240000
   },
-  { 
-    id: 'usr-9', 
-    email: 'crew104@cleanward.org', 
-    pass: 'demo123', 
-    name: 'Harish Kumar (Crew #104)', 
+  {
+    id: 'usr-9',
+    email: 'crew104@cleanward.org',
+    pass: 'demo123',
+    name: 'Harish Kumar (Crew #104)',
     crewNumber: '104',
-    role: 'worker', 
+    role: 'worker',
     verificationCode: 'WRK-104',
     assignedWard: 'Ward S - Powai Lake & Tech Enclave',
     vehicleType: 'C&D Debris Hydraulic Dumper (14T)',
@@ -1429,13 +1433,13 @@ const SEED_USERS = [
     lastKnownLng: 72.9120,
     lastLocationUpdatedAt: Date.now() - 300000
   },
-  { 
-    id: 'usr-10', 
-    email: 'crew105@cleanward.org', 
-    pass: 'demo123', 
-    name: 'Sachin Kamble (Crew #105)', 
+  {
+    id: 'usr-10',
+    email: 'crew105@cleanward.org',
+    pass: 'demo123',
+    name: 'Sachin Kamble (Crew #105)',
     crewNumber: '105',
-    role: 'worker', 
+    role: 'worker',
     verificationCode: 'WRK-105',
     assignedWard: 'Ward R/Central - Borivali West',
     vehicleType: 'Mini Tipper E-Rickshaw (0.8T)',
@@ -1445,13 +1449,13 @@ const SEED_USERS = [
     lastKnownLng: 72.8567,
     lastLocationUpdatedAt: Date.now() - 3600000
   },
-    { 
-    id: 'usr-11', 
-    email: 'crew106@cleanward.org', 
-    pass: 'demo123', 
-    name: 'Pooja Shinde (Crew #106)', 
+  {
+    id: 'usr-11',
+    email: 'crew106@cleanward.org',
+    pass: 'demo123',
+    name: 'Pooja Shinde (Crew #106)',
     crewNumber: '106',
-    role: 'worker', 
+    role: 'worker',
     verificationCode: 'WRK-106',
     assignedWard: 'Ward D - Malabar Hill & Breach Candy',
     phone: '+91 98201-55011',
@@ -1470,13 +1474,13 @@ const SEED_USERS = [
     lastKnownLng: 72.8055,
     lastLocationUpdatedAt: Date.now() - 150000
   },
-  { 
-    id: 'usr-12', 
-    email: 'crew107@cleanward.org', 
-    pass: 'demo123', 
-    name: 'Deepak Jadhav (Crew #107)', 
+  {
+    id: 'usr-12',
+    email: 'crew107@cleanward.org',
+    pass: 'demo123',
+    name: 'Deepak Jadhav (Crew #107)',
     crewNumber: '107',
-    role: 'worker', 
+    role: 'worker',
     verificationCode: 'WRK-107',
     assignedWard: 'Ward K/West - Andheri West & Juhu Coastal',
     phone: '+91 98203-77012',
@@ -1495,13 +1499,13 @@ const SEED_USERS = [
     lastKnownLng: 72.8250,
     lastLocationUpdatedAt: Date.now() - 200000
   },
-  { 
-    id: 'usr-13', 
-    email: 'crew108@cleanward.org', 
-    pass: 'demo123', 
-    name: 'Santosh Gaikwad (Crew #108)', 
+  {
+    id: 'usr-13',
+    email: 'crew108@cleanward.org',
+    pass: 'demo123',
+    name: 'Santosh Gaikwad (Crew #108)',
     crewNumber: '108',
-    role: 'worker', 
+    role: 'worker',
     verificationCode: 'WRK-108',
     assignedWard: 'Ward F/North - Matunga & Sion Central',
     phone: '+91 98205-99013',
@@ -1520,13 +1524,13 @@ const SEED_USERS = [
     lastKnownLng: 72.8550,
     lastLocationUpdatedAt: Date.now() - 250000
   },
-  { 
-    id: 'usr-14', 
-    email: 'crew109@cleanward.org', 
-    pass: 'demo123', 
-    name: 'Manoj Kamble (Crew #109)', 
+  {
+    id: 'usr-14',
+    email: 'crew109@cleanward.org',
+    pass: 'demo123',
+    name: 'Manoj Kamble (Crew #109)',
     crewNumber: '109',
-    role: 'worker', 
+    role: 'worker',
     verificationCode: 'WRK-109',
     assignedWard: 'Ward M/East - Chembur & Govandi Eco-Hub',
     phone: '+91 98207-22014',
@@ -1545,13 +1549,13 @@ const SEED_USERS = [
     lastKnownLng: 72.9050,
     lastLocationUpdatedAt: Date.now() - 300000
   },
-  { 
-    id: 'usr-15', 
-    email: 'crew110@cleanward.org', 
-    pass: 'demo123', 
-    name: 'Vijay Patil (Crew #110)', 
+  {
+    id: 'usr-15',
+    email: 'crew110@cleanward.org',
+    pass: 'demo123',
+    name: 'Vijay Patil (Crew #110)',
     crewNumber: '110',
-    role: 'worker', 
+    role: 'worker',
     verificationCode: 'WRK-110',
     assignedWard: 'Ward T - Mulund Green Corridor',
     phone: '+91 98209-44015',
@@ -1570,13 +1574,13 @@ const SEED_USERS = [
     lastKnownLng: 72.9550,
     lastLocationUpdatedAt: Date.now() - 350000
   },
-{ 
-    id: 'usr-5', 
-    email: 'admin@citygov.org', 
-    pass: 'demo123', 
-    name: 'Municipal Sanitation Officer', 
-    role: 'admin', 
-    verificationCode: 'ADMIN2026' 
+  {
+    id: 'usr-5',
+    email: 'admin@citygov.org',
+    pass: 'demo123',
+    name: 'Municipal Sanitation Officer',
+    role: 'admin',
+    verificationCode: 'ADMIN2026'
   }
 ];
 
@@ -1970,27 +1974,27 @@ const SEED_HOSPITAL_STAFF = [
 ];
 
 const SEED_REDEMPTIONS = [
-  { 
-    id: 'RED-501', 
-    userId: 'usr-1', 
-    userName: 'Ananya Sharma', 
-    itemId: 'digital_badge', 
-    itemName: 'Digital Eco-Champion Badge', 
-    creditCost: 0, 
-    status: 'Fulfilled', 
-    requestedAt: Date.now() - (24 * 60 * 60 * 1000), 
-    fulfilledAt: Date.now() - (24 * 60 * 60 * 1000) 
+  {
+    id: 'RED-501',
+    userId: 'usr-1',
+    userName: 'Ananya Sharma',
+    itemId: 'digital_badge',
+    itemName: 'Digital Eco-Champion Badge',
+    creditCost: 0,
+    status: 'Fulfilled',
+    requestedAt: Date.now() - (24 * 60 * 60 * 1000),
+    fulfilledAt: Date.now() - (24 * 60 * 60 * 1000)
   },
-  { 
-    id: 'RED-502', 
-    userId: 'usr-1', 
-    userName: 'Ananya Sharma', 
-    itemId: 'sapling', 
-    itemName: 'Sapling / Native Fruit Plant', 
-    creditCost: 50, 
-    status: 'Requested', 
-    requestedAt: Date.now() - (3 * 60 * 60 * 1000), 
-    fulfilledAt: null 
+  {
+    id: 'RED-502',
+    userId: 'usr-1',
+    userName: 'Ananya Sharma',
+    itemId: 'sapling',
+    itemName: 'Sapling / Native Fruit Plant',
+    creditCost: 50,
+    status: 'Requested',
+    requestedAt: Date.now() - (3 * 60 * 60 * 1000),
+    fulfilledAt: null
   }
 ];
 
@@ -2085,7 +2089,7 @@ async function checkBackendHealth() {
       updateBackendStatusIndicator(true);
       return true;
     }
-  } catch (e) {}
+  } catch (e) { }
   isBackendConnected = false;
   updateBackendStatusIndicator(false);
   return false;
@@ -2296,7 +2300,7 @@ function initAuth() {
     }
   ];
 
-  window.renderGoogleAccountList = function() {
+  window.renderGoogleAccountList = function () {
     const container = document.getElementById('googleAuthAccountList');
     if (!container) return;
 
@@ -2422,7 +2426,7 @@ function initAuth() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(targetUser)
-        }).catch(() => {});
+        }).catch(() => { });
       } else {
         targetUser.authProvider = 'google';
         targetUser.googleVerified = true;
@@ -2447,13 +2451,13 @@ function initAuth() {
     }, 550);
   };
 
-  window.toggleGoogleCustomInput = function() {
+  window.toggleGoogleCustomInput = function () {
     const form = document.getElementById('googleCustomAccountForm');
     if (!form) return;
     form.style.display = form.style.display === 'none' ? 'block' : 'none';
   };
 
-  window.submitGoogleCustomAccount = function() {
+  window.submitGoogleCustomAccount = function () {
     const nameInput = document.getElementById('googleCustomName');
     const emailInput = document.getElementById('googleCustomEmail');
     const roleInput = document.getElementById('googleCustomRole');
@@ -2477,12 +2481,12 @@ function initAuth() {
     selectGoogleAccount(email, name, role, '#4285F4', initials);
   };
 
-  window.handleGoogleCredentialResponse = function(response) {
+  window.handleGoogleCredentialResponse = function (response) {
     if (!response || !response.credential) return;
     try {
       const base64Url = response.credential.split('.')[1];
       const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
         return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
       }).join(''));
 
@@ -2628,7 +2632,7 @@ function initAuth() {
           try {
             const { data: pData } = await client.from('profiles').select('*').eq('id', data.user.id).single();
             profile = pData;
-          } catch (pe) {}
+          } catch (pe) { }
 
           const supaUser = {
             id: data.user.id,
@@ -2723,7 +2727,7 @@ function initAuth() {
       submitBtn.innerHTML = `<span class="btn-spinner"></span> Creating Account...`;
     }
 
-    const primaryOrgName = (role === 'institution') 
+    const primaryOrgName = (role === 'institution')
       ? (instType === 'school' ? schoolName : (instType === 'company' ? companyName : name))
       : name;
 
@@ -2808,7 +2812,7 @@ function initAuth() {
     if (client && client.auth) {
       try {
         await client.auth.signOut();
-      } catch (e) {}
+      } catch (e) { }
     }
     localStorage.removeItem('swm_current_user');
     currentUser = null;
@@ -2823,7 +2827,7 @@ function initAuth() {
   }
 }
 
-window.quickLogin = function(email) {
+window.quickLogin = function (email) {
   const users = getUsers();
   const found = users.find(u => u.email === email);
   if (found) setCurrentUser(found);
@@ -2982,7 +2986,7 @@ function updateWardFieldFromCoords(lat, lng, addressData, isCitizen) {
     input.value = derivation.label;
   }
   if (notice) {
-    notice.textContent = derivation.isExact 
+    notice.textContent = derivation.isExact
       ? `📍 Verified statutory zone: ${derivation.wardName}`
       : `📍 ${derivation.label}`;
   }
@@ -3130,7 +3134,7 @@ function reverseGeocode(lat, lng, landmarkInputId, statusId, isCitizen) {
     });
 }
 
-window.locateUser = function(role) {
+window.locateUser = function (role) {
   const isCitizen = role === 'citizen';
   const statusElem = document.getElementById(isCitizen ? 'citizenLocStatus' : 'instLocStatus');
 
@@ -3171,7 +3175,7 @@ window.locateUser = function(role) {
   );
 };
 
-window.locateNewBranch = function() {
+window.locateNewBranch = function () {
   const statusNotice = document.getElementById('newBranchWardNotice');
   if (!navigator.geolocation) {
     applyBranchCoordinates(19.1136, 72.8697);
@@ -3338,7 +3342,7 @@ function renderCitizenDashboard() {
   renderPersonalImpactTracker();
 }
 
-window.selectSeverity = function(sev) {
+window.selectSeverity = function (sev) {
   document.getElementById('citizenSeverity').value = sev;
   const btns = document.querySelectorAll('.severity-btn');
   btns.forEach(b => {
@@ -3450,7 +3454,7 @@ function formatAudioTime(secs) {
   return `${m}:${s < 10 ? '0' : ''}${s}`;
 }
 
-window.toggleAudioPlayback = function() {
+window.toggleAudioPlayback = function () {
   const audio = document.getElementById('audioPlayback');
   const btn = document.getElementById('audioPlayToggleBtn');
   if (audio.paused) {
@@ -3462,14 +3466,14 @@ window.toggleAudioPlayback = function() {
   }
 };
 
-window.seekAudioPlayback = function(val) {
+window.seekAudioPlayback = function (val) {
   const audio = document.getElementById('audioPlayback');
   if (audio.duration) {
     audio.currentTime = (val / 100) * audio.duration;
   }
 };
 
-window.setAudioVolume = function(val) {
+window.setAudioVolume = function (val) {
   const audio = document.getElementById('audioPlayback');
   audio.volume = parseFloat(val);
 };
@@ -3640,7 +3644,7 @@ function triggerEcoConfettiBurst(originElem) {
   });
 }
 
-window.redeemCreditStoreItem = function(itemId) {
+window.redeemCreditStoreItem = function (itemId) {
   const item = CREDIT_STORE_CATALOG.find(i => i.id === itemId);
   if (!item) return;
 
@@ -3758,7 +3762,7 @@ function renderStatusStepperHTML(status, compact = false) {
 
 /* Screen-Level Emergency Alert Edge Pulse / Glow */
 let emergencyAlertTimeout = null;
-window.triggerEmergencyScreenAlert = function(reportOrText) {
+window.triggerEmergencyScreenAlert = function (reportOrText) {
   if (typeof document === 'undefined') return;
   let existing = document.getElementById('emergencyScreenAlertVignette');
   if (existing) existing.remove();
@@ -3769,7 +3773,7 @@ window.triggerEmergencyScreenAlert = function(reportOrText) {
 
   const banner = document.createElement('div');
   banner.className = 'emergency-vignette-banner';
-  const label = typeof reportOrText === 'object' && reportOrText 
+  const label = typeof reportOrText === 'object' && reportOrText
     ? `🚨 CRITICAL EMERGENCY REPORT #${reportOrText.id || 'ALERT'} (${reportOrText.area || reportOrText.ward || 'Municipal Zone'})`
     : (typeof reportOrText === 'string' ? reportOrText : '🚨 CRITICAL OVERFLOW EMERGENCY ALERT ACTIVE');
   banner.innerHTML = `<span>${label}</span> <span style="font-size: 0.72rem; opacity: 0.85; text-decoration: underline;">Dismiss ✕</span>`;
@@ -3840,12 +3844,12 @@ function renderCitizenReportsFeed() {
   `).join('');
 }
 
-window.filterCitizenReports = function(filter) {
+window.filterCitizenReports = function (filter) {
   citizenFilter = filter;
   renderCitizenReportsFeed();
 };
 
-window.triggerEmergencyModal = function() {
+window.triggerEmergencyModal = function () {
   const landmark = prompt('Enter Exact Landmark of Emergency Hazardous Spill / Severe Obstruction:', 'City Commercial Market Gate #1');
   if (!landmark) return;
 
@@ -4013,13 +4017,13 @@ function renderInstitutionDashboard() {
   renderInstitutionPeerBenchmark();
 }
 
-window.changeInstBranch = function(branchId) {
+window.changeInstBranch = function (branchId) {
   currentUser.activeBranchId = branchId;
   updateUserRecord(currentUser);
   renderInstitutionDashboard();
 };
 
-window.openAddBranchModal = function() {
+window.openAddBranchModal = function () {
   document.getElementById('addBranchModal').classList.add('active');
 
   const form = document.getElementById('addBranchForm');
@@ -4082,9 +4086,9 @@ function renderInstitutionList() {
   `).join('');
 }
 
-window.triggerInstitutionOverloadAlert = function() {
+window.triggerInstitutionOverloadAlert = function () {
   const currentBranch = (currentUser.branches && currentUser.branches.find(b => b.id === currentUser.activeBranchId)) || { name: 'Main Campus', ward: 'Ward K/East - Andheri Industrial Estate', lat: 19.1136, lng: 72.8697 };
-  
+
   const newReport = {
     id: 'OVERLOAD-' + Math.floor(1000 + Math.random() * 9000),
     userId: currentUser.id,
@@ -4196,7 +4200,7 @@ function renderHospitalDashboard() {
   renderHospitalPharmaExpiryTable();
 }
 
-window.validateBMWForm = function() {
+window.validateBMWForm = function () {
   const cat = document.getElementById('bmwCategory')?.value;
   const ward = document.getElementById('hospitalWard')?.value?.trim();
   const facility = document.getElementById('bmwTreatmentFacility')?.value;
@@ -4213,7 +4217,7 @@ window.validateBMWForm = function() {
   }
 };
 
-window.updateHospitalHazardThreshold = function() {
+window.updateHospitalHazardThreshold = function () {
   const val = parseFloat(document.getElementById('hospitalThresholdInput').value);
   if (!val || val < 1) {
     alert('Please enter a valid threshold in kg.');
@@ -4233,7 +4237,7 @@ function renderHospitalLog() {
   const threshold = currentUser.hazardThreshold || 25;
 
   const hazardousPendingKg = bmwReports.filter(r => r.category !== 'biomed_general' && r.lifecycleStage !== 'Disposed')
-                                       .reduce((sum, r) => sum + r.volumeKg, 0);
+    .reduce((sum, r) => sum + r.volumeKg, 0);
 
   if (hazardousPendingKg > threshold) {
     alertBox.style.display = 'block';
@@ -4276,7 +4280,7 @@ function renderHospitalLog() {
   }).join('');
 }
 
-window.advanceContainerLifecycle = function(id) {
+window.advanceContainerLifecycle = function (id) {
   const STAGES = ['Registered', 'Collected', 'In Transit', 'Treated', 'Disposed'];
   let bmwReports = getHospitalReports();
   const idx = bmwReports.findIndex(r => r.id === id);
@@ -4293,7 +4297,7 @@ window.advanceContainerLifecycle = function(id) {
 };
 
 /* End-to-End Bug Fix: Hospital Compliance CSV Export (RFC-4180 Compliant) */
-window.exportHospitalAuditCSV = function() {
+window.exportHospitalAuditCSV = function () {
   const bmwReports = getHospitalReports().filter(r => r.userId === currentUser.id);
   if (bmwReports.length === 0) {
     alert('No biomedical logs available to export!');
@@ -4346,9 +4350,23 @@ window.exportHospitalAuditCSV = function() {
   URL.revokeObjectURL(url);
 };
 
-window.printHospitalCertificate = function() {
+window.printHospitalCertificate = function () {
   window.print();
 };
+
+// Global Print Lifecycle Handlers for Clean PDF Generation
+window.addEventListener('beforeprint', () => {
+  const activeModal = document.querySelector('.modal-overlay.active');
+  if (activeModal) {
+    document.body.classList.add('printing-modal');
+  } else {
+    document.body.classList.remove('printing-modal');
+  }
+});
+
+window.addEventListener('afterprint', () => {
+  document.body.classList.remove('printing-modal');
+});
 
 function renderHospitalStaffTable() {
   const tbody = document.getElementById('hospitalStaffTableBody');
@@ -4364,7 +4382,7 @@ function renderHospitalStaffTable() {
   `).join('');
 }
 
-window.openStaffTrainingModal = function() {
+window.openStaffTrainingModal = function () {
   document.getElementById('staffTrainingModal').classList.add('active');
 
   const form = document.getElementById('staffTrainingForm');
@@ -4418,8 +4436,8 @@ function calcDistance(lat1, lon1, lat2, lon2) {
   const dLat = (p2Lat - p1Lat) * Math.PI / 180;
   const dLng = (p2Lon - p1Lon) * Math.PI / 180;
   const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-            Math.cos(p1Lat * Math.PI / 180) * Math.cos(p2Lat * Math.PI / 180) *
-            Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    Math.cos(p1Lat * Math.PI / 180) * Math.cos(p2Lat * Math.PI / 180) *
+    Math.sin(dLng / 2) * Math.sin(dLng / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
@@ -4652,7 +4670,7 @@ function runSoftwareRouteOptimizer() {
 
 window.runSoftwareRouteOptimizer = runSoftwareRouteOptimizer;
 
-window.recalculateWorkerRoute = function(btn) {
+window.recalculateWorkerRoute = function (btn) {
   if (typeof playCivicAudio === 'function') playCivicAudio('click');
   const targetBtn = btn || document.getElementById('workerRecalculateRouteBtn') || document.querySelector("button[onclick*='RouteOptimizer'], button[onclick*='recalculateWorkerRoute']");
   const origHtml = targetBtn ? targetBtn.innerHTML : '🗺️ Recalculate Route';
@@ -4721,7 +4739,7 @@ window.toggleWorkerShift = function() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ workerId: currentUser.id, shiftStatus: newStatus })
-    }).catch(() => {});
+    }).catch(() => { });
   }
 
   if (newStatus === 'off-shift' && workerWatchId) {
@@ -4967,11 +4985,11 @@ function updateWorkerLocation(lat, lng) {
         lng: workerCurrentPos.lng,
         timestamp: workerCurrentPos.updatedAt
       })
-    }).catch(() => {});
+    }).catch(() => { });
   }
 }
 
-window.selectWorkerTargetStop = function(stopId) {
+window.selectWorkerTargetStop = function (stopId) {
   activeWorkerTargetStopId = stopId;
   const reports = getReports().filter(r => r.status !== 'cleared');
   updateWorkerNavigationGuidance(reports);
@@ -5087,7 +5105,7 @@ function startWorkerGeolocationWatch(finalRoute) {
   );
 }
 
-window.refreshWorkerLiveLocation = function() {
+window.refreshWorkerLiveLocation = function () {
   if (!navigator.geolocation) {
     alert('Geolocation not supported. You can drag the 🚛 marker on the map to test locations.');
     return;
@@ -5108,13 +5126,13 @@ window.refreshWorkerLiveLocation = function() {
   );
 };
 
-window.recenterWorkerMap = function() {
+window.recenterWorkerMap = function () {
   if (workerMapObj) {
     workerMapObj.setView([workerCurrentPos.lat, workerCurrentPos.lng], 15);
   }
 };
 
-window.openWorkerProofModal = function(reportId) {
+window.openWorkerProofModal = function (reportId) {
   const reportInput = document.getElementById('proofReportId');
   if (reportInput) reportInput.value = reportId;
   const modal = document.getElementById('workerProofModal');
@@ -5125,7 +5143,7 @@ window.openWorkerProofModal = function(reportId) {
     form.onsubmit = (e) => {
       e.preventDefault();
       const id = document.getElementById('proofReportId')?.value || reportId;
-      
+
       let reports = getReports();
       const index = reports.findIndex(r => r.id === id);
       if (index !== -1) {
@@ -5242,7 +5260,7 @@ function renderAdminFeedTable(customReports) {
   const workers = getUsers().filter(u => u.role === 'worker');
 
   tbody.innerHTML = reports.map(r => {
-    const workerOptions = workers.map(w => 
+    const workerOptions = workers.map(w =>
       `<option value="${w.id}" ${r.assignedWorkerId === w.id ? 'selected' : ''}>${w.name}</option>`
     ).join('');
 
@@ -5282,16 +5300,16 @@ function renderAdminFeedTable(customReports) {
         </td>
         <td>
           ${r.status === 'cleared'
-            ? `<button id="forceClearBtn_${r.id}" class="btn btn-outline btn-xs" onclick="adminForceClear('${r.id}')" style="background: rgba(16, 185, 129, 0.12); color: #10b981; border-color: #10b981; opacity: 0.85;" title="Report already cleared">✓ Cleared</button>`
-            : `<button id="forceClearBtn_${r.id}" class="btn btn-outline btn-xs" onclick="adminForceClear('${r.id}')" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.6);" title="Force mark report as cleared">Force Clear</button>`
-          }
+        ? `<button id="forceClearBtn_${r.id}" class="btn btn-outline btn-xs" onclick="adminForceClear('${r.id}')" style="background: rgba(16, 185, 129, 0.12); color: #10b981; border-color: #10b981; opacity: 0.85;" title="Report already cleared">✓ Cleared</button>`
+        : `<button id="forceClearBtn_${r.id}" class="btn btn-outline btn-xs" onclick="adminForceClear('${r.id}')" style="color: #ef4444; border-color: rgba(239, 68, 68, 0.6);" title="Force mark report as cleared">Force Clear</button>`
+      }
         </td>
       </tr>
     `;
   }).join('');
 }
 
-window.filterAdminFeed = function() {
+window.filterAdminFeed = function () {
   const keywordInput = document.getElementById('adminFeedSearchInput');
   const statusSelect = document.getElementById('adminFeedStatusFilter');
   const wardSelect = document.getElementById('adminFeedWardFilter');
@@ -5327,7 +5345,7 @@ window.filterAdminFeed = function() {
   renderAdminFeedTable(filtered);
 };
 
-window.resetAdminFeedFilters = function() {
+window.resetAdminFeedFilters = function () {
   const keywordInput = document.getElementById('adminFeedSearchInput');
   const statusSelect = document.getElementById('adminFeedStatusFilter');
   const wardSelect = document.getElementById('adminFeedWardFilter');
@@ -5394,12 +5412,12 @@ function renderAdminFleet() {
   }).join('');
 }
 
-window.openDispatchStandbyVehicleModal = function() {
+window.openDispatchStandbyVehicleModal = function () {
   const modal = document.getElementById('dispatchStandbyModal');
   if (modal) modal.classList.add('active');
 };
 
-window.handleDispatchStandbySubmit = async function(e) {
+window.handleDispatchStandbySubmit = async function (e) {
   if (e) e.preventDefault();
   const regNo = document.getElementById('standbyRegNo').value.trim();
   const driver = document.getElementById('standbyDriver').value.trim();
@@ -5432,7 +5450,7 @@ window.handleDispatchStandbySubmit = async function(e) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newVehicle)
       });
-    } catch (err) {}
+    } catch (err) { }
   }
 
   closeModal('dispatchStandbyModal');
@@ -5441,7 +5459,7 @@ window.handleDispatchStandbySubmit = async function(e) {
   renderAdminFleet();
 };
 
-window.toggleFleetMaintenance = async function(id) {
+window.toggleFleetMaintenance = async function (id) {
   const fleet = getFleet();
   const v = fleet.find(f => f.id === id);
   if (!v) return;
@@ -5454,13 +5472,13 @@ window.toggleFleetMaintenance = async function(id) {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: v.status })
-    }).catch(() => {});
+    }).catch(() => { });
   }
 
   renderAdminFleet();
 };
 
-window.rerouteFleetVehicle = async function(id) {
+window.rerouteFleetVehicle = async function (id) {
   const fleet = getFleet();
   const v = fleet.find(f => f.id === id);
   if (!v) return;
@@ -5477,7 +5495,7 @@ window.rerouteFleetVehicle = async function(id) {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ward: v.ward, status: v.status })
-      }).catch(() => {});
+      }).catch(() => { });
     }
 
     renderAdminFleet();
@@ -5540,7 +5558,7 @@ function renderAdminGrievanceTable() {
   }).join('');
 }
 
-window.adminUrgencyBoost = async function(reportId) {
+window.adminUrgencyBoost = async function (reportId) {
   const reports = getReports();
   const rep = reports.find(r => r.id === reportId);
   if (!rep) return;
@@ -5554,14 +5572,14 @@ window.adminUrgencyBoost = async function(reportId) {
   if (isBackendConnected) {
     try {
       await fetch(`/api/reports/${reportId}/boost`, { method: 'POST' });
-    } catch (e) {}
+    } catch (e) { }
   }
 
   alert(`⚡ Ticket ${reportId} received Urgency Boost! Crew dispatch priority elevated.`);
   renderAdminDashboard();
 };
 
-window.adminEscalateTicket = async function(reportId) {
+window.adminEscalateTicket = async function (reportId) {
   const reports = getReports();
   const rep = reports.find(r => r.id === reportId);
   if (!rep) return;
@@ -5575,14 +5593,14 @@ window.adminEscalateTicket = async function(reportId) {
   if (isBackendConnected) {
     try {
       await fetch(`/api/reports/${reportId}/escalate`, { method: 'POST' });
-    } catch (e) {}
+    } catch (e) { }
   }
 
   alert(`🏛️ Ticket ${reportId} officially escalated to Zonal Municipal Commissioner!`);
   renderAdminDashboard();
 };
 
-window.openSanitationNoticeModal = function(reportId) {
+window.openSanitationNoticeModal = function (reportId) {
   const reports = getReports();
   const rep = reports.find(r => r.id === reportId);
   if (!rep) return;
@@ -5596,7 +5614,7 @@ window.openSanitationNoticeModal = function(reportId) {
   if (modal) modal.classList.add('active');
 };
 
-window.handleSanitationNoticeSubmit = function(e) {
+window.handleSanitationNoticeSubmit = function (e) {
   if (e) e.preventDefault();
   const id = document.getElementById('noticeReportId').value;
   const violation = document.getElementById('noticeViolationType').value;
@@ -5748,7 +5766,7 @@ function openUpdateComplianceModal() {
 }
 window.openUpdateComplianceModal = openUpdateComplianceModal;
 
-window.onComplianceWardSelectChange = function(ward) {
+window.onComplianceWardSelectChange = function (ward) {
   const metrics = JSON.parse(localStorage.getItem('swm_compliance_metrics') || '[]');
   const m = metrics.find(item => item.ward === ward);
   if (m) {
@@ -5776,7 +5794,7 @@ function saveWardComplianceMetrics(ward, seg, cov, proc) {
 }
 window.saveWardComplianceMetrics = saveWardComplianceMetrics;
 
-window.handleUpdateComplianceSubmit = function(e) {
+window.handleUpdateComplianceSubmit = function (e) {
   if (e) e.preventDefault();
   const ward = document.getElementById('complianceWardSelect').value;
   const seg = Number(document.getElementById('compSegregationInput').value);
@@ -5790,7 +5808,7 @@ window.handleUpdateComplianceSubmit = function(e) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updatedObj)
-    }).catch(() => {});
+    }).catch(() => { });
   }
 
   closeModal('updateComplianceModal');
@@ -5798,7 +5816,7 @@ window.handleUpdateComplianceSubmit = function(e) {
   renderAdminComplianceTable();
 };
 
-window.exportAdminLogsCSV = function() {
+window.exportAdminLogsCSV = function () {
   const logs = getAdminAuditTrail();
   if (logs.length === 0) {
     alert('No operational logs available to export.');
@@ -5830,7 +5848,7 @@ window.exportAdminLogsCSV = function() {
   URL.revokeObjectURL(url);
 };
 
-window.adminSmartAutoAssign = async function() {
+window.adminSmartAutoAssign = async function () {
   const reports = getReports();
   const unassigned = reports.filter(r => r.status === 'reported');
   const workers = getUsers().filter(u => u.role === 'worker');
@@ -5854,7 +5872,7 @@ window.adminSmartAutoAssign = async function() {
         alert(`⚡ Smart Auto-Assign complete! ${result.count} report(s) dispatched to municipal crews via REST API.`);
         return;
       }
-    } catch (e) {}
+    } catch (e) { }
   }
 
   let count = 0;
@@ -5873,14 +5891,14 @@ window.adminSmartAutoAssign = async function() {
   renderAdminDashboard();
 };
 
-window.applyBroadcastPreset = function(val) {
+window.applyBroadcastPreset = function (val) {
   const input = document.getElementById('adminBroadcastInput');
   if (input && val) {
     input.value = val;
   }
 };
 
-window.publishBroadcastAdvisory = async function() {
+window.publishBroadcastAdvisory = async function () {
   const input = document.getElementById('adminBroadcastInput');
   if (!input) return;
   const msg = input.value.trim();
@@ -5911,7 +5929,7 @@ window.publishBroadcastAdvisory = async function() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newBroadcast)
       });
-    } catch (e) {}
+    } catch (e) { }
   }
 
   input.value = '';
@@ -5922,7 +5940,7 @@ window.publishBroadcastAdvisory = async function() {
   alert('📢 Municipal Broadcast Advisory transmitted live to all civic views!');
 };
 
-window.clearBroadcastAdvisory = async function() {
+window.clearBroadcastAdvisory = async function () {
   const broadcasts = getBroadcasts();
   broadcasts.forEach(b => b.active = false);
   saveBroadcasts(broadcasts);
@@ -5931,14 +5949,14 @@ window.clearBroadcastAdvisory = async function() {
   if (isBackendConnected) {
     try {
       await fetch('/api/broadcasts', { method: 'DELETE' });
-    } catch (e) {}
+    } catch (e) { }
   }
 
   displayActiveBroadcasts();
   alert('All active municipal broadcasts cleared.');
 };
 
-window.dismissBroadcast = function() {
+window.dismissBroadcast = function () {
   const container = document.getElementById('globalBroadcastContainer');
   if (container) container.style.display = 'none';
 };
@@ -5959,7 +5977,7 @@ function displayActiveBroadcasts() {
   }
 }
 
-window.openAboutProjectModal = function() {
+window.openAboutProjectModal = function () {
   const modal = document.getElementById('aboutProjectModal');
   if (modal) modal.classList.add('active');
 };
@@ -6174,8 +6192,8 @@ function getVehicleSvgIcon(vehicleType = '', isIdle = false) {
     <rect x="25" y="31" width="4" height="8" rx="2" fill="#1e293b"/>
     <rect x="4" y="17" width="22" height="25" rx="3" fill="${bodyFill}" stroke="${strokeFill}" stroke-width="1.5"/>
     <rect x="6" y="19.5" width="18" height="20" rx="2" fill="${bedFill}" stroke="${strokeFill}" stroke-width="1"/>
-    ${isBiomed 
-      ? '<path d="M13 26h4v3h3v4h-3v3h-4v-3h-3v-4h3v-3z" fill="#ef4444"/>' 
+    ${isBiomed
+      ? '<path d="M13 26h4v3h3v4h-3v3h-4v-3h-3v-4h3v-3z" fill="#ef4444"/>'
       : '<line x1="6" y1="26" x2="24" y2="26" stroke="#b45309" stroke-width="1" stroke-dasharray="2 2"/><line x1="6" y1="33" x2="24" y2="33" stroke="#b45309" stroke-width="1" stroke-dasharray="2 2"/>'}
     <path d="M5 17V8a3 3 0 0 1 3-3h14a3 3 0 0 1 3 3v9H5z" fill="${cabFill}"/>
     <path d="M7 8h16l-1 5H8L7 8z" fill="#fef3c7"/>
@@ -7383,7 +7401,7 @@ window.reassignNearestWorkerStop = function(fromWorkerId) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reportId: stopToReassign.id, toWorkerId: bestWorker.id })
-      }).catch(() => {});
+      }).catch(() => { });
     }
 
     alert(`✅ Reassigned Stop #${stopToReassign.id} (${stopToReassign.landmark}) to nearest crew: ${bestWorker.name} (${minDistanceKm.toFixed(2)} km away)!\n\nRoutes and stop queues recalculated for both workers.`);
@@ -7441,7 +7459,7 @@ function startAdminOverlayTruck(roadCoords, worker, vehicle) {
   });
 }
 
-window.adminOverlayWorkerRoute = function(workerId) {
+window.adminOverlayWorkerRoute = function (workerId) {
   if (!adminWorkerMapObj) return;
 
   const workers = getUsers().filter(u => u.role === 'worker');
@@ -7532,14 +7550,14 @@ window.adminOverlayWorkerRoute = function(workerId) {
     countElem.classList.add('stop-count-badge-pop');
   }
   if (listElem) {
-    listElem.innerHTML = assignedStops.length === 0 
+    listElem.innerHTML = assignedStops.length === 0
       ? 'No active pending stops assigned.'
       : `<div style="margin-bottom: 0.5rem;"><button type="button" class="btn btn-outline btn-xs" onclick="reassignNearestWorkerStop('${worker.id}')">🔄 Reassign Next Stop to Nearest Crew</button></div>` +
-        assignedStops.map((s, idx) => `<div style="padding: 0.25rem 0; border-bottom: 1px dashed var(--civic-border);"><strong>${idx + 1}.</strong> ${s.landmark} <span style="color: #64748b;">(${s.area || s.wardZone})</span> ${s.isEmergency ? '<span style="color: #dc2626; font-weight: 800;">🚨 EMERGENCY</span>' : ''}</div>`).join('');
+      assignedStops.map((s, idx) => `<div style="padding: 0.25rem 0; border-bottom: 1px dashed var(--civic-border);"><strong>${idx + 1}.</strong> ${s.landmark} <span style="color: #64748b;">(${s.area || s.wardZone})</span> ${s.isEmergency ? '<span style="color: #dc2626; font-weight: 800;">🚨 EMERGENCY</span>' : ''}</div>`).join('');
   }
 };
 
-window.clearAdminWorkerRouteOverlay = function() {
+window.clearAdminWorkerRouteOverlay = function () {
   if (adminOverlayTruckController && typeof adminOverlayTruckController.stop === 'function') {
     adminOverlayTruckController.stop();
     adminOverlayTruckController = null;
@@ -7560,7 +7578,7 @@ window.clearAdminWorkerRouteOverlay = function() {
 
 let adminLiveWorkerSimInterval = null;
 
-window.toggleAdminLiveWorkerSimulation = function(forceState) {
+window.toggleAdminLiveWorkerSimulation = function (forceState) {
   const btn = document.getElementById('btnAdminLiveSimulationToggle');
   const dot = document.getElementById('adminLiveSimulationDot');
   const txt = document.getElementById('adminLiveSimulationText');
@@ -7587,7 +7605,7 @@ window.toggleAdminLiveWorkerSimulation = function(forceState) {
   }
 };
 
-window.renderAdminWorkerLocationsMap = function(forceRefresh) {
+window.renderAdminWorkerLocationsMap = function (forceRefresh) {
   initAdminWorkerLocationsMap(forceRefresh);
 };
 
@@ -8127,7 +8145,7 @@ function renderAdminRedemptionsQueue() {
   `).join('');
 }
 
-window.adminFulfillRedemption = function(id) {
+window.adminFulfillRedemption = function (id) {
   let redemptions = getRedemptions();
   const idx = redemptions.findIndex(r => r.id === id);
   if (idx !== -1) {
@@ -8139,7 +8157,7 @@ window.adminFulfillRedemption = function(id) {
   }
 };
 
-window.switchAdminTab = function(tabName) {
+window.switchAdminTab = function (tabName) {
   const tabs = document.querySelectorAll('#adminDashboard .auth-tabs .auth-tab');
   tabs.forEach(t => t.classList.remove('active'));
 
@@ -8185,7 +8203,7 @@ window.switchAdminTab = function(tabName) {
   if (tabName === 'logs') renderAdminLogsTable();
 };
 
-window.reassignWorker = async function(reportId, workerId) {
+window.reassignWorker = async function (reportId, workerId) {
   let reports = getReports();
   const index = reports.findIndex(r => r.id === reportId);
   if (index !== -1) {
@@ -8241,7 +8259,7 @@ function showToast(message, type = 'success') {
 }
 window.showToast = showToast;
 
-window.adminForceClear = async function(reportId) {
+window.adminForceClear = async function (reportId) {
   let reports = getReports();
   const index = reports.findIndex(r => r.id === reportId);
   if (index !== -1) {
@@ -8283,9 +8301,9 @@ window.adminForceClear = async function(reportId) {
     const keywordInput = document.getElementById('adminFeedSearchInput');
     const statusSelect = document.getElementById('adminFeedStatusFilter');
     const wardSelect = document.getElementById('adminFeedWardFilter');
-    const hasFilter = (keywordInput && keywordInput.value.trim()) || 
-                      (statusSelect && statusSelect.value !== 'all') || 
-                      (wardSelect && wardSelect.value !== 'all');
+    const hasFilter = (keywordInput && keywordInput.value.trim()) ||
+      (statusSelect && statusSelect.value !== 'all') ||
+      (wardSelect && wardSelect.value !== 'all');
 
     renderAdminDashboard();
     if (hasFilter && typeof filterAdminFeed === 'function') {
@@ -8356,10 +8374,10 @@ function renderAdminWorkerTable() {
   }).join('');
 }
 
-window.exportAdminAnalyticsCSV = function() {
+window.exportAdminAnalyticsCSV = function () {
   const reports = getReports();
   let csvRows = ['"ID","Reporter","Role","Company/School","Resolved Address","Ward","Category","Severity","Emergency","Status","Latitude","Longitude","Timestamp"'];
-  
+
   reports.forEach(r => {
     csvRows.push([
       `"${r.id}"`,
@@ -8439,7 +8457,7 @@ function awardCredits(amount, reason) {
   }
 }
 
-window.openCreditLedgerModal = function() {
+window.openCreditLedgerModal = function () {
   const modal = document.getElementById('creditLedgerModal');
   const tbody = document.getElementById('creditLedgerTableBody');
 
@@ -8459,7 +8477,7 @@ window.openCreditLedgerModal = function() {
   modal.classList.add('active');
 };
 
-window.closeModal = function(modalId) {
+window.closeModal = function (modalId) {
   if (!modalId) {
     document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
     return;
@@ -8499,7 +8517,7 @@ function checkAndMergeDuplicates(newReport) {
     dup.notes = (dup.notes || '') + `\n[Duplicate report merged at ${new Date().toLocaleTimeString()} by ${newReport.userName}]`;
     if (newReport.isEmergency) dup.isEmergency = true;
     if (newReport.isPriorityPickup) dup.isPriorityPickup = true;
-    
+
     saveReports(reports);
 
     // Recalculate credit for all reporters
@@ -8658,12 +8676,12 @@ function initSegregationGuide() {
   if (input) {
     input.addEventListener('input', (e) => {
       const q = e.target.value.toLowerCase().trim();
-      const filtered = SEGREGATION_ITEMS.filter(i => 
-        i.name.toLowerCase().includes(q) || 
+      const filtered = SEGREGATION_ITEMS.filter(i =>
+        i.name.toLowerCase().includes(q) ||
         (i.name_hi && i.name_hi.toLowerCase().includes(q)) ||
-        i.bin.toLowerCase().includes(q) || 
+        i.bin.toLowerCase().includes(q) ||
         (i.bin_hi && i.bin_hi.toLowerCase().includes(q)) ||
-        i.tip.toLowerCase().includes(q) || 
+        i.tip.toLowerCase().includes(q) ||
         (i.tip_hi && i.tip_hi.toLowerCase().includes(q))
       );
       render(filtered);
@@ -8753,12 +8771,12 @@ function renderCitizenReferralWidget() {
   input.value = currentUser.referralCode;
 }
 
-window.copyCitizenReferralLink = function() {
+window.copyCitizenReferralLink = function () {
   const input = document.getElementById('citizenReferralCodeInput');
   const feedback = document.getElementById('referralCopyFeedback');
   if (!input) return;
   const link = `${window.location.origin}/#ref=${input.value}`;
-  navigator.clipboard.writeText(link).catch(() => {});
+  navigator.clipboard.writeText(link).catch(() => { });
   if (feedback) {
     feedback.style.display = 'block';
     setTimeout(() => { feedback.style.display = 'none'; }, 3000);
@@ -8958,7 +8976,7 @@ function checkOfflineQueueStatus() {
     }
   }
 }
-window.flushOfflineQueue = function() {
+window.flushOfflineQueue = function () {
   const queue = getOfflineQueue();
   if (queue.length === 0) {
     alert('No offline reports pending synchronization.');
@@ -8996,7 +9014,7 @@ function initOfflineQueueSync() {
 /* ==========================================================================
    16. INSTITUTION WASTE AUDIT CERTIFICATE & PEER BENCHMARKING
    ========================================================================== */
-window.openWasteAuditCertModal = function() {
+window.openWasteAuditCertModal = function () {
   const modal = document.getElementById('instAuditCertModal');
   if (!modal) return;
   const orgNameEl = document.getElementById('certOrgName');
@@ -9114,11 +9132,11 @@ function renderHospitalPharmaExpiryTable() {
   }).join('');
 }
 
-window.openAddPharmaExpiryModal = function() {
+window.openAddPharmaExpiryModal = function () {
   document.getElementById('addPharmaExpiryModal')?.classList.add('active');
 };
 
-window.handleAddPharmaExpirySubmit = function(e) {
+window.handleAddPharmaExpirySubmit = function (e) {
   e.preventDefault();
   const medName = document.getElementById('pharmaMedName').value.trim();
   const batchId = document.getElementById('pharmaBatchId').value.trim();
@@ -9142,7 +9160,7 @@ window.handleAddPharmaExpirySubmit = function(e) {
   alert(`Added ${medName} to pharmacy expiry tracking list!`);
 };
 
-window.logPharmaAsExpiredBMW = function(pharmaId) {
+window.logPharmaAsExpiredBMW = function (pharmaId) {
   const list = getHospitalPharmaExpiry();
   const item = list.find(p => p.id === pharmaId);
   if (!item) return;
@@ -9200,7 +9218,7 @@ function renderWorkerSafetyChecklist() {
   }
 }
 
-window.updateWorkerSafetyChecklist = function() {
+window.updateWorkerSafetyChecklist = function () {
   const ids = ['checkPpeGloves', 'checkPpeVest', 'checkPpeBoots', 'checkVehicleHydraulics', 'checkFirstAidKit'];
   let checkedCount = 0;
   ids.forEach(id => {
@@ -9222,7 +9240,7 @@ window.updateWorkerSafetyChecklist = function() {
   }
 };
 
-window.saveWorkerSafetyLog = function() {
+window.saveWorkerSafetyLog = function () {
   const todayStr = new Date().toISOString().slice(0, 10);
   const timeStr = new Date().toLocaleTimeString();
   const logData = { date: todayStr, time: timeStr, verified: true, workerId: currentUser?.id, workerName: currentUser?.name };
@@ -9239,7 +9257,7 @@ function renderWorkerPhotoProofGallery() {
   const countBadge = document.getElementById('workerPhotoProofCountBadge');
   if (!grid) return;
 
-  const myClearedReports = getReports().filter(r => 
+  const myClearedReports = getReports().filter(r =>
     r.status === 'cleared' && (r.assignedWorkerId === currentUser?.id || (currentUser?.name && r.assignedWorkerName && r.assignedWorkerName.includes(currentUser.name)))
   );
 
@@ -9298,7 +9316,7 @@ function logAdminAction(action, actor, details) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(entry)
-    }).catch(() => {});
+    }).catch(() => { });
   }
   return entry;
 }
@@ -9333,7 +9351,7 @@ function renderAdminLogsTable() {
   }).join('');
 }
 
-window.openAdminWeeklyDigestModal = function() {
+window.openAdminWeeklyDigestModal = function () {
   const modal = document.getElementById('adminWeeklyDigestModal');
   if (!modal) return;
   const reports = getReports();
@@ -9529,7 +9547,7 @@ const I18N = {
 };
 let currentLang = localStorage.getItem('swm_lang') || 'en';
 
-window.toggleAppLanguage = function() {
+window.toggleAppLanguage = function () {
   currentLang = currentLang === 'en' ? 'hi' : 'en';
   localStorage.setItem('swm_lang', currentLang);
   applyAppLanguage(currentLang);
@@ -9548,7 +9566,7 @@ function applyAppLanguage(lang) {
 
   // 1. Language buttons
   const langBtns = [document.getElementById('langToggleBtn'), document.getElementById('guestLangToggleBtn')];
-  langBtns.forEach(b => { 
+  langBtns.forEach(b => {
     if (b) {
       b.textContent = dict.langBtn;
       b.title = dict.langBtnTitle;
@@ -9813,7 +9831,7 @@ function updateNotificationBadge() {
     }
   }
 }
-window.toggleNotificationDropdown = function() {
+window.toggleNotificationDropdown = function () {
   const dropdown = document.getElementById('notificationDropdown');
   if (!dropdown) return;
   dropdown.classList.toggle('active');
@@ -9838,13 +9856,13 @@ function renderNotificationDropdown() {
   `).join('');
   updateNotificationBadge();
 }
-window.markAllNotificationsRead = function() {
+window.markAllNotificationsRead = function () {
   let list = getNotifications();
   list.forEach(n => n.read = true);
   saveNotifications(list);
   renderNotificationDropdown();
 };
-window.markNotificationRead = function(id) {
+window.markNotificationRead = function (id) {
   let list = getNotifications();
   const item = list.find(n => n.id === id);
   if (item) {
@@ -9858,7 +9876,7 @@ function initNotifications() {
 }
 
 /* Keyboard Shortcuts Help Panel */
-window.openKeyboardShortcutsModal = function() {
+window.openKeyboardShortcutsModal = function () {
   document.getElementById('keyboardShortcutsModal')?.classList.add('active');
 };
 function initKeyboardShortcuts() {
@@ -9929,7 +9947,7 @@ function getCivicAudioContext() {
     if (AudioCtx) civicAudioCtx = new AudioCtx();
   }
   if (civicAudioCtx && civicAudioCtx.state === 'suspended') {
-    civicAudioCtx.resume().catch(() => {});
+    civicAudioCtx.resume().catch(() => { });
   }
   return civicAudioCtx;
 }
@@ -9998,12 +10016,12 @@ function playCivicAudio(type) {
       osc.start(now);
       osc.stop(now + 0.035);
     }
-  } catch (e) {}
+  } catch (e) { }
 }
 window.playCivicAudio = playCivicAudio;
 
 /* Eco-Credit Flying Coin Animation */
-window.triggerEcoCreditCoinFlyAnimation = function(amount = 5, startElement) {
+window.triggerEcoCreditCoinFlyAnimation = function (amount = 5, startElement) {
   if (typeof document === 'undefined') return;
   const coin = document.createElement('div');
   coin.className = 'flying-credit-coin';
@@ -10032,7 +10050,7 @@ window.triggerEcoCreditCoinFlyAnimation = function(amount = 5, startElement) {
 /* ==========================================================================
    22. DRIVER DEVIATION, SKIP REASON LOG & EXTERNAL NAVIGATION
    ========================================================================== */
-window.openWorkerSkipStopModal = function(stopId) {
+window.openWorkerSkipStopModal = function (stopId) {
   const input = document.getElementById('skipReportId');
   if (input) input.value = stopId;
   const modal = document.getElementById('workerSkipStopModal');
@@ -10040,7 +10058,7 @@ window.openWorkerSkipStopModal = function(stopId) {
   playCivicAudio('beep');
 };
 
-window.handleWorkerSkipStopSubmit = function(e) {
+window.handleWorkerSkipStopSubmit = function (e) {
   if (e && e.preventDefault) e.preventDefault();
   const stopId = document.getElementById('skipReportId')?.value;
   const reason = document.getElementById('skipReasonCategory')?.value || 'Road Blocked';
@@ -10069,7 +10087,7 @@ window.handleWorkerSkipStopSubmit = function(e) {
 /* ==========================================================================
    23. AUTOMATED DAILY CREW SHIFT HANDOVER REPORT (PRINTABLE PDF VIEW)
    ========================================================================== */
-window.openAdminShiftHandoverModal = function() {
+window.openAdminShiftHandoverModal = function () {
   const modal = document.getElementById('adminShiftHandoverReportModal');
   const container = document.getElementById('adminShiftHandoverContent');
   if (!modal || !container) return;
@@ -10138,9 +10156,9 @@ window.openAdminShiftHandoverModal = function() {
     <h4 style="margin: 0.75rem 0 0.35rem 0; font-size: 0.95rem;">Unresolved Emergency Hazards / Obstructed Stops:</h4>
     <div style="font-size: 0.82rem; margin-bottom: 1.25rem;">
       ${emergencies.filter(e => e.status !== 'cleared').length === 0 && skipped.length === 0
-        ? `<div style="color: #059669; font-weight: 700;">✓ All statutory emergency spills cleared for current shift. Zero road deviations.</div>`
-        : `<div>Pending Escalations: <strong>${emergencies.filter(e => e.status !== 'cleared').length}</strong> emergency spills, <strong>${skipped.length}</strong> skipped stops recorded.</div>`
-      }
+      ? `<div style="color: #059669; font-weight: 700;">✓ All statutory emergency spills cleared for current shift. Zero road deviations.</div>`
+      : `<div>Pending Escalations: <strong>${emergencies.filter(e => e.status !== 'cleared').length}</strong> emergency spills, <strong>${skipped.length}</strong> skipped stops recorded.</div>`
+    }
     </div>
 
     <div style="display: flex; justify-content: space-between; border-top: 1px solid var(--civic-border); padding-top: 1rem; font-size: 0.78rem; color: #64748b; flex-wrap: wrap; gap: 0.5rem;">
@@ -10401,7 +10419,7 @@ let aiSmartBinMarker = null;
 window.MUMBAI_SMART_BINS = MUMBAI_SMART_BINS;
 window.AI_SAMPLE_WASTE_ITEMS = AI_SAMPLE_WASTE_ITEMS;
 
-window.openAIVisionScanner = function(source = 'hub') {
+window.openAIVisionScanner = function (source = 'hub') {
   const modal = document.getElementById('aiVisionScannerModal');
   if (!modal) return;
   modal.classList.add('active');
@@ -10410,7 +10428,7 @@ window.openAIVisionScanner = function(source = 'hub') {
   selectAISampleItem(currentAIScannedItem ? currentAIScannedItem.id : 'pet_bottle');
 };
 
-window.closeAIVisionScanner = function() {
+window.closeAIVisionScanner = function () {
   const modal = document.getElementById('aiVisionScannerModal');
   if (modal) modal.classList.remove('active');
   if (aiScannerAnimationTimeout) {
@@ -10419,7 +10437,7 @@ window.closeAIVisionScanner = function() {
   }
 };
 
-window.selectAISampleItem = function(itemKey) {
+window.selectAISampleItem = function (itemKey) {
   const item = AI_SAMPLE_WASTE_ITEMS[itemKey] || AI_SAMPLE_WASTE_ITEMS.pet_bottle;
   currentAIScannedItem = item;
 
@@ -10455,7 +10473,7 @@ window.selectAISampleItem = function(itemKey) {
   });
 };
 
-window.runAIScanningAnimation = function(onComplete) {
+window.runAIScanningAnimation = function (onComplete) {
   const beam = document.getElementById('aiScanBeam');
   const statusEl = document.getElementById('aiScanStatus');
   const targetTag = document.getElementById('aiTargetTag');
@@ -10492,7 +10510,7 @@ window.runAIScanningAnimation = function(onComplete) {
   }, 1150);
 };
 
-window.renderAIDetectionResults = function(item) {
+window.renderAIDetectionResults = function (item) {
   if (!item) return;
 
   const catBadge = document.getElementById('aiDetectedCategoryBadge');
@@ -10529,7 +10547,7 @@ window.renderAIDetectionResults = function(item) {
   updateNearestSmartBin(item.categoryKey);
 };
 
-window.updateNearestSmartBin = function(categoryKey) {
+window.updateNearestSmartBin = function (categoryKey) {
   const latInput = document.getElementById('citizenLat');
   const lngInput = document.getElementById('citizenLng');
   const userLat = latInput && !isNaN(parseFloat(latInput.value)) ? parseFloat(latInput.value) : 19.0280;
@@ -10585,12 +10603,12 @@ window.updateNearestSmartBin = function(categoryKey) {
   }
 };
 
-window.handleCustomImageUpload = function(event) {
+window.handleCustomImageUpload = function (event) {
   const file = event.target.files && event.target.files[0];
   if (!file) return;
 
   const reader = new FileReader();
-  reader.onload = function(e) {
+  reader.onload = function (e) {
     const stage = document.getElementById('aiItemGraphicStage');
     if (stage) {
       stage.innerHTML = `<img src="${e.target.result}" style="max-width: 150px; max-height: 150px; object-fit: contain; border-radius: 8px; filter: drop-shadow(0 0 10px rgba(56,189,248,0.5));" alt="Uploaded Waste Item">`;
@@ -10629,7 +10647,7 @@ window.handleCustomImageUpload = function(event) {
   reader.readAsDataURL(file);
 };
 
-window.applyAIDetectionToReport = function() {
+window.applyAIDetectionToReport = function () {
   if (!currentAIScannedItem) return;
 
   closeAIVisionScanner();
@@ -10658,7 +10676,7 @@ window.applyAIDetectionToReport = function() {
   }
 };
 
-window.showNearestBinOnMap = function() {
+window.showNearestBinOnMap = function () {
   const bin = currentNearestSmartBin || MUMBAI_SMART_BINS[0];
   closeAIVisionScanner();
 

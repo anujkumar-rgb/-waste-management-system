@@ -1316,34 +1316,271 @@ button, input, select, textarea {
   border-color: rgba(217, 119, 6, 0.3);
 }
 
-/* --- Statutory Audit Print View (@media print) --- */
-
+/* ==========================================================================
+   STATUTORY MUNICIPAL PRINT & PDF EXPORT STYLESHEET (@media print)
+   Supports: Admin Reports Table, Shift Handover Protocol, Hospital Manifests,
+             Institution Certificates, Weekly Executive Digest, Compliance KPIs
+   ========================================================================== */
 @media print {
-  body {
-    background: #ffffff !important;
-    color: #000000 !important;
-    font-size: 11pt !important;
+  /* 1. Global Reset & High-Contrast Typography */
+  *, *::before, *::after {
+    box-shadow: none !important;
+    text-shadow: none !important;
+    visibility: visible !important;
   }
-  .navbar, .btn, .theme-toggle-btn, .modal-overlay,
-  #authView, #citizenDashboard, #workerDashboard, #institutionDashboard, #adminDashboard,
-  #hospitalHazardAlert, .card:not(.print-include) {
+
+  html, body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 9.5pt !important;
+    line-height: 1.4 !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    min-width: 100% !important;
+  }
+
+  /* 2. Hide Non-Printable UI Chrome, Buttons, Navigation, and WebGL Canvases */
+  header, footer, nav, .navbar, .btn, .theme-toggle-btn, .no-print,
+  #offlineBanner, #heroSection, #authView, .view-switch-tabs,
+  .hotspot-map-container, #liveWorkerMap, .scanner-container,
+  #hero3DContainer, #gear3DCanvas, #scene3DContainer, #hero3DCanvas,
+  .modal-close, .modal-close-btn, .btn-group, .filter-chip,
+  #adminWorkerFilterGroup, #adminAnalyticsChartsGrid,
+  #adminHotspotMap, #workerRouteMap, #citizenLocationMap,
+  input, select, textarea {
     display: none !important;
   }
-  #hospitalDashboard {
+
+  /* 3. CASE A: When a Printable Modal is Open (Shift Handover, Audit Certificate, Weekly Digest) */
+  body.printing-modal .dashboard-view,
+  body.printing-modal main > *:not(.modal-overlay.active) {
+    display: none !important;
+  }
+
+  body.printing-modal .modal-overlay.active,
+  .modal-overlay.active {
     display: block !important;
+    position: static !important;
+    background: #ffffff !important;
     padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    z-index: auto !important;
   }
-  #hospitalDashboard .dashboard-header {
-    border-bottom: 2px solid #000 !important;
+
+  .modal-overlay.active .modal-card,
+  #adminShiftHandoverReportModal .modal-card,
+  #instAuditCertModal .modal-card,
+  #adminWeeklyDigestModal .modal-card {
+    position: static !important;
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0.5rem 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    overflow: visible !important;
+  }
+
+  /* Specific styles for Institutional Certificate */
+  .inst-cert-card {
+    position: static !important;
+    display: block !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+    padding: 2rem !important;
+    border: 3px double #166534 !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+  }
+
+  /* Specific styles for Daily Shift Handover Report Modal */
+  #adminShiftHandoverReportModal {
+    position: static !important;
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  /* 4. CASE B: Normal Dashboard Printing (e.g. Admin Reports Table, Hospital Manifest, Citizen) */
+  .dashboard-view.active {
+    display: block !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Hide inactive dashboards */
+  .dashboard-view:not(.active) {
+    display: none !important;
+  }
+
+  /* If no modal is active, hide all modals */
+  body:not(.printing-modal) .modal-overlay:not(.active) {
+    display: none !important;
+  }
+
+  /* 5. Headers, Titles & Municipal Branding in Print */
+  .dashboard-header {
+    display: block !important;
+    border-bottom: 2px solid #0f172a !important;
     margin-bottom: 1rem !important;
+    padding-bottom: 0.5rem !important;
   }
-  .custom-table {
-    border: 1px solid #000 !important;
+
+  .dashboard-header h2, .dashboard-header h3 {
+    color: #0f172a !important;
+    font-size: 15pt !important;
+    font-weight: 800 !important;
+    margin: 0 0 0.25rem 0 !important;
   }
-  .custom-table th, .custom-table td {
-    border: 1px solid #000 !important;
-    color: #000 !important;
-    padding: 6px !important;
+
+  .dashboard-header p {
+    color: #475569 !important;
+    font-size: 9pt !important;
+    margin: 0 !important;
+  }
+
+  /* 6. Cards, Tables, and Data Containers */
+  .card, .stat-card {
+    display: block !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 4px !important;
+    margin-bottom: 1rem !important;
+    padding: 0.75rem !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    overflow: visible !important;
+  }
+
+  .table-container, .table-responsive {
+    display: block !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 4px !important;
+    margin-bottom: 1rem !important;
+    padding: 0.25rem !important;
+    page-break-inside: auto !important;
+    break-inside: auto !important;
+    overflow: visible !important;
+  }
+
+  /* 7. Municipal Tables (Reports Table, Compliance Table, Hospital Manifest) */
+  table, .custom-table, #adminReportsTable, #hospitalComplianceTable {
+    display: table !important;
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin: 0.5rem 0 !important;
+    font-size: 8.5pt !important;
+  }
+
+  thead {
+    display: table-header-group !important;
+  }
+
+  tbody {
+    display: table-row-group !important;
+  }
+
+  tr {
+    display: table-row !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  th, td, .custom-table th, .custom-table td,
+  #adminReportsTable th, #adminReportsTable td {
+    display: table-cell !important;
+    border: 1px solid #94a3b8 !important;
+    color: #0f172a !important;
+    background: #ffffff !important;
+    padding: 5px 6px !important;
+    text-align: left !important;
+    vertical-align: middle !important;
+    word-break: break-word !important;
+  }
+
+  th, .custom-table th, #adminReportsTable th {
+    background: #f1f5f9 !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Hide the Action column in print (buttons like Clear, Boost, Reassign are non-printable) */
+  th:last-child, td:last-child {
+    display: none !important;
+  }
+
+  /* 8. Status Badges, Severity Indicators & Steppers */
+  .badge, .status-badge, .status-pill, .severity-pill {
+    display: inline-block !important;
+    padding: 2px 5px !important;
+    border: 1px solid #64748b !important;
+    border-radius: 3px !important;
+    font-size: 7pt !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    background: #f8fafc !important;
+    text-transform: uppercase !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .badge-hazardous, .badge-critical, .severity-emergency {
+    border-color: #dc2626 !important;
+    color: #dc2626 !important;
+    background: #fef2f2 !important;
+  }
+
+  .badge-ontrack, .status-cleared {
+    border-color: #166534 !important;
+    color: #166534 !important;
+    background: #f0fdf4 !important;
+  }
+
+  .badge-attention, .badge-neartarget, .status-assigned {
+    border-color: #d97706 !important;
+    color: #d97706 !important;
+    background: #fffbeb !important;
+  }
+
+  /* Steppers */
+  .status-stepper {
+    display: flex !important;
+    gap: 2px !important;
+  }
+
+  .step-node {
+    display: inline-block !important;
+    font-size: 6.5pt !important;
+    padding: 1px 3px !important;
+    border: 1px solid #94a3b8 !important;
+  }
+
+  .step-node.completed, .step-node.active {
+    font-weight: 700 !important;
+    border-color: #0f172a !important;
+  }
+
+  /* 9. Page Margins */
+  @page {
+    margin: 0.8cm;
+    size: auto;
   }
 }
 
@@ -1679,27 +1916,7 @@ button, input, select, textarea {
   margin: 0 auto 1rem;
   border: 3px solid #d97706;
 }
-@media print {
-  body * {
-    visibility: hidden;
-  }
-  .inst-cert-card, .inst-cert-card * {
-    visibility: visible;
-  }
-  .inst-cert-card {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    margin: 0;
-    padding: 2rem;
-    box-shadow: none;
-    border: 3px double #166534;
-  }
-  .modal-close-btn, .btn, .navbar, header, footer {
-    display: none !important;
-  }
-}
+/* Block 2 merged into master print stylesheet */
 
 /* Pharma Expiry Reminders Table */
 .pharma-badge-critical {
@@ -2797,29 +3014,7 @@ html.theme-transitioning *::after {
   background: var(--civic-border);
 }
 
-/* Printable Municipal Shift Handover Report Modal */
-@media print {
-  body * {
-    visibility: hidden;
-  }
-  #adminShiftHandoverReportModal,
-  #adminShiftHandoverReportModal * {
-    visibility: visible;
-  }
-  #adminShiftHandoverReportModal {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    background: #ffffff !important;
-    color: #000000 !important;
-  }
-  .no-print {
-    display: none !important;
-  }
-}
+/* Block 3 merged into master print stylesheet */
 
 /* ==========================================================================
    THREE.JS 3D MUNICIPAL DIGITAL TWIN & INTERACTIVE VISUALIZATIONS

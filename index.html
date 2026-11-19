@@ -1723,10 +1723,11 @@
             <option value="Ward A">Ward A - Colaba & Fort</option>
           </select>
           <button class="btn btn-outline btn-sm" onclick="resetAdminFeedFilters()">Reset Filters</button>
+          <button class="btn btn-outline btn-sm" onclick="window.print()" title="Print complete municipal reports log or Save as PDF">🖨️ Print Operations Log (PDF)</button>
         </div>
 
         <div class="table-responsive">
-          <table class="custom-table">
+          <table class="custom-table" id="adminReportsTable">
             <thead>
               <tr>
                 <th>ID</th>
