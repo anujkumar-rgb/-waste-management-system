@@ -2582,7 +2582,7 @@ function initAuth() {
   signupRole.addEventListener('change', updateSignupRoleFields);
   signupInstType.addEventListener('change', updateInstitutionTypeFields);
 
-  loginForm.addEventListener('submit', (e) => {
+  loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const emailInput = document.getElementById('loginEmail');
     const passInput = document.getElementById('loginPassword');
@@ -2591,14 +2591,16 @@ function initAuth() {
     const email = emailInput.value.trim();
     const pass = passInput.value;
 
+    if (submitBtn) {
+      submitBtn.classList.add('btn-loading');
+      submitBtn.innerHTML = `<span class="btn-spinner"></span> Authenticating...`;
+    }
+
+    // 1. Check local seed accounts first (for instant offline testing)
     const users = getUsers();
     const found = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.pass === pass);
 
     if (found) {
-      if (submitBtn) {
-        submitBtn.classList.add('btn-loading');
-        submitBtn.innerHTML = `<span class="btn-spinner"></span> Authenticating...`;
-      }
       setTimeout(() => {
         if (submitBtn) submitBtn.innerHTML = `✓ Access Authorized`;
         setTimeout(() => {
@@ -2609,14 +2611,62 @@ function initAuth() {
           setCurrentUser(found);
         }, 180);
       }, 350);
-    } else {
-      triggerFieldValidationError(emailInput);
-      triggerFieldValidationError(passInput);
-      alert('Invalid login credentials! Please use one of the quick test login buttons below.');
+      return;
     }
+
+    // 2. Try Supabase Authentication if not matching local demo seeds
+    const client = typeof window.initSupabaseClient === 'function' ? window.initSupabaseClient() : null;
+    if (client && client.auth && typeof client.auth.signInWithPassword === 'function') {
+      try {
+        const { data, error } = await client.auth.signInWithPassword({
+          email: email,
+          password: pass
+        });
+
+        if (!error && data && data.user) {
+          let profile = null;
+          try {
+            const { data: pData } = await client.from('profiles').select('*').eq('id', data.user.id).single();
+            profile = pData;
+          } catch (pe) {}
+
+          const supaUser = {
+            id: data.user.id,
+            name: profile?.full_name || data.user.user_metadata?.full_name || email.split('@')[0],
+            email: data.user.email,
+            role: profile?.role || data.user.user_metadata?.role || 'citizen',
+            institutionType: profile?.institution_type || null,
+            credits: profile?.credits ?? 100,
+            authProvider: 'supabase_email',
+            verified: true
+          };
+
+          if (submitBtn) submitBtn.innerHTML = `✓ Access Authorized`;
+          setTimeout(() => {
+            if (submitBtn) {
+              submitBtn.classList.remove('btn-loading');
+              submitBtn.innerHTML = `Sign In`;
+            }
+            setCurrentUser(supaUser);
+          }, 180);
+          return;
+        }
+      } catch (authErr) {
+        console.warn('Supabase Auth error:', authErr.message);
+      }
+    }
+
+    // If both failed
+    if (submitBtn) {
+      submitBtn.classList.remove('btn-loading');
+      submitBtn.innerHTML = `Sign In`;
+    }
+    triggerFieldValidationError(emailInput);
+    triggerFieldValidationError(passInput);
+    alert('Invalid login credentials! Please check your email and password, or use one of the quick test login buttons below.');
   });
 
-  signupForm.addEventListener('submit', (e) => {
+  signupForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const nameInput = document.getElementById('signupName');
     const emailInput = document.getElementById('signupEmail');
@@ -2677,8 +2727,39 @@ function initAuth() {
       ? (instType === 'school' ? schoolName : (instType === 'company' ? companyName : name))
       : name;
 
+    let supabaseUserId = null;
+    const client = typeof window.initSupabaseClient === 'function' ? window.initSupabaseClient() : null;
+
+    if (client && client.auth && typeof client.auth.signUp === 'function') {
+      try {
+        const { data, error } = await client.auth.signUp({
+          email: email,
+          password: pass,
+          options: {
+            data: {
+              full_name: primaryOrgName,
+              role: role,
+              institution_type: role === 'institution' ? instType : null,
+              company_name: companyName,
+              school_name: schoolName,
+              business_type: businessType,
+              verification_code: verificationCode
+            }
+          }
+        });
+        if (error) {
+          console.warn('Supabase sign up warning:', error.message);
+        } else if (data && data.user) {
+          supabaseUserId = data.user.id;
+          console.log('✅ Registered with Supabase Auth:', data.user.id);
+        }
+      } catch (sbErr) {
+        console.warn('Supabase Auth Sign Up error:', sbErr.message);
+      }
+    }
+
     const newUser = {
-      id: 'usr-' + Math.floor(1000 + Math.random() * 9000),
+      id: supabaseUserId || ('usr-' + Math.floor(1000 + Math.random() * 9000)),
       name: primaryOrgName,
       contactPerson: name,
       email,
@@ -2690,6 +2771,7 @@ function initAuth() {
       businessType: role === 'institution' && instType === 'company' ? businessType : null,
       verificationCode,
       credits: (role === 'citizen' || role === 'hospital') ? 30 : 0,
+      authProvider: supabaseUserId ? 'supabase_email' : 'local',
       branches: role === 'institution' ? [
         { id: 'br-main', name: 'Main Campus / Facility', address: 'Loading Gate #1', ward: 'Ward K/East - Andheri Industrial Estate', lat: 19.1136, lng: 72.8697 }
       ] : null,
@@ -2721,7 +2803,13 @@ function initAuth() {
     }, 380);
   });
 
-  function handleLogout() {
+  async function handleLogout() {
+    const client = typeof window.initSupabaseClient === 'function' ? window.initSupabaseClient() : null;
+    if (client && client.auth) {
+      try {
+        await client.auth.signOut();
+      } catch (e) {}
+    }
     localStorage.removeItem('swm_current_user');
     currentUser = null;
     if (window.history && window.history.replaceState) {
